@@ -1,0 +1,1 @@
+export { postForm } from './post'

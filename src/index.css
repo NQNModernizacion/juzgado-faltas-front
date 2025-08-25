@@ -1,0 +1,14 @@
+@import 'assets/loader.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-attachment: fixed !important;
+  height: 100dvh;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
