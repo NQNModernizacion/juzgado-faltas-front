@@ -82,7 +82,7 @@ const UserRoleForm: React.FC<Props> = ({ stateContext, dataContext, show }) => {
       <hr className="mt-3" />
       <div className="row m-0 space-y-3">
         <SelectSearch
-          className={{ container: 'col-12 col-lg-5', label: 'form-label' }}
+          className={{ container: 'col-12 col-lg-5', label: 'block text-sm font-semibold !text-text' }}
           isClearable
           id="user"
           value={formatProvider(user)}
@@ -92,10 +92,11 @@ const UserRoleForm: React.FC<Props> = ({ stateContext, dataContext, show }) => {
           options={formatModels(data.users)}
         />
         <SelectSearch
-          className={{
-            container: 'col-12 col-lg-5',
-            label: 'form-label',
-          }}
+          // className={{
+          //   container: 'col-12 col-lg-5',
+          //   label: 'form-label',
+          // }}
+          className={{ container: 'col-12 col-lg-5', label: 'block text-sm font-semibold text-text' }}
           isSearchable
           isClearable
           id="role"

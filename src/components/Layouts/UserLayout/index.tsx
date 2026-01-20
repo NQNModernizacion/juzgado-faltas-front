@@ -25,31 +25,45 @@ const UserLayout = () => {
 
   return (
     <>
-      <nav className="bg-[#FFFFFF9E] shadow-md h-[90px] flex items-center">
+      <nav className="bg-surface/90 backdrop-blur shadow-mxSoft h-[90px] flex items-center border-b border-border">
         <div className="container flex justify-between flex-wrap gap-1">
           <img
             alt="Logo Neuquén Capital"
             role="button"
             className="h-16"
-            src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
+            src='https://webservice.muninqn.gov.ar/cglobales/assets/logo_rojo.svg'
+            //src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
             onClick={() => nav('/')}
           />
 
           {perfil && (
             <div className="flex items-center gap-3">
-              <div className="hidden sm:block text-start">
+              {/* <div className="hidden sm:block text-start">
                 <small className="nombre-usuario-navbar">{perfil.nombre}</small>
                 <br />
                 <small className="email-usuario-navbar">
                   {perfil.correoElectronico}
                 </small>
+              </div> */}
+              <div className="hidden sm:block text-start leading-tight">
+                <small className="block text-sm font-semibold text-primary-600">
+                  {perfil.nombre}
+                </small>
+                <small className="block text-sm text-muted">
+                  {perfil.correoElectronico}
+                </small>
               </div>
 
-              <div className="hidden sm:block w-px h-12 bg-gray-400"></div>
+
+              <div className="hidden sm:block h-12 w-px bg-border"></div>
 
               {/* Botón de logout */}
               <div
-                className="ms-2 sm:ms-0 text-primary font-semibold cursor-pointer flex gap-2 items-center text-blue-600 hover:text-blue-800"
+                className="ms-2 sm:ms-0
+    font-semibold cursor-pointer
+    flex gap-2 items-center
+    text-primary-600 hover:text-primary-700
+    transition-colors"
                 onClick={handleLogout}
                 role="button"
               >
@@ -61,7 +75,10 @@ const UserLayout = () => {
         </div>
       </nav>
 
-      <main className="container mx-auto py-6">
+      {/* <main className="container mx-auto py-6">
+        <Outlet />
+      </main> */}
+      <main className="app-scope container mx-auto py-6">
         <Outlet />
       </main>
 

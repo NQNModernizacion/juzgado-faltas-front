@@ -29,7 +29,7 @@ const LoginForm = () => {
 
     form.type = 'internal'
 
-    const response = await axios().post('auth', form)
+    const response = await axios().post('/api/auth', form)
     const { data, error } = response.data
 
     if (data) {
@@ -49,7 +49,10 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(login)} className="space-y-4">
-      <h2 className="text-center text-2xl font-bold text-primary-800">
+      {/* <h2 className="text-center text-2xl font-bold text-primary-800">
+        Ingresar al sistema
+      </h2> */}
+         <h2 className="text-center text-2xl font-bold text-text">
         Ingresar al sistema
       </h2>
 
@@ -74,14 +77,23 @@ const LoginForm = () => {
         <span className="text-red-500 font-medium">{loginError}</span>
       )}
 
-      <Button
+      {/* <Button
         className="w-full"
         textSize="lg"
         type="submit"
         isLoading={isSubmitting}
       >
         {isSubmitting ? 'Ingresando...' : 'Ingresar'}
-      </Button>
+      </Button> */}
+      <Button
+  className="w-full"
+  textSize="lg"
+  type="submit"
+  color="secondary"
+  isLoading={isSubmitting}
+>
+  {isSubmitting ? 'Ingresando...' : 'ACCEDER'}
+</Button>
     </form>
   )
 }

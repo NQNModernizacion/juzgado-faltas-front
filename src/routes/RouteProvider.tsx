@@ -39,7 +39,7 @@ const RouteProvider = () => {
             path="/admin"
             element={
               <ProtectedRoute
-                requiredRoles={['admin']}
+                requiredRoles={['admin.permisos']}
                 // requiredPermissions={['permiso.prueba']}
               >
                 <PanelAdmin />

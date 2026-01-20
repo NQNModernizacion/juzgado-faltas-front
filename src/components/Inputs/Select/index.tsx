@@ -25,7 +25,8 @@ const Select = ({ label, name, options, control, smallText, hideErrors = false }
       <select
         id={`input-${name}`}
         {...control.register(name)}
-        className="block w-full px-1.5 py-[4px] border border-primary rounded-md shadow-sm outline-none focus:ring-primary focus:border-primary"
+        className="block w-full rounded-xl bg-surface px-3 py-2 text-text border border-border shadow-sm outline-none transition focus:ring-2 focus:ring-primary-600/25 focus:border-primary-600"
+
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

@@ -97,9 +97,13 @@ const UserPermissionForm: React.FC<Props> = ({
       <hr className="mt-3" />
       <div className="row m-0">
         <SelectSearch
+          // className={{
+          //   container: 'col-6 col-lg-10',
+          //   label: `form-label`,
+          // }}
           className={{
             container: 'col-6 col-lg-10',
-            label: `form-label`,
+            label: 'block text-sm font-semibold !text-text',
           }}
           isClearable
           id="user"

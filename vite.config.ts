@@ -15,6 +15,22 @@ export default defineConfig(({ command, mode }) => {
     define: {
       __DEV__: JSON.stringify(mode !== 'production'),
     },
+    server: {
+      proxy: {
+        "/auth": {
+          target: "http://prueba-template-backend.test",
+          changeOrigin: true,
+        },
+        "/api": {
+          target: "http://prueba-template-backend.test",
+          changeOrigin: true,
+        },
+        "/private": {
+          target: "http://prueba-template-backend.test",
+          changeOrigin: true,
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

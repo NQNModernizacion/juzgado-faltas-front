@@ -17,13 +17,25 @@ const GuestLayout = ({ children }: GuestLayoutProps) => {
 
   return (
     <>
-      <nav className="bg-[#FFFFFF9E] mb-4 shadow-md h-[90px] flex items-center">
+      {/* <nav className="bg-[#FFFFFF9E] mb-4 shadow-md h-[90px] flex items-center">
         <div className="container flex justify-between flex-wrap gap-1">
           <img
             alt="Logo Neuquén Capital"
             role="button"
             className="h-16"
-            src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
+            //src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
+            src='https://webservice.muninqn.gov.ar/cglobales/assets/logo_rojo.svg'
+          />
+        </div>
+      </nav> */}
+         <nav className="bg-white mb-4 shadow-md h-[90px] flex items-center">
+        <div className="container flex justify-between flex-wrap gap-1">
+          <img
+            alt="Logo Neuquén Capital"
+            role="button"
+            className="h-16"
+            //src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
+            src='https://webservice.muninqn.gov.ar/cglobales/assets/logo_rojo.svg'
           />
         </div>
       </nav>

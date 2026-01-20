@@ -19,3 +19,46 @@ const FormSection = ({ children, title, subtitle, fullWidth, className, ...props
 }
 
 export default FormSection
+// type FormSectionProps = {
+//   children: React.ReactNode
+//   title?: string
+//   subtitle?: string
+//   fullWidth?: boolean
+//   className?: string
+// }
+
+// const FormSection = ({
+//   children,
+//   title,
+//   subtitle,
+//   fullWidth,
+//   className,
+//   ...props
+// }: FormSectionProps) => {
+//   return (
+//     <div className="mx-section">
+//       <div className="px-4 pt-4">
+//         {title && (
+//           <div className="mb-3">
+//             <span className="mx-section__title">{title}</span>
+//             {subtitle && <p className="mt-2 mx-section__subtitle">{subtitle}</p>}
+//           </div>
+//         )}
+//       </div>
+
+//       <div
+//         {...props}
+//         className={[
+//           'px-4 pb-4',
+//           'grid grid-cols-1 gap-6',
+//           !fullWidth ? 'md:grid-cols-2' : '',
+//           className ?? '',
+//         ].join(' ')}
+//       >
+//         {children}
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default FormSection
