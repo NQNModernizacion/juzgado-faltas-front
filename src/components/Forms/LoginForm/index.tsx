@@ -1,20 +1,21 @@
-import { useContext, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
+import { log } from "@/utils/logger";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-toastify";
 
-import { axios } from '@/utils/axios'
-import { UserContext } from '@/context/UserWrapper'
-import { schema } from '@/schemas/LoginSchema'
-import { setStorage } from '@/utils/localStorage'
-import Input from '@/components/Inputs/Input'
-import Button from '@/components/Button'
-import { toast } from 'react-toastify'
+import { axios } from "@/utils/axios";
+import { UserContext } from "@/context/UserWrapper";
+import { schema } from "@/schemas/LoginSchema";
+import { setStorage } from "@/utils/localStorage";
+
+import { ButtonBase, RHFInput } from "muni-ui";
 
 const LoginForm = () => {
-  const { actions: ua } = useContext(UserContext)
-  const nav = useNavigate()
-  const [loginError, setLoginError] = useState(null)
+  const { actions: ua } = useContext(UserContext);
+  const nav = useNavigate();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     control,
@@ -22,80 +23,79 @@ const LoginForm = () => {
     formState: { isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
-  })
+    defaultValues: { _id: "", password: "" },
+  });
 
   const login = async (form: any) => {
-    setLoginError(null)
+    log.info("[UserLayout] logout click");
+    setLoginError(null);
 
-    form.type = 'internal'
+    try {
+      const payload = { ...form, type: "internal" };
+      const response = await axios().post("auth", payload);
+      const { data, error } = response.data ?? {};
 
-    const response = await axios().post('/api/auth', form)
-    const { data, error } = response.data
-
-    if (data) {
-      setStorage(data)
-      ua.setStore(data)
-      nav('/')
-    }
-
-    if (error) {
-      if (error.general === 'Credenciales incorrectas') {
-        setLoginError(error.general)
-      } else {
-        toast.error('Ocurrió un error inesperado al ingresar al sistema')
+      if (data) {
+        setStorage(data);
+        ua.setStore(data);
+        nav("/");
+        return;
       }
+
+      if (error) {
+        if (error.general === "Credenciales incorrectas") {
+          setLoginError(error.general);
+        } else {
+          toast.error("Ocurrió un error inesperado al ingresar al sistema");
+        }
+      }
+    } catch {
+      toast.error("Ocurrió un error inesperado al ingresar al sistema");
     }
-  }
+  };
+
+  const invalid = (errors: any) => {
+    // para que “no haga nada” nunca más sin feedback
+    console.log("Login invalid", errors);
+  };
 
   return (
-    <form onSubmit={handleSubmit(login)} className="space-y-4">
-      {/* <h2 className="text-center text-2xl font-bold text-primary-800">
-        Ingresar al sistema
-      </h2> */}
-         <h2 className="text-center text-2xl font-bold text-text">
+    <form onSubmit={handleSubmit(login, invalid)} className="space-y-4">
+      <h2 className="text-center text-2xl font-bold text-text">
         Ingresar al sistema
       </h2>
 
-      <hr />
+      <hr className="border-border" />
 
-      <Input
+      <RHFInput
         control={control}
-        label="Correo electrónico / DNI *"
         name="_id"
+        label="Correo electrónico / DNI *"
         placeholder="usuario@gmail.com / 99.999.999"
       />
 
-      <Input
+      <RHFInput
         control={control}
-        type="password"
         name="password"
+        type="password"
         label="Contraseña *"
         placeholder="********"
       />
 
-      {loginError && (
-        <span className="text-red-500 font-medium">{loginError}</span>
-      )}
+      {loginError ? (
+        <div className="mx-error">{loginError}</div>
+      ) : null}
 
-      {/* <Button
+      <ButtonBase
         className="w-full"
-        textSize="lg"
         type="submit"
+        color="primary"
         isLoading={isSubmitting}
       >
-        {isSubmitting ? 'Ingresando...' : 'Ingresar'}
-      </Button> */}
-      <Button
-  className="w-full"
-  textSize="lg"
-  type="submit"
-  color="secondary"
-  isLoading={isSubmitting}
->
-  {isSubmitting ? 'Ingresando...' : 'ACCEDER'}
-</Button>
+        ACCEDER
+      </ButtonBase>
     </form>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

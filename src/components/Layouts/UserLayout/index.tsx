@@ -1,5 +1,8 @@
+import { log } from "@/utils/logger";
 import { useContext, useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
+
+import { useMe } from "@/query/hooks/useMe";
 
 import Logout from '@/components/Svgs/Logout'
 import { UserContext } from '@/context/UserWrapper'
@@ -11,17 +14,50 @@ const UserLayout = () => {
   const { actions: ua } = useContext(UserContext)
   const perfil = ua.persona()
   const nav = useNavigate()
+
+  const token = ua.token();
+const { data: me, isLoading: meLoading, error: meError } = useMe(token);
+
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+ 
+
 
   useEffect(() => {
-    initApp(ua)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (me) {
+      log.info("[ReactQuery] /me OK", me);
+    }
+    if (meError) {
+      log.error("[ReactQuery] /me ERROR", meError);
+    }
+  }, [me, meError]);
+  
+
+
+
 
   const handleLogout = () => {
-    setIsLoggingOut(true)
-    logout()
-  }
+    log.info("[UserLayout] logout click");
+    log.error("ALWAYS");
+    setIsLoggingOut(true);
+
+    // 1) borra storage
+    logout();
+
+    // limpia store en memoria
+    ua.setStore({
+      user: null,
+      app_data: null,
+      front_types: [],
+      token: null,
+    });
+    log.info("[UserLayout] clearing store");
+    // navegá al login 
+    nav("/login", { replace: true });
+
+    // sacar overlay después de navegar
+    setIsLoggingOut(false);
+  };
+
 
   return (
     <>

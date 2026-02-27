@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 
-import Container from '../Container'
+// import Container from '../Container'
 import ChevronLeft from '../Svgs/ChevronLeft'
 import Home from '../Svgs/Home'
 import error404 from '@/assets/404_not_found.png'
+import { Container } from 'muni-ui'
 
 export const NotFound = () => {
   const nav = useNavigate()
