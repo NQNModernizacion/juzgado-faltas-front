@@ -1,216 +1,188 @@
-import { isAxiosError } from 'axios'
-import { toast } from 'react-toastify'
-import { toastOptions } from '../../../config/toast'
-import { axios } from '../../../utils/axios'
+import { toast } from "react-toastify";
+import { toastOptions } from "../../../config/toast";
+import { axios } from "../../../utils/axios";
+import { CheckboxBase } from "muni-ui";
 
+/** Roles */
 export const getRoles = async (roles, setRoles) => {
-  setRoles({ ...roles, loading: true })
-  const response = await axios().get('/roles')
+  setRoles({ ...roles, loading: true, error: null });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  try {
+    const response = await axios().get("/roles");
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      toast.success('Roles cargados', toastOptions)
-      let listado = data.map((item) => {
-        let obj = item
+      toast.success("Roles cargados", toastOptions);
 
-        obj.label = item.name
+      const listado = (data ?? []).map((item) => ({
+        ...item,
+        label: item.name, // react-select style
+      }));
 
-        return obj
-      })
-
-      setRoles({ ...roles, loading: false, data: listado })
+      setRoles({ ...roles, loading: false, data: listado });
+      return;
     }
 
-    if (!data && error) {
-      setRoles({ ...roles, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setRoles({ ...roles, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setRoles({
       ...roles,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
+/** Trae permisos del rol seleccionado */
 export const buscarRol = async (rol, setRol, permisos, setPermisos) => {
-  setPermisos({ ...permisos, data: null })
-  setRol({ ...rol, loading: true })
-  const response = await axios().get('/roles/' + rol.rol[0].id)
+  setPermisos({ ...permisos, data: null, error: null });
+  setRol({ ...rol, loading: true, error: null });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  try {
+    const roleId = rol?.rol?.[0]?.id;
+    const response = await axios().get("/roles/" + roleId);
+
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      toast.success('Rol encontrado', toastOptions)
-      let list = data.permissions.map((item) => {
-        return item.id
-      })
+      toast.success("Rol encontrado", toastOptions);
 
-      setRol({ ...rol, loading: false, data: data, permisos_rol: list })
+      const list = (data.permissions ?? []).map((p) => p.id);
+      setRol({ ...rol, loading: false, data, permisos_rol: list });
+      return;
     }
 
-    if (!data && error) {
-      setRol({ ...rol, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setRol({ ...rol, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setRol({
       ...rol,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
+/** Catálogo de permisos */
 export const getPermisos = async (permisos, setPermisos) => {
-  setPermisos({ ...permisos, loading: true, data: null })
-  const response = await axios().get('/permisos')
+  setPermisos({ ...permisos, loading: true, data: null, error: null });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  try {
+    const response = await axios().get("/permisos");
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setPermisos({ ...permisos, loading: false, data: data })
-      toast.success('Permisos cargados', toastOptions)
+      setPermisos({ ...permisos, loading: false, data });
+      toast.success("Permisos cargados", toastOptions);
+      return;
     }
 
-    if (!data && error) {
-      setPermisos({ ...permisos, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setPermisos({ ...permisos, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setPermisos({
       ...permisos,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
-const tiene_permiso = (nombre, permisosRol) => {
-  let tiene = false
-
-  permisosRol.map((item) => {
-    if (item == nombre) {
-      tiene = true
-    }
-  })
-
-  return tiene
-}
-
-const asignarPermiso = (e, rol, setRol) => {
-  if (e.target.checked) {
-    let lista = rol.permisos_rol
-
-    lista.push(parseInt(e.target.value))
-    setRol({ ...rol, permisos_rol: lista })
-  } else {
-    let list = rol.permisos_rol
-    let lista = list.filter((item) => {
-      if (item != e.target.value) {
-        return item
-      }
-    })
-
-    setRol({ ...rol, permisos_rol: lista })
-  }
-}
-
-export const dataTablePermisos = (data, permisosRol, actions, rol, setRol) => {
-  const columns = [
-    {
-      field: 'id',
-      headerName: 'Identificador',
-      width: 10,
-      flex: 0.5,
-      hide: true,
-    },
-    {
-      field: 'accion',
-      headerName: 'Acción',
-      width: 50,
-      flex: 0.2,
-      sorteable: false,
-      hide: !actions.hasPermission('role-permission.asign'),
-      renderCell: (p) => {
-        return (
-          <div className="d-flex justify-content-evenly w-100">
-            <input
-              key={p.id}
-              defaultChecked={tiene_permiso(p.row.id, rol.permisos_rol)}
-              id={p.row.id}
-              type="checkbox"
-              value={p.row.id}
-              onChange={(e) => {
-                asignarPermiso(e, rol, setRol)
-              }}
-            />
-          </div>
-        )
-      },
-    },
-    {
-      field: 'name',
-      headerName: 'Nombre',
-      width: 60,
-      flex: 1,
-      sorteable: true,
-    },
-    {
-      field: 'description',
-      headerName: 'Descripción',
-      width: 150,
-      flex: 1.3,
-      sorteable: true,
-    },
-  ]
-
-  const rows = data.map((d) => {
-    return {
-      id: d.id,
-      name: d.name,
-      description: d.description,
-    }
-  })
-
-  const filter = (d, value) => {
-    value = value.toLowerCase()
-
-    return d.id?.toString().toLowerCase().includes(value) || d.name?.toLowerCase().includes(value) || d.descripcion?.toLowerCase().includes(value)
-  }
-
-  return { columns, rows, filter }
-}
-
+/** Guardar permisos asignados al rol */
 export const guardarPermisos = async (guardar, setGuardar, rol) => {
-  setGuardar({ ...guardar, loading: true })
-  const response = await axios().post('/guardarPermisosRol', {
-    permisos_id: rol.permisos_rol,
-    rol_id: rol.data.id,
-  })
+  setGuardar({ ...guardar, loading: true, error: null });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  try {
+    const response = await axios().post("/guardarPermisosRol", {
+      permisos_id: rol.permisos_rol,
+      rol_id: rol.data.id,
+    });
+
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setGuardar({ ...guardar, loading: false, data: data })
-      toast.success('Permisos sincronizados', toastOptions)
+      setGuardar({ ...guardar, loading: false, data });
+      toast.success("Permisos sincronizados", toastOptions);
+      return;
     }
 
-    if (!data && error) {
-      setGuardar({ ...guardar, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setGuardar({ ...guardar, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setGuardar({
       ...guardar,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
+
+/** ====== Helpers selección ====== */
+const asignarPermiso = (checked, value, rol, setRol) => {
+  const id = parseInt(value, 10);
+  const list = Array.isArray(rol.permisos_rol) ? [...rol.permisos_rol] : [];
+
+  if (checked) {
+    if (!list.includes(id)) list.push(id);
+  } else {
+    const idx = list.indexOf(id);
+    if (idx >= 0) list.splice(idx, 1);
+  }
+
+  setRol({ ...rol, permisos_rol: list });
+};
+
+/** ====== Table model muni-ui ====== */
+export const tablePermisosRolModel = (data, actions, rol, setRol) => {
+  const canAssign = actions.hasPermission("admin.role-permission.asign");
+
+  const rows = (data ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    description: d.description,
+  }));
+
+  const isChecked = (permId) => Array.isArray(rol.permisos_rol) && rol.permisos_rol.includes(permId);
+
+  const columns = [
+    ...(canAssign
+      ? [
+          {
+            id: "accion",
+            header: "Acción",
+            align: "center",
+            headerClassName: "w-[120px]",
+            cellClassName: "w-[120px]",
+            render: (row) => (
+              <div className="flex justify-center">
+                <CheckboxBase
+                  checked={isChecked(row.id)}
+                  onCheckedChange={(checked) => {
+                    asignarPermiso(!!checked, row.id, rol, setRol);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []),
+    { id: "name", header: "Nombre", render: (r) => r.name ?? "-" },
+    { id: "description", header: "Descripción", render: (r) => r.description ?? "-" },
+  ];
+
+  const filter = (row, value) => {
+    const v = (value ?? "").toLowerCase();
+    return (
+      String(row.id ?? "").toLowerCase().includes(v) ||
+      (row.name ?? "").toLowerCase().includes(v) ||
+      (row.description ?? "").toLowerCase().includes(v)
+    );
+  };
+
+  return { columns, rows, filter };
+};

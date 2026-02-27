@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, SelectSearch } from '../../../components'
+// import { SelectSearch } from '../../../components'
 import { UserContext } from '../../../context'
 import { asignarRol, consultar_persona, desasignarRol, getRoles, ver_role_en_persona } from './handlers'
+import { Container, SelectSearch } from 'muni-ui'
 
 export default function Roles() {
   const { actions } = useContext(UserContext)

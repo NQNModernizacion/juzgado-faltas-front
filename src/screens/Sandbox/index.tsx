@@ -1,4 +1,5 @@
-import Container from '@/components/Container'
+import { Container } from "muni-ui"
+
 
 const Sandbox = () => {
   return <Container title="Sandbox">a</Container>

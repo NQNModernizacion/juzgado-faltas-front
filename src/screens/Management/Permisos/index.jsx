@@ -1,138 +1,201 @@
-import { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Container, Table } from '../../../components'
-import { UserContext } from '../../../context'
-import { GuardarPermisos, consultar_persona, dataTablePermisos } from './handlers'
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { UserContext } from "../../../context";
+import {
+  consultar_persona,
+  GuardarPermisos,
+  tablePermisosModel,
+} from "./handlers";
+
+import {
+  Container,
+  ButtonBase,
+  InputBase,
+  Table,
+  FormSection,
+} from "muni-ui";
 
 export default function Permisos() {
-  const navigate = useNavigate()
-  const { actions } = useContext(UserContext)
+  const navigate = useNavigate();
+  const { actions } = useContext(UserContext);
+
   const [permisos, setPermisos] = useState({
     data: null,
     error: null,
     loading: false,
-  })
+  });
 
   const [listado, setListado] = useState({
     permisos: [],
     permisos_asign: [],
     permisos_no_asign: [],
     permisos_select: [],
-  })
+  });
 
   const [guardarPermisos, setGuardarPermisos] = useState({
     data: null,
     error: null,
     loading: false,
-  })
+  });
 
   const [persona, setPersona] = useState({
     data: null,
     error: null,
     loading: false,
-    values: {
-      data: '',
-    },
-  })
+    values: { data: "" },
+  });
+
+  const [q, setQ] = useState("");
 
   useEffect(() => {
-    if (!(actions.hasPermission('admin.permission.view') && actions.isAdmin())) {
-      if (actions.isAdmin()) {
-        navigate('/administrador/roles-permisos')
-      } else {
-        navigate('/')
-      }
+    if (!(actions.hasPermission("admin.permission.view") && actions.isAdmin())) {
+      navigate(actions.isAdmin() ? "/administrador/roles-permisos" : "/");
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSubmitBuscar = (e) =>
+    consultar_persona(
+      e,
+      persona,
+      setPersona,
+      setListado,
+      listado,
+      setPermisos,
+      permisos
+    );
+
+  const model = useMemo(() => {
+    const base = tablePermisosModel(permisos.data ?? [], listado, setListado, persona, actions);
+    const rows = q.trim() ? base.rows.filter((r) => base.filter(r, q)) : base.rows;
+    return { columns: base.columns, rows };
+  }, [permisos.data, listado, persona, actions, q]);
+
+  const canAssign = actions.hasPermission("admin.permission.asign");
+  const canSync =
+    canAssign &&
+    !!persona.data &&
+    (listado.permisos_select?.length ?? 0) > 0 &&
+    !guardarPermisos.loading;
 
   return (
-    <Container linkBack={'/administrador/roles-permisos'} title={'Administración de Permisos'}>
-      {
-        <form onSubmit={(e) => consultar_persona(e, persona, setPersona, setListado, listado, setPermisos, permisos)}>
-          <label className="form-label">Ingrese DNI, ID o Email</label>
-          <div className="d-flex justify-content-between gap-2">
-            <input
-              className="form-control"
-              type="text"
-              value={persona.values.data}
-              onChange={(e) => {
-                setPersona({
-                  ...persona,
-                  values: { data: e.target.value },
-                })
-              }}
-            />
-            <button className="btn btn-primary" disabled={persona.loading} type="submit">
-              Buscar
-            </button>
-          </div>
-          {persona.loading && (
-            <div className="d-flex justify-content-center mt-3">
-              <div className="spinner-border text-primary" role="status" />
+    <Container linkBack="/administrador/roles-permisos" title="Administración de Permisos" className="space-y-4">
+      <form onSubmit={onSubmitBuscar} className="space-y-4">
+        <FormSection title="Buscar persona" fullWidth>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
+            <div className="md:col-span-9">
+              <InputBase
+                label="Ingrese DNI, ID o Email"
+                value={persona.values.data}
+                onChange={(e) =>
+                  setPersona((prev) => ({ ...prev, values: { data: e.target.value } }))
+                }
+              />
             </div>
-          )}
-          {persona.data && (
-            <div className="mt-2">
-              <div className="card mb-2 shadow">
-                <div className="row g-0 align-items-center">
-                  <div className="col-12">
-                    <div className="card-body">
-                      <div className="row">
-                        <h5 className="card-title">
-                          <i className="bi bi-person-fill text-primary" /> {persona.data.user.nombre}
-                        </h5>
-                        <h6 className="card-subtitle mb-2 text-body-secondary">Correo: {persona.data.user.correoElectronico}</h6>
-                        <h6 className="card-subtitle mb-2 text-body-secondary">Documento: {persona.data.user.documento}</h6>
-                        <h6 className="card-subtitle mb-0 text-body-secondary">¿Ha entrado a la aplicación?: {persona.data.in_app ? 'Sí' : 'No'}</h6>
-                      </div>
-                    </div>
-                  </div>
+
+            <div className="md:col-span-3">
+              <ButtonBase
+                type="submit"
+                color="primary"
+                className="w-full"
+                disabled={persona.loading}
+                isLoading={persona.loading}
+              >
+                Buscar
+              </ButtonBase>
+            </div>
+          </div>
+
+          {persona.loading ? (
+            <div className="flex justify-center py-2">
+              <span className="mx-spinner" aria-hidden="true" />
+            </div>
+          ) : null}
+        </FormSection>
+
+        {persona.data ? (
+          <div className="mx-surface mx-surface-pad">
+            <div className="text-base font-semibold text-text">
+              {persona.data.user?.nombre}
+            </div>
+            <div className="mt-1 text-sm text-muted">
+              Correo: {persona.data.user?.correoElectronico}
+            </div>
+            <div className="text-sm text-muted">
+              Documento: {persona.data.user?.documento}
+            </div>
+            <div className="text-sm text-muted">
+              ¿Ha entrado a la aplicación?: {persona.data.in_app ? "Sí" : "No"}
+            </div>
+          </div>
+        ) : null}
+
+        {persona.data ? (
+          <FormSection title="Permisos" subtitle="Seleccioná permisos y sincronizá" fullWidth>
+            <div className="space-y-3">
+              {/* Toolbar */}
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
+                <div className="md:col-span-7">
+                  <InputBase
+                    label="Buscar permiso"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Buscar por nombre o descripción..."
+                  />
+                </div>
+
+                <div className="md:col-span-5 flex md:justify-end">
+                  {canAssign ? (
+                    <ButtonBase
+                      type="button"
+                      color="secondary"
+                      disabled={!canSync}
+                      isLoading={guardarPermisos.loading}
+                      onClick={() =>
+                        GuardarPermisos(
+                          persona,
+                          guardarPermisos,
+                          setGuardarPermisos,
+                          listado.permisos_select,
+                          permisos,
+                          setPermisos,
+                          listado,
+                          setListado
+                        )
+                      }
+                    >
+                      Sincronizar permisos seleccionados
+                    </ButtonBase>
+                  ) : null}
                 </div>
               </div>
 
-              {permisos.loading && permisos.data === null && (
-                <div className="d-flex justify-content-center mt-3">
-                  <div className="spinner-border text-primary" role="status" />
+              {permisos.loading && permisos.data === null ? (
+                <div className="flex justify-center py-2">
+                  <span className="mx-spinner" aria-hidden="true" />
                 </div>
-              )}
+              ) : null}
 
-              {permisos.data && (
-                <div className="mt-2">
-                  <Table
-                    data={dataTablePermisos(permisos.data, listado, setListado, persona, actions)}
-                    height={500}
-                    render={() => (
-                      <div className="d-flex justify-content-end w-100">
-                        {actions.hasPermission('admin.permission.asign') && (
-                          <button
-                            className="btn btn-primary my-auto mx-3"
-                            disabled={guardarPermisos.loading}
-                            type="button"
-                            onClick={() => {
-                              GuardarPermisos(
-                                persona,
-                                guardarPermisos,
-                                setGuardarPermisos,
-                                listado.permisos_select,
-                                permisos,
-                                setPermisos,
-                                listado,
-                                setListado
-                              )
-                            }}
-                          >
-                            Sincronizar Permisos seleccionados
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  />
+              {permisos.error ? (
+                <div className="mx-surface mx-surface-pad">
+                  <div className="text-sm font-semibold text-danger-700">
+                    {String(permisos.error)}
+                  </div>
                 </div>
-              )}
+              ) : null}
+
+              <Table
+                rows={model.rows}
+                columns={model.columns}
+                getRowId={(r, i) => r?.id ?? i}
+                maxHeightClassName="max-h-[500px]"
+                emptyText="Sin resultados"
+              />
             </div>
-          )}
-        </form>
-      }
+          </FormSection>
+        ) : null}
+      </form>
     </Container>
-  )
+  );
 }

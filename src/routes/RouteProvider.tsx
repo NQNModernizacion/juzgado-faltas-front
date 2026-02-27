@@ -11,6 +11,7 @@ import GuestLayout from '@/components/Layouts/GuestLayout'
 
 const RouteProvider = () => {
   return (
+   
     <HashRouter
       future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
     >
@@ -33,21 +34,32 @@ const RouteProvider = () => {
           }
         >
           <Route path="/" element={<Menu />} />
-
+   
           <Route path="/sandbox" element={<Sandbox />} />
           <Route
+          
             path="/admin"
             element={
-              <ProtectedRoute
-                requiredRoles={['admin.permisos']}
-                // requiredPermissions={['permiso.prueba']}
+               <ProtectedRoute
+                 requiredRoles={['admin']}
+                 requiredPermissions={['admin.permission.view']}
+
               >
                 <PanelAdmin />
-              </ProtectedRoute>
+               </ProtectedRoute>
             }
           />
 
-          {__DEV__ && <Route path="/_viewcom" element={<DevScreen />} />}
+         <Route path="/_viewcom" element={<DevScreen />} />
+          {/* <Route
+  path="/_viewcom"
+  element={
+     <ProtectedRoute requiredRoles={['admin.permisos']}>
+      <DevScreen />
+     </ProtectedRoute>
+  }
+/> */}
+
         </Route>
 
         <Route

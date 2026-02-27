@@ -1,161 +1,165 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from "react";
+import { ButtonBase, SelectSearch } from "muni-ui";
+import AddUsers from "../AddUsers";
+import Loader from "@/components/Loader";
 
-import { formatModel, formatModels } from '@/utils/estados'
+import { UserContext } from "@/context/UserWrapper";
 
-import SelectSearch from '../../components/SelectSearch'
-import ButtonAdmin from '../ButtonAdmin'
-import CardAdmin from '../CardAdmin'
-import {
-  changeCheckPermission,
-  changeUserPermissions,
-  getPermissionsForm,
-} from './handlers'
-import { changeUser, groupedPermissions } from '../handlers'
-import Loader from '@/components/Loader'
-import Button from '@/components/Button'
-import AddUsers from '../AddUsers'
+import { useQueryClient } from "@tanstack/react-query";
 
-interface Role {
-  id: number
-  description: string
+import { toast } from "react-toastify";
+import { toastOptions } from "@/config/toast";
+import { useSyncUserPermissions } from "@/query/mutations/useAdminMutations";
+
+interface Permission {
+  id: number;
+  name: string;
+  description?: string;
 }
 
 interface User {
-  id: number
-  roles: Role[]
+  id: number;
+  permissions?: any[];
+  permission_names?: string[];
 }
 
-interface Permission {
-  id: number
-  name: string
-}
+type RSOption = { label: string; value: string | number };
 
-interface StateContext {
-  state: {
-    loading: boolean
-    role: Role | null
-    user: User | null
-  }
-  setState: React.Dispatch<React.SetStateAction<any>>
-}
+const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
+  const { state, setState } = stateContext;
+  const { user } = state;
 
-interface DataContext {
-  data: {
-    users: User[]
-    permissions: Permission[]
-  }
-  setData: React.Dispatch<React.SetStateAction<any>>
-}
+  const { data } = dataContext;
+  const permissions: Permission[] = data?.permissions ?? [];
 
-interface Props {
-  stateContext: StateContext
-  dataContext: DataContext
-  show: boolean
-}
+  const { actions: ua } = useContext(UserContext);
+  const tokenKey = ua.token() ?? null;
 
-const UserPermissionForm: React.FC<Props> = ({
-  stateContext,
-  dataContext,
-  show,
-}) => {
-  const { state, setState } = stateContext
-  const { loading, role, user } = state
+  const qc = useQueryClient();
+  const syncPerms = useSyncUserPermissions(tokenKey);
 
-  const { data, setData } = dataContext
-  const { users, permissions } = data
+  const [showBuscar, setShowBuscar] = useState(false);
+  const [permsSelected, setPermsSelected] = useState<RSOption[]>([]);
 
-  const [permissionsForm, setPermissionsForm] = useState<Record<
-    string,
-    Permission[]
-  > | null>(null)
+  // options
+  const permOptions: RSOption[] = useMemo(
+    () =>
+      permissions.map((p) => ({
+        label: p.description ?? p.name,
+        value: p.id,
+      })),
+    [permissions]
+  );
 
+  // name -> id
+  const permNameToId = useMemo(() => {
+    const m = new Map<string, number>();
+    permissions.forEach((p) => m.set(p.name, p.id));
+    return m;
+  }, [permissions]);
+
+  // precargar selección al cambiar user
   useEffect(() => {
-    const aux = getPermissionsForm(permissions, user)
-    setPermissionsForm(aux)
-  }, [permissions, user])
+    if (!user) {
+      setPermsSelected([]);
+      return;
+    }
 
-  const permissions_groups = permissionsForm
-    ? groupedPermissions(permissionsForm)
-    : null
-  const grupos = permissions_groups ? Object.keys(permissions_groups) : []
-  const [showBuscar, setShowBuscar] = useState(false)
-  const handleUserSelect = (selectedUser: User) => {
-    setState((prev) => ({ ...prev, user: selectedUser }))
-    setShowBuscar(false)
-  }
-  if (!show) return null
+    let names: string[] = Array.isArray(user.permission_names) ? user.permission_names : [];
+
+    if (!names.length && Array.isArray(user.permissions)) {
+      const p0 = user.permissions[0];
+      if (typeof p0 === "string") names = user.permissions as string[];
+      else if (p0 && typeof p0 === "object") {
+        names = (user.permissions as any[]).map((x) => x?.name).filter(Boolean);
+      }
+    }
+
+    const ids = names
+      .map((n) => permNameToId.get(n))
+      .filter((v): v is number => typeof v === "number");
+
+    setPermsSelected(permOptions.filter((o) => ids.includes(Number(o.value))));
+  }, [user?.id, permOptions, permNameToId]);
+
+  const handleUserSelect = (selectedUser: any) => {
+    setState((prev: any) => ({ ...prev, user: selectedUser }));
+    setShowBuscar(false);
+    // opcional: limpiar selección “manual” previa si te quedaba pegada
+    // setPermsSelected([]);
+  };
+
+  const canSave = !!user && permsSelected.length > 0 && !syncPerms.isPending;
+
+  if (!show) return null;
 
   return (
-    <>
-      {' '}
-      <div>
-        <Button onClick={() => setShowBuscar(true)}>
-          Buscar persona por DNI{' '}
-        </Button>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <ButtonBase type="button" onClick={() => setShowBuscar(true)}>
+          Buscar persona por DNI
+        </ButtonBase>
+
         <AddUsers show={showBuscar} onUserSelect={handleUserSelect} />
-      </div>{' '}
-      <hr className="mt-3" />
-      <div className="row m-0">
-        <SelectSearch
-          // className={{
-          //   container: 'col-6 col-lg-10',
-          //   label: `form-label`,
-          // }}
-          className={{
-            container: 'col-6 col-lg-10',
-            label: 'block text-sm font-semibold !text-text',
-          }}
-          isClearable
-          id="user"
-          value={formatModel(user)}
-          onChange={(u) => changeUser(u, users, setState)}
-          disabled={loading}
-          label="Seleccione un Usuario *"
-          options={formatModels(users)}
-        />
-        <div className="col-6 col-lg-2 d-flex flex-column m-auto">
-          <label className={`form-label invisible`}>HIDDEN</label>
-          {loading && <Loader />}
-
-          {!user?.roles?.some((r) => r.id === role?.id) && (
-            <ButtonAdmin
-              hidden={loading}
-              className="rounded-md bg-primary-600 px-4 py-1"
-              disabled={!user}
-              onClick={() =>
-                changeUserPermissions(user, permissionsForm, setState, setData)
-              }
-            >
-              GUARDAR
-            </ButtonAdmin>
-          )}
-        </div>
-        <hr className="my-3" />
       </div>
-      {!!user?.roles?.length && (
-        <>
-          {user.roles.map((r) => (
-            <span
-              key={r.id}
-              role="button"
-              className={`badge me-2 rounded-md bg-success px-4 py-1`}
-            >
-              {r.description}
-            </span>
-          ))}
-          <hr className="my-3" />
-        </>
-      )}
-      <CardAdmin
-        grupos={grupos}
-        permissions_groups={permissions_groups}
-        loading={loading}
-        changeCheckPermission={changeCheckPermission}
-        permissionsForm={permissionsForm}
-        setPermissionsForm={setPermissionsForm}
-      />
-    </>
-  )
-}
 
-export default UserPermissionForm
+      <hr className="border-border" />
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-10">
+          <SelectSearch<RSOption>
+            id="permissions"
+            label="Seleccione Permisos *"
+            options={permOptions}
+            value={permsSelected}
+            onChange={(opts: any) => setPermsSelected(opts ?? [])}
+            isMulti
+            isClearable
+            isSearchable
+            disabled={!user || syncPerms.isPending}
+          />
+        </div>
+
+        <div className="lg:col-span-2 flex flex-col gap-2">
+          {syncPerms.isPending ? (
+            <div className="flex justify-center py-2">
+              <Loader />
+            </div>
+          ) : null}
+
+          <ButtonBase
+            type="button"
+            color="primary"
+            disabled={!canSave}
+            onClick={() => {
+              const permissionIds = permsSelected
+                .map((p) => Number(p.value))
+                .filter((n) => Number.isFinite(n) && n > 0);
+
+              syncPerms.mutate(
+                { userId: user!.id, permissionIds },
+                {
+                  onSuccess: () => {
+                    toast.success("Permisos guardados", toastOptions);
+
+                    // ✅ si querés refrescar el user-by-dni específico:
+                    // necesitás el dni actual del buscador; si lo tenés guardado en AddUsers, pasalo al state.
+                    // invalidateUserByDni(qc, tokenKey, dniActual);
+                  },
+                  onError: (e: any) => {
+                    const msg = e?.message ?? e?.error ?? "Error guardando permisos";
+                    toast.error(msg, toastOptions);
+                  },
+                }
+              );
+            }}
+          >
+            GUARDAR
+          </ButtonBase>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserPermissionForm;

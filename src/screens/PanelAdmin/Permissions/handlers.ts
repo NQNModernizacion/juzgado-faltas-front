@@ -26,7 +26,7 @@ export const initialDataState = {
 export const unMount = async (setData, setState) => {
   setState((state) => ({ ...state, loading: true }))
 
-  const response = await axios().get('permissions')
+  const response = await axios().get('admin/bootstrap')
 
   const { data, error } = response.data
 
@@ -50,6 +50,51 @@ export const changeUser = (user, users, setState) => {
     setState((state) => ({ ...state, user: null }))
   }
 }
+
+export const findUserByDni = async (
+  dni: string,
+  setState: any,
+  onFound?: (payload: any) => void
+) => {
+  const clean = String(dni ?? "").replace(/\D/g, "");
+
+  if (!clean) {
+    toast.error("DNI inválido", toastOptions);
+    return null;
+  }
+
+  setState((s: any) => ({ ...s, loading: true }));
+
+  try {
+    const res = await axios().get(`admin/users/by-dni/${clean}`);
+    const { data, error } = res.data ?? {};
+
+    if (error) {
+      toast.error(error, toastOptions);
+      return null;
+    }
+
+    const userId = data?.user?.id;
+    if (!userId) {
+      toast.error("La persona no tiene usuario asociado", toastOptions);
+      return null;
+    }
+
+    // 👇 Shape mínimo para tu estado (user.roles lo usan varios componentes)
+    const pickedUser = { id: userId, roles: [] };
+
+    setState((s: any) => ({ ...s, user: pickedUser }));
+    toast.success("Usuario encontrado", toastOptions);
+
+    onFound?.(data); // si querés usar persona en UI
+    return pickedUser;
+  } catch (e: any) {
+    toast.error("Hubo un error buscando el DNI", toastOptions);
+    return null;
+  } finally {
+    setState((s: any) => ({ ...s, loading: false }));
+  }
+};
 
 export const changeRole = (role, roles, setState, callback = null) => {
   const _role = roles?.find((u) => u.id === role?.value)

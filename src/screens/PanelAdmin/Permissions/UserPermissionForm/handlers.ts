@@ -1,5 +1,8 @@
 import { axios } from "@/utils/axios";
 
+import { toast } from "react-toastify";
+import { toastOptions } from "@/config/toast";
+type RSOption = { label: string; value: string | number };
 
 /** Completa el tipo de dato PermissionForm */
 export const getPermissionsForm = (permissions, user) => {
@@ -69,3 +72,40 @@ export const changeUserPermissions = async (user, permissionsForm, setState, set
     }
   }
 };
+
+
+export async function changeUserPermissionsMulti(
+  user: { id: number } | null,
+  selected: RSOption[],
+  setState: any
+) {
+  if (!user?.id) {
+    toast.error("Seleccioná un usuario", toastOptions);
+    return;
+  }
+
+  const permissionIds = (selected ?? [])
+    .map((p) => Number(p.value))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  setState((s: any) => ({ ...s, loading: true }));
+
+  try {
+    const res = await axios().post(`/admin/users/${user.id}/sync-permissions`, {
+      permission_ids: permissionIds,
+    });
+
+    const { data, error } = res.data ?? {};
+    if (error) throw new Error(error);
+
+    toast.success("Permisos guardados", toastOptions);
+
+    // opcional: reflejar en estado si querés
+    // data.permissions son NAMES, si querés mapearlos a objetos lo hacemos con catálogo
+  } catch (e: any) {
+    const msg = e?.response?.data?.error ?? e?.message ?? "Error guardando permisos";
+    toast.error(msg, toastOptions);
+  } finally {
+    setState((s: any) => ({ ...s, loading: false }));
+  }
+}

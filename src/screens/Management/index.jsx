@@ -1,9 +1,10 @@
 import { useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { Container } from '../../components'
+// import { Container } from '../../components'
 import { toastOptions } from '../../config/toast'
 import { UserContext } from '../../context'
+import { Container } from 'muni-ui'
 
 export default function Management() {
   const { actions } = useContext(UserContext)

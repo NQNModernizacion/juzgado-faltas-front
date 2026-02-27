@@ -1,90 +1,150 @@
-import FormFooter from '@/components/FormFooter'
-import { Person, Role, User } from '@/interfaces'
-import { axios } from '@/utils/axios'
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import InfoPerson from './InfoPerson'
-import { toast } from 'react-toastify'
-import { toastOptions } from '@/config/toast'
-import Input from '@/components/Inputs/Input'
+import React, { useContext, useMemo, useState } from "react";
+import { ButtonBase, InputBase } from "muni-ui";
+import { toast } from "react-toastify";
+import { toastOptions } from "@/config/toast";
 
-interface DataContext {
-  users: User[]
-  roles: Role[]
-  permissions: any[]
-}
+import { UserContext } from "@/context/UserWrapper";
+import { userKeys } from "@/query/keys";
+import { useUserByDni } from "@/query/hooks/useUserByDni";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface State {
-  loading: boolean
-  role: Role | null
-  user: User | null
-}
+import InfoPerson from "./InfoPerson";
+
+type PersonaInfo = {
+  dni: number;
+  nombres: string;
+  apellidos: string;
+  user_id: number;
+};
+
+type UserAccess = {
+  id: number;
+  email: string;
+  roles: string[];
+  permissions: string[];
+};
 
 interface Props {
-  show: boolean
-  onUserSelect: (user: User) => void
+  show: boolean;
+  onUserSelect: (user: any) => void;
 }
 
 const AddUsers: React.FC<Props> = ({ show, onUserSelect }) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm()
+  const { actions: ua } = useContext(UserContext);
+  const tokenKey = ua.token() ?? null;
 
-  const [persona, setPersona] = useState<Person | null>(null)
+  const qc = useQueryClient();
 
-  const onSubmit = async (form: any) => {
-    const response = await axios().get(`get_person_info/${form.documento}`)
+  const [dni, setDni] = useState("");
 
-    const { data } = response
-    if (!data.error) {
-      setPersona(response.data)
-    } else {
-      toast.error(data.error, toastOptions)
+  const dniClean = useMemo(() => String(dni ?? "").replace(/\D/g, ""), [dni]);
+
+  // ✅ enabled:false → NO dispara al tipear, solo con refetch()
+  const q = useUserByDni({ tokenKey, dni: dniClean, enabled: false });
+
+  const persona: PersonaInfo | null = (q.data?.persona as any) ?? null;
+  const userAccess: UserAccess | null = (q.data?.user as any) ?? null;
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!dniClean) {
+      toast.error("Ingresá un DNI válido", toastOptions);
+      return;
     }
-  }
+
+    const res = await q.refetch();
+
+    if (res.error) {
+      const msg =
+        (res.error as any)?.response?.data?.error ??
+        (res.error as any)?.message ??
+        "Error consultando DNI";
+      toast.error(msg, toastOptions);
+      return;
+    }
+
+    if (!res.data?.user) {
+      toast.info("La persona no tiene usuario en la tabla users (local)", toastOptions);
+    }
+  };
+
+  const resetLocal = () => {
+    // limpia input
+    setDni("");
+
+    // limpia el resultado visible (remueve cache del dni buscado)
+    if (dniClean) {
+      qc.removeQueries({ queryKey: userKeys.byDni(tokenKey, dniClean) });
+    }
+  };
 
   const handleSelectPerson = () => {
-    if (persona) {
-      if (persona.informacion.usuarioID == 0) {
-        toast.error('La persona no posee usuario', toastOptions)
-      } else {
-        const selectedUser: User = {
-          id: persona.informacion.usuarioID, // Asegúrate de que `persona.id` sea el ID del usuario
-          roles: [], // Inicialmente sin roles
-        }
-        onUserSelect(selectedUser)
-      }
-    }
-  }
+    if (!persona) return;
 
-  if (!show) return null
+    if (!userAccess?.id) {
+      toast.error("No se puede seleccionar: no existe usuario local", toastOptions);
+      return;
+    }
+
+    const selectedUser = {
+      id: userAccess.id,
+      email: userAccess.email,
+      persona,
+
+      // ✅ esto sirve para precargar selects
+      role_names: userAccess.roles ?? [],
+      permission_names: userAccess.permissions ?? [],
+
+      // opcional legacy (si tus forms esperan objetos)
+      roles: (userAccess.roles ?? []).map((name) => ({
+        id: -1,
+        name,
+        description: name,
+      })),
+      permissions: (userAccess.permissions ?? []).map((name) => ({
+        id: -1,
+        name,
+      })),
+    };
+
+    onUserSelect(selectedUser);
+
+    // ✅ deja el buscador limpio para la próxima búsqueda
+    resetLocal();
+  };
+
+  if (!show) return null;
 
   return (
-    <div className="">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex items-end gap-4 max-w-3xl mt-4 "
-      >
-        <Input
-          className={{ container: 'w-full' }}
-          control={control}
-          name="documento"
-          label="Número de DNI"
-        />
-        <div>
-          <FormFooter isSubmitting={isSubmitting} submitButtonText="Buscar" />
+    <div className="w-full">
+      <form onSubmit={onSubmit} className="flex w-full flex-wrap items-end gap-3">
+        <div className="flex-1 min-w-[240px]">
+          <InputBase
+            control={undefined as any}
+            name="dni"
+            label="Número de DNI"
+            value={dni}
+            onChange={(e: any) => setDni(e?.target?.value ?? "")}
+            className={{
+              container: "w-full",
+              label: "block text-sm font-semibold text-text",
+            }}
+          />
         </div>
-      </form>
-      {persona && (
-        <InfoPerson
-          persona={persona.informacion}
-          onSelect={handleSelectPerson}
-        />
-      )}
-    </div>
-  )
-}
 
-export default AddUsers
+        <ButtonBase type="submit" color="primary" disabled={q.isFetching} className="h-10 px-6">
+          {q.isFetching ? "Buscando..." : "Buscar"}
+        </ButtonBase>
+      </form>
+
+      {persona ? (
+        <div className="mt-4">
+          <InfoPerson persona={persona} onSelect={handleSelectPerson} />
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+export default AddUsers;

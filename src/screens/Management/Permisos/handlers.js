@@ -1,199 +1,204 @@
-import { isAxiosError } from 'axios'
-import { toast } from 'react-toastify'
-import { toastOptions } from '../../../config/toast'
-import { axios } from '../../../utils/axios'
+import { toast } from "react-toastify";
+import { toastOptions } from "../../../config/toast";
+import { axios } from "../../../utils/axios";
+import { CheckboxBase } from "muni-ui";
 
-export const getPermisos = async (permisos, setPermisos, listado, setListado, perms) => {
-  setPermisos({ ...permisos, loading: true, data: null })
-  const response = await axios().get('/permisos')
+/** ====== API ====== */
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+export const getPermisos = async (
+  permisos,
+  setPermisos,
+  listado,
+  setListado,
+  perms
+) => {
+  setPermisos({ ...permisos, loading: true, data: null, error: null });
+
+  try {
+    const response = await axios().get("/permisos");
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setPermisos({ ...permisos, loading: false, data: data })
-      toast.success('Permisos cargados', toastOptions)
-      /* let lista = perms.map(item=>{
-              return item.id
-            }) */
-      setListado({ ...listado, permisos: data, permisos_select: perms })
+      setPermisos({ ...permisos, loading: false, data });
+      toast.success("Permisos cargados", toastOptions);
+
+      // perms = ids seleccionados (ya venía en tu lógica)
+      setListado({ ...listado, permisos: data, permisos_select: perms });
+      return;
     }
 
-    if (!data && error) {
-      setPermisos({ ...permisos, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setPermisos({ ...permisos, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setPermisos({
       ...permisos,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
-export const consultar_persona = async (e, persona, setPersona, setListado, listado, setPermisos, permisos) => {
-  e.preventDefault()
+export const consultar_persona = async (
+  e,
+  persona,
+  setPersona,
+  setListado,
+  listado,
+  setPermisos,
+  permisos
+) => {
+  e.preventDefault();
+
   setListado({
     ...listado,
     permisos_asign: [],
     permisos_no_asign: [],
     permisos_select: [],
-  })
-  setPersona({ ...persona, loading: true, data: null })
-  const response = await axios().post('/buscar_persona', {
-    data: persona.values.data,
-  })
+  });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  setPersona({ ...persona, loading: true, data: null, error: null });
+
+  try {
+    const response = await axios().post("/buscar_persona", {
+      data: persona.values.data,
+    });
+
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setPersona({ ...persona, loading: false, data: data })
-      let listado = data.permisos.map((item) => item.id)
+      setPersona({ ...persona, loading: false, data });
 
-      getPermisos(permisos, setPermisos, listado, setListado, listado)
+      // ids de permisos ya asignados
+      const selectedIds = (data.permisos ?? []).map((item) => item.id);
+
+      // cargar catálogo y setear selección
+      await getPermisos(permisos, setPermisos, listado, setListado, selectedIds);
+      return;
     }
 
-    if (!data && error) {
-      setPersona({ ...persona, data: null, loading: false, error: error })
-      if (error.general) {
-        toast.error(error.general, toastOptions)
-      } else {
-        toast.error(error, toastOptions)
-      }
-    }
-  } else {
+    setPersona({ ...persona, data: null, loading: false, error: error ?? "Error desconocido" });
+
+    if (error?.general) toast.error(error.general, toastOptions);
+    else toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e2) {
     setPersona({
       ...persona,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
-const seleccionar = (e, listado, setListado) => {
-  if (e.target.checked) {
-    let list = listado.permisos_select
+export const GuardarPermisos = async (
+  persona,
+  guardarPermisos,
+  setGuardarPermisos,
+  permisosSelect,
+  permisos,
+  setPermisos,
+  listado,
+  setListado
+) => {
+  setGuardarPermisos({ ...guardarPermisos, loading: true, error: null });
 
-    list.push(parseInt(e.target.value))
-    setListado({ ...listado, permisos_select: list })
-  } else {
-    let list = listado.permisos_select
-    let lista = list.filter((item) => {
-      if (item != e.target.value) {
-        return item
-      }
-    })
+  try {
+    const response = await axios().post("/sincronizarPermisos", {
+      user_id: persona.data.user.usuarioID,
+      permisos_id: permisosSelect,
+    });
 
-    setListado({ ...listado, permisos_select: lista })
-  }
-}
-
-const tiene_permiso = (nombre, persona, listado, setListado) => {
-  let tiene = false
-
-  persona.data.permisos.map((item) => {
-    if (item.name === nombre) {
-      tiene = true
-    }
-  })
-
-  return tiene
-}
-
-export const dataTablePermisos = (data, listado, setListado, persona, actions) => {
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 10, flex: 0.5, hide: true },
-    {
-      field: 'accion',
-      headerName: 'Acción',
-      width: 50,
-      flex: 0.2,
-      sorteable: false,
-      hide: !actions.hasPermission('admin.permission.asign'),
-      renderCell: (p) => {
-        return (
-          <div className="d-flex justify-content-evenly w-100">
-            <input
-              key={p.id}
-              defaultChecked={tiene_permiso(p.row.name, persona, listado, setListado)}
-              id={p.row.id}
-              type="checkbox"
-              value={p.row.id}
-              onChange={(e) => {
-                seleccionar(e, listado, setListado)
-              }}
-            />
-          </div>
-        )
-      },
-    },
-    {
-      field: 'name',
-      headerName: 'Nombre',
-      width: 60,
-      flex: 1,
-      sorteable: true,
-    },
-    {
-      field: 'description',
-      headerName: 'Descripción',
-      width: 150,
-      flex: 1.3,
-      sorteable: true,
-    },
-  ]
-
-  const rows = data.map((d) => {
-    return {
-      id: d.id,
-      name: d.name,
-      description: d.description,
-    }
-  })
-
-  const filter = (d, value) => {
-    value = value.toLowerCase()
-
-    return d.id?.toString().toLowerCase().includes(value) || d.name?.toLowerCase().includes(value) || d.descripcion?.toLowerCase().includes(value)
-  }
-
-  return { columns, rows, filter }
-}
-
-export const GuardarPermisos = async (persona, guardarPermisos, setGuardarPermisos, permisosSelect, permisos, setPermisos, listado, setListado) => {
-  setGuardarPermisos({ ...guardarPermisos, loading: true })
-  const response = await axios().post('/sincronizarPermisos', {
-    user_id: persona.data.user.usuarioID,
-    permisos_id: permisosSelect,
-  })
-
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setGuardarPermisos({
-        ...guardarPermisos,
-        loading: false,
-        data: data,
-      })
-      toast.success('Permisos actualizados', toastOptions)
+      setGuardarPermisos({ ...guardarPermisos, loading: false, data });
+      toast.success("Permisos actualizados", toastOptions);
+      return;
     }
 
-    if (!data && error) {
-      setGuardarPermisos({
-        ...guardarPermisos,
-        loading: false,
-        error: error,
-      })
-      toast.error(error, toastOptions)
-    }
-  } else {
+    setGuardarPermisos({ ...guardarPermisos, loading: false, error: error ?? "Error desconocido" });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
     setGuardarPermisos({
       ...guardarPermisos,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
+
+/** ====== helpers selección (misma lógica que tu versión) ====== */
+
+const seleccionar = (checked, value, listado, setListado) => {
+  const id = parseInt(value, 10);
+
+  if (checked) {
+    const list = Array.isArray(listado.permisos_select) ? [...listado.permisos_select] : [];
+    if (!list.includes(id)) list.push(id);
+    setListado({ ...listado, permisos_select: list });
+  } else {
+    const list = Array.isArray(listado.permisos_select) ? listado.permisos_select : [];
+    const next = list.filter((item) => item !== id);
+    setListado({ ...listado, permisos_select: next });
+  }
+};
+
+const tiene_permiso = (nombre, persona) => {
+  let tiene = false;
+  (persona?.data?.permisos ?? []).forEach((item) => {
+    if (item.name === nombre) tiene = true;
+  });
+  return tiene;
+};
+
+/** ====== Table model muni-ui (reemplaza DataGrid) ====== */
+export const tablePermisosModel = (data, listado, setListado, persona, actions) => {
+  const canAssign = actions.hasPermission("admin.permission.asign");
+
+  const rows = (data ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    description: d.description,
+  }));
+
+  const columns = [
+    ...(canAssign
+      ? [
+          {
+            id: "accion",
+            header: "Acción",
+            align: "center",
+            headerClassName: "w-[120px]",
+            cellClassName: "w-[120px]",
+            render: (row) => (
+              <div className="flex justify-center">
+                <CheckboxBase
+                  // checkbox base: lo manejamos como “defaultChecked + onChange”
+                  // para mantener lo más parecido a tu implementación actual
+                  defaultChecked={tiene_permiso(row.name, persona)}
+                  onCheckedChange={(checked) => {
+                    seleccionar(!!checked, row.id, listado, setListado);
+                  }}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []),
+    { id: "name", header: "Nombre", render: (r) => r.name ?? "-" },
+    { id: "description", header: "Descripción", render: (r) => r.description ?? "-" },
+  ];
+
+  const filter = (row, value) => {
+    const v = (value ?? "").toLowerCase();
+    return (
+      String(row.id ?? "").toLowerCase().includes(v) ||
+      (row.name ?? "").toLowerCase().includes(v) ||
+      (row.description ?? "").toLowerCase().includes(v)
+    );
+  };
+
+  return { columns, rows, filter };
+};

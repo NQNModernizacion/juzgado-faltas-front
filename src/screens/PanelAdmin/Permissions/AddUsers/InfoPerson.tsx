@@ -1,22 +1,54 @@
-import Button from '@/components/Button';
+import { ButtonBase } from "muni-ui";
 
-const InfoPerson = ({ persona, onSelect }: any) => {
+type PersonaInfo = {
+  dni?: number;
+  nombres?: string;
+  apellidos?: string;
+  user_id?: number;
+
+  // opcionales por si en otros flujos todavía vienen con nombres viejos
+  documento?: number;
+  usuarioID?: number;
+
+  nombreCompleto?: string;
+  correoElectronico?: string;
+};
+
+const InfoPerson = ({
+  persona,
+  onSelect,
+}: {
+  persona: PersonaInfo | null;
+  onSelect: () => void;
+}) => {
   if (!persona) return null;
 
+  const fullName =
+    persona.nombreCompleto ??
+    `${persona.apellidos ?? ""} ${persona.nombres ?? ""}`.trim();
+
+  // ✅ soporta ambos nombres (nuevo y legacy)
+  const dni = persona.dni ?? persona.documento ?? null;
+  const userId = persona.user_id ?? persona.usuarioID ?? null;
+
   return (
-    <div className="py-5 flex justify-between">
-      <div className=" flex items-center gap-6">
-        <div className="inline-block">
-          <h2 className="text-2xl font-bold text-zinc-700">
-            {persona?.razonSocial.nombreCompleto}
-          </h2>
-          <p className="mt-2 font-semibold text-zinc-700">
-            {persona?.correoElectronico.direccion}
-          </p>
-        </div>
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <h2 className="text-lg font-bold text-text sm:text-xl">{fullName || "-"}</h2>
+
+        <p className="mt-1 text-sm font-medium text-muted break-words">
+          DNI: {dni ?? "-"} · UserID: {userId ?? "-"}
+        </p>
+
+        {!!persona.correoElectronico ? (
+          <p className="mt-1 text-sm text-muted break-words">{persona.correoElectronico}</p>
+        ) : null}
       </div>
-      <div className="me-14 mt-8">
-        <Button onClick={onSelect}>Seleccionar</Button>
+
+      <div className="shrink-0">
+        <ButtonBase type="button" onClick={onSelect}>
+          Seleccionar
+        </ButtonBase>
       </div>
     </div>
   );

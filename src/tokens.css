@@ -1,5 +1,5 @@
-:root {
-    /* PRIMARY (coral) */
+/* :root {
+
     --mx-primary-50: 255 241 241;
     --mx-primary-100: 255 225 225;
     --mx-primary-200: 255 199 199;
@@ -11,8 +11,7 @@
     --mx-primary-800: 160 20 20;
     --mx-primary-900: 132 24 24;
     --mx-primary-950: 72 7 7;
-  
-    /* SECONDARY (amarillo) */
+
     --mx-secondary-50: 255 251 207;
     --mx-secondary-100: 255 249 184;
     --mx-secondary-200: 255 246 138;
@@ -25,7 +24,6 @@
     --mx-secondary-900: 194 181 0;
     --mx-secondary-950: 186 174 0;
   
-    /* neutrales */
     --mx-bg: 245 246 248;
     --mx-surface: 255 255 255;
   
@@ -34,4 +32,4 @@
     --mx-border: 229 231 235;
     --mx-overlay: 0 0 0;
   }
-  
+   */

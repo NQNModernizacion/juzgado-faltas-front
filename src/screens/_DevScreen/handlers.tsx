@@ -19,3 +19,26 @@ export const dataTable = (data: any[] /* , d: DispachState */) => {
 
   return { columns, rows: data }
 }
+import type { TableColumn } from "muni-ui";
+
+export const dataTableMx = (data: any[]) => {
+  const columns: TableColumn<any>[] = [
+    {
+      id: "avatar",
+      header: "",
+      render: () => <h2 className="m-0">H2</h2>,
+    },
+    {
+      id: "name",
+      header: "Name",
+      render: (row) => row.name,
+    },
+    {
+      id: "label",
+      header: "label",
+      render: (row) => row.label,
+    },
+  ];
+
+  return { columns, rows: data };
+};

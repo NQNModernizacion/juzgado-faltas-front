@@ -1,55 +1,57 @@
-import { isAxiosError } from 'axios'
-import { toast } from 'react-toastify'
-import { toastOptions } from '../../../config/toast'
-import { axios } from '../../../utils/axios'
+import { toast } from "react-toastify";
+import { toastOptions } from "../../../config/toast";
+import { axios } from "../../../utils/axios";
 
+/** Trae usuarios */
 export const getUsers = async (usuarios, setUsuarios) => {
-  setUsuarios({ ...usuarios, loading: true })
-  const response = await axios().get('/usersList')
+  setUsuarios({ ...usuarios, loading: true, error: null });
 
-  if (!isAxiosError(response)) {
-    const { data, error } = response.data
+  try {
+    const response = await axios().get("/usersList");
+    const { data, error } = response?.data ?? {};
 
     if (data && !error) {
-      setUsuarios({ ...usuarios, loading: false, data: data })
-      toast.success('Usuarios cargados', toastOptions)
+      setUsuarios({ ...usuarios, loading: false, data });
+      toast.success("Usuarios cargados", toastOptions);
+      return;
     }
 
-    if (!data && error) {
-      setUsuarios({ ...usuarios, loading: false, error: error })
-      toast.error(error, toastOptions)
-    }
-  } else {
     setUsuarios({
       ...usuarios,
       loading: false,
-      error: 'Hubo un error durante la consulta',
-    })
+      error: error ?? "Error desconocido",
+    });
+    toast.error(error ?? "Error desconocido", toastOptions);
+  } catch (e) {
+    setUsuarios({
+      ...usuarios,
+      loading: false,
+      error: "Hubo un error durante la consulta",
+    });
+    toast.error("Hubo un error durante la consulta", toastOptions);
   }
-}
+};
 
-export const dataTableUsuarios = (data) => {
+/** Model para muni-ui Table */
+export const tableUsuariosModel = (data) => {
+  const rows = (data ?? []).map((d) => ({
+    id: d.id,
+  }));
+
   const columns = [
     {
-      field: 'id',
-      headerName: 'ID',
-      width: 10,
-      flex: 0.5,
-      sorteabled: true,
+      id: "id",
+      header: "ID",
+      headerClassName: "w-[120px]",
+      cellClassName: "w-[120px]",
+      render: (r) => String(r.id ?? "-"),
     },
-  ]
+  ];
 
-  const rows = data.map((d) => {
-    return {
-      id: d.id,
-    }
-  })
+  const filter = (row, value) => {
+    const v = (value ?? "").toLowerCase();
+    return String(row.id ?? "").toLowerCase().includes(v);
+  };
 
-  const filter = (d, value) => {
-    value = value.toLowerCase()
-
-    return d.id?.toString().toLowerCase().includes(value)
-  }
-
-  return { columns, rows, filter }
-}
+  return { columns, rows, filter };
+};
