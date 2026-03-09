@@ -22,41 +22,38 @@
 
 
 // utils/localStorage.ts (o .js)
-import { scopedKey } from "./storageScope";
 
-export const KEY = scopedKey("store");
+//*---------------------------------------------------------------------------
 
-export const getSession = () => {
-  const raw = sessionStorage.getItem(KEY);
-  return raw ? JSON.parse(raw) : null;
-};
+// import { scopedKey } from "./storageScope";
 
-export const setStorage = (data) => {
-  sessionStorage.setItem(KEY, JSON.stringify(data));
-};
+// export const KEY = scopedKey("store");
 
-export const removeStore = () => {
-  sessionStorage.removeItem(KEY);
-};
+// export const getSession = () => {
+//   const raw = sessionStorage.getItem(KEY);
+//   return raw ? JSON.parse(raw) : null;
+// };
 
-// export const removeUser = () => {
-  //   sessionStorage.removeItem(KEY);
-  // };
-  
-export const getToken = () => getSession()?.token ?? null;
+// export const setStorage = (data) => {
+//   sessionStorage.setItem(KEY, JSON.stringify(data));
+// };
 
-// export const logout = () => {
+// export const removeStore = () => {
 //   sessionStorage.removeItem(KEY);
 // };
 
-export const logout = async () => {
-  try {
-    await axios().post("logout"); 
-  } finally {
-    sessionStorage.removeItem(KEY); 
-    window.location.href = WEBLOGIN_URL;
-  }
-};
+  
+// export const getToken = () => getSession()?.token ?? null;
+
+
+// export const logout = async () => {
+//   try {
+//     await axios().post("logout"); 
+//   } finally {
+//     sessionStorage.removeItem(KEY); 
+//     window.location.href = WEBLOGIN_URL;
+//   }
+// };
 
 
 

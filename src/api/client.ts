@@ -20,17 +20,27 @@ function normalizeResponse<T>(body: any): T {
   if (body === undefined) {
     throw new Error("Respuesta inválida: body undefined");
   }
+
   return body as T;
 }
 
-
-export async function apiGet<T>(path: string, token?: string): Promise<T> {
-  const res = await axios(token).get(path);
-  console.log("[apiGet]", path, "status:", res.status, "body:", res.data);
+export async function apiGet<T>(path: string): Promise<T> {
+  const res = await axios().get(path);
+  console.info("[apiGet]", path, "status:", res.status, "body:", res.data);
   return normalizeResponse<T>(res.data);
 }
 
-export async function apiPost<T>(path: string, body?: any, token?: string): Promise<T> {
-  const res = await axios(token).post(path, body);
+export async function apiPost<T>(path: string, body?: any): Promise<T> {
+  const res = await axios().post(path, body);
+  return normalizeResponse<T>(res.data);
+}
+
+export async function apiPut<T>(path: string, body?: any): Promise<T> {
+  const res = await axios().put(path, body);
+  return normalizeResponse<T>(res.data);
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  const res = await axios().delete(path);
   return normalizeResponse<T>(res.data);
 }

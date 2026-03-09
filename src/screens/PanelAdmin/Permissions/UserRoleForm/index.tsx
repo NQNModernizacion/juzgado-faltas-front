@@ -272,14 +272,24 @@ const UserRoleForm: React.FC<Props> = ({ stateContext, dataContext, show }) => {
   );
 
   // cuando cambia el user, opcionalmente resetea roles seleccionados
-  useEffect(() => {
-    const existing = (user?.role_names ?? user?.roles?.map((r:any)=>r.name ?? r.description) ?? []) as string[];
-    const pre = existing
-      .map((name) => roleOptions.find((o) => o.label === name))
-      .filter(Boolean) as RSOption[];
-  
-    setRolesSelected(pre);
-  }, [user?.id, roleOptions]);
+ useEffect(() => {
+  const existing = (
+    user?.role_names ??
+    user?.roles?.map((r: any) => r.name ?? r.description) ??
+    []
+  ) as string[];
+
+  const pre = existing
+    .map((name) => roleOptions.find((o) => o.label === name))
+    .filter(Boolean) as RSOption[];
+
+  setRolesSelected((prev) => {
+    const prevValues = prev.map((x) => String(x.value)).join("|");
+    const nextValues = pre.map((x) => String(x.value)).join("|");
+
+    return prevValues === nextValues ? prev : pre;
+  });
+}, [user?.id]);
 
   
   const handleUserSelect = (selectedUser: User) => {
