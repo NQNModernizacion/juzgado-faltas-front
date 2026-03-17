@@ -1,4 +1,5 @@
 import { axios } from "@/utils/axios";
+import { log } from "@/utils/logger";
 
 type Envelope<T> = { data?: T; error?: any };
 
@@ -7,7 +8,6 @@ function isEnvelope<T>(v: any): v is Envelope<T> {
 }
 
 function normalizeResponse<T>(body: any): T {
-  // Caso A: { data, error }
   if (isEnvelope<T>(body)) {
     if (body.error) throw body.error;
     if (body.data === undefined) {
@@ -16,7 +16,6 @@ function normalizeResponse<T>(body: any): T {
     return body.data as T;
   }
 
-  // Caso B: respuesta plana
   if (body === undefined) {
     throw new Error("Respuesta inválida: body undefined");
   }
@@ -26,21 +25,24 @@ function normalizeResponse<T>(body: any): T {
 
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await axios().get(path);
-  console.info("[apiGet]", path, "status:", res.status, "body:", res.data);
+  log.info("[apiGet]", path, "status:", res.status, "body:", res.data);
   return normalizeResponse<T>(res.data);
 }
 
 export async function apiPost<T>(path: string, body?: any): Promise<T> {
   const res = await axios().post(path, body);
+  log.info("[apiPost]", path, "status:", res.status, "body:", res.data);
   return normalizeResponse<T>(res.data);
 }
 
 export async function apiPut<T>(path: string, body?: any): Promise<T> {
   const res = await axios().put(path, body);
+  log.info("[apiPut]", path, "status:", res.status, "body:", res.data);
   return normalizeResponse<T>(res.data);
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
   const res = await axios().delete(path);
+  log.info("[apiDelete]", path, "status:", res.status, "body:", res.data);
   return normalizeResponse<T>(res.data);
 }

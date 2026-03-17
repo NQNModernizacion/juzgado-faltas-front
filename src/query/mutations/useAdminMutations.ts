@@ -7,14 +7,11 @@ import {
 import {
   syncUserRoles,
   syncUserPermissions,
-  syncRolePermissions,   // 👈 AGREGAR
+  syncRolePermissions,
 } from "@/api/admin";
 
 import { adminKeys, userKeys } from "../keys";
 
-/* ===========================
-   USER → ROLES
-=========================== */
 export function useSyncUserRoles(tokenKey: string | null) {
   const qc = useQueryClient();
 
@@ -30,9 +27,6 @@ export function useSyncUserRoles(tokenKey: string | null) {
   });
 }
 
-/* ===========================
-   USER → PERMISSIONS
-=========================== */
 export function useSyncUserPermissions(tokenKey: string | null) {
   const qc = useQueryClient();
 
@@ -56,9 +50,6 @@ export function useSyncUserPermissions(tokenKey: string | null) {
   });
 }
 
-/* ===========================
-   ROLE → PERMISSIONS   ✅ NUEVO
-=========================== */
 export function useSyncRolePermissions(tokenKey: string | null) {
   const qc = useQueryClient();
 
@@ -82,9 +73,6 @@ export function useSyncRolePermissions(tokenKey: string | null) {
   });
 }
 
-/* ===========================
-   INVALIDATE USER BY DNI
-=========================== */
 export function invalidateUserByDni(
   qc: QueryClient,
   tokenKey: string | null,

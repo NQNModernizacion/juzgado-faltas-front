@@ -1,95 +1,122 @@
-// import { setStorage } from './utils/localStorage'
-// import { getParams, removeURLParameter } from './utils/common'
-// import { Actions } from './interfaces'
-// import { axios } from './utils/axios'
-// import { toast } from 'react-toastify'
-// import { toastOptions } from './config/toast'
+// import { getParams, removeURLParameter } from "./utils/common";
+// import { axios } from "./utils/axios";
+// import { toast } from "react-toastify";
+// import { toastOptions } from "./config/toast";
 
-// export const initApp = async (ua: Actions) => {
-//   const token = getParams().token
+import { toast } from "react-toastify";
+import { axios } from "./utils/axios";
+import { getParams, removeURLParameter } from "./utils/common";
+import { setStorage } from "./utils/localStorage";
+import { toastOptions } from "./config/toast";
+
+// type InitActions = {
+//   setStore: (data: any) => void;
+//   setLoading: (value: boolean) => void;
+// };
+
+// export const initApp = async (ua: InitActions) => {
+//   const token = getParams().token;
 
 //   if (token) {
-//     showSpinner(true)
-//     const response = await axios(token).post('auth', { type: 'app_login' })
-//     showSpinner(false)
+//     showSpinner(true);
 
-//     const { data, error } = response.data
+//     const response = await axios(token).post("auth", { type: "app_login" });
+
+//     showSpinner(false);
+
+//     const { data, error } = response.data ?? {};
 
 //     if (data) {
-//       ua.setStore(data)
-//       setStorage(data)
+//       ua.setStore(data);
 //     }
 
 //     if (error) {
-//       toast.error(error, toastOptions)
-//       return null
+//       toast.error(error, toastOptions);
+//       return null;
 //     }
 
-//     let url = removeURLParameter(window.location.href, 'token')
-//     url = url + '#/'
-//     window.location.href = url
-//     // retornamos a weblogin o al internal login
+//     let url = removeURLParameter(window.location.href, "token");
+//     url = url + "#/";
+//     window.location.href = url;
 //   }
-//   ua.setLoading(false)
-// }
+
+//   ua.setLoading(false);
+// };
 
 // /** Enviamos un bool para mostrar el spinner principal */
 // export const showSpinner = (loading: boolean) => {
 //   if (loading) {
-//     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//     //@ts-expect-error
-//     window.cargarSpinner()
+//     // @ts-expect-error
+//     window.cargarSpinner();
 //   } else {
-//     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//     //@ts-expect-error
-//     window.eliminarSpinner()
+//     // @ts-expect-error
+//     window.eliminarSpinner();
 //   }
-// }
+// };
 
+// src/utils/handlers.ts
+// src/utils/handlers.ts
+// import { getParams, removeURLParameter } from "./common"; // O ./utils/common dependiendo de tu estructura
+// import { axios } from "./axios";
+// import { toast } from "react-toastify";
+// import { toastOptions } from "../config/toast";
+// import { setStorage } from "./localStorage"; // Nuestra función que usa GLOBAL_KEY
 
-//----------------------------------------------------------------------------------        
-import { getParams, removeURLParameter } from "./utils/common";
-import { Actions } from "./interfaces";
-import { axios } from "./utils/axios";
-import { toast } from "react-toastify";
-import { toastOptions } from "./config/toast";
+type InitActions = {
+  // setStore es lo que definió tu UserWrapper para mapear a Zustand
+  setStore: (data: any) => void;
+  setLoading: (value: boolean) => void;
+};
 
-export const initApp = async (ua: Actions) => {
+export const initApp = async (ua: InitActions) => {
   const token = getParams().token;
 
   if (token) {
+    ua.setLoading(true); // Usamos la acción del context para el loading
     showSpinner(true);
 
-    const response = await axios(token).post("auth", { type: "app_login" });
+    try {
+      const response = await axios(token).post("auth", { type: "app_login" });
+      showSpinner(false);
 
-    showSpinner(false);
+      const { data, error } = response.data ?? {};
 
-    const { data, error } = response.data ?? {};
+      if (data) {
+        // 1. Persistimos en LocalStorage Global (para el portal MuniExpress)
+        setStorage(data); 
+        
+        // 2. Actualizamos Zustand a través del wrapper
+        // Esto automáticamente disparará el sessionStorage de la app
+        ua.setStore(data);
+      }
 
-    if (data) {
-      ua.setStore(data);
+      if (error) {
+        toast.error(error, toastOptions);
+        ua.setLoading(false);
+        return;
+      }
+
+      // Limpieza de URL
+      let url = removeURLParameter(window.location.href, "token");
+      window.location.href = url + "#/";
+      
+    } catch (err) {
+      showSpinner(false);
+      ua.setLoading(false);
+      console.error("Error en initApp:", err);
     }
-
-    if (error) {
-      toast.error(error, toastOptions);
-      return null;
-    }
-
-    let url = removeURLParameter(window.location.href, "token");
-    url = url + "#/";
-    window.location.href = url;
+  } else {
+    ua.setLoading(false);
   }
-
-  ua.setLoading(false);
 };
 
-/** Enviamos un bool para mostrar el spinner principal */
+/** Spinner global del index.html */
 export const showSpinner = (loading: boolean) => {
   if (loading) {
     // @ts-expect-error
-    window.cargarSpinner();
+    window.cargarSpinner?.();
   } else {
     // @ts-expect-error
-    window.eliminarSpinner();
+    window.eliminarSpinner?.();
   }
 };

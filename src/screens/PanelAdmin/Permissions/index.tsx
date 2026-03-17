@@ -8,6 +8,7 @@ import RolesPermissionForm from "./RolesPermissionForm";
 
 import { UserContext } from "@/context/UserWrapper";
 import { useAdminBootstrap } from "@/query/hooks/useAdminBootstrap";
+import { useSessionStore } from "@/store/sessionStore";
 
 interface State {
   screen: keyof typeof screen_dic;
@@ -24,12 +25,17 @@ interface Data {
 
 const Permissions: React.FC = () => {
   const [state, setState] = useState<State>({ ...initialState });
-  const [data, setData] = useState<Data>({ ...initialDataState });
+  const [data, setData] = useState<Data>({
+    users: [],
+    roles: [],
+    permissions: [],
+  });
 
-  // ✅ acá estaba tu problema: ua no existía
   const { actions: ua } = useContext(UserContext);
+  // const token = ua.token();
+  // const tokenKey = token ?? null;
 
-  const token = ua.token();
+  const token = useSessionStore((s) => s.token);
   const tokenKey = token ?? null;
 
   const bootstrap = useAdminBootstrap({
@@ -37,20 +43,21 @@ const Permissions: React.FC = () => {
     tokenKey,
   });
 
-  // ✅ volcar bootstrap al dataContext
   useEffect(() => {
     if (!bootstrap.data) return;
 
-    setData((prev) => ({
-      ...prev,
+    setData({
+      users: bootstrap.data.users ?? [],
       roles: bootstrap.data.roles ?? [],
       permissions: bootstrap.data.permissions ?? [],
-    }));
+    });
   }, [bootstrap.data]);
 
-  // ✅ mantener state.loading con isFetching
   useEffect(() => {
-    setState((prev) => ({ ...prev, loading: bootstrap.isFetching }));
+    setState((prev) => ({
+      ...prev,
+      loading: bootstrap.isFetching,
+    }));
   }, [bootstrap.isFetching]);
 
   const handleScreenChange = useCallback((key: keyof typeof screen_dic) => {
@@ -67,16 +74,13 @@ const Permissions: React.FC = () => {
       const isActive = key === state.screen;
       const isDisabled = state.loading || isActive;
 
-      const variant = isActive ? "solid" : "outline";
-      const color = "secondary";
-
       return (
         <ButtonBase
           key={String(key)}
           type="button"
           size="sm"
-          variant={variant}
-          color={color}
+          variant={isActive ? "solid" : "outline"}
+          color="secondary"
           disabled={isDisabled}
           onClick={() => handleScreenChange(key)}
           className={[

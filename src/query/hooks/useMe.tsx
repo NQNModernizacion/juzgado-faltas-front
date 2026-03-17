@@ -1,27 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiGet } from "@/api/client";
+import { fetchMe } from "@/api/auth";
 import { useSessionStore } from "@/store/sessionStore";
-
-export type MeResponse = {
-  id: number;
-  email: string;
-  roles: string[];
-  permissions: string[];
-};
-
-export const meKeys = {
-  me: (token: string | null) => ["me", token] as const,
-};
+import { authKeys } from "../authKeys";
 
 export function useMe() {
   const token = useSessionStore((s) => s.token);
 
   return useQuery({
-    queryKey: meKeys.me(token),
+    queryKey: authKeys.me(token),
+    queryFn: fetchMe,
     enabled: !!token,
-    queryFn: async () => {
-      return await apiGet<MeResponse>("me");
-    },
     staleTime: 5 * 60 * 1000,
   });
 }

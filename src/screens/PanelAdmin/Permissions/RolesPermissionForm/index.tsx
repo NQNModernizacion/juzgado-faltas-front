@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { ButtonBase, SelectSearch } from "muni-ui";
 import { UserContext } from "@/context/UserWrapper";
 import { useSyncRolePermissions } from "@/query/mutations/useAdminMutations";
+import { useSessionStore } from "@/store/sessionStore";
 
 
 type RSOption = { label: string; value: string | number };
@@ -9,8 +10,9 @@ type RSOption = { label: string; value: string | number };
 const RolesPermissionForm = ({ stateContext, dataContext, show }: any) => {
   if (!show) return null;
 
-  const { actions: ua } = useContext(UserContext);
-  const tokenKey = ua.token() ?? null;
+ const token = useSessionStore((s) => s.token);
+const tokenKey = token ?? null;
+// console.info("tokenKey", tokenKey);
 
   const { state, setState } = stateContext;
   const { role } = state;

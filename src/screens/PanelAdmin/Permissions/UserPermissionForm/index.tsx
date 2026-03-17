@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { toastOptions } from "@/config/toast";
 import { useSyncUserPermissions } from "@/query/mutations/useAdminMutations";
+import { useSessionStore } from "@/store/sessionStore";
 
 interface Permission {
   id: number;
@@ -32,8 +33,8 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
   const { data } = dataContext;
   const permissions: Permission[] = data?.permissions ?? [];
 
-  const { actions: ua } = useContext(UserContext);
-  const tokenKey = ua.token() ?? null;
+  const token = useSessionStore((s) => s.token);
+const tokenKey = token ?? null;
 
   const qc = useQueryClient();
   const syncPerms = useSyncUserPermissions(tokenKey);
@@ -41,7 +42,6 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
   const [showBuscar, setShowBuscar] = useState(false);
   const [permsSelected, setPermsSelected] = useState<RSOption[]>([]);
 
-  // options
   const permOptions: RSOption[] = useMemo(
     () =>
       permissions.map((p) => ({
@@ -51,17 +51,15 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
     [permissions]
   );
 
-  // name -> id
   const permNameToId = useMemo(() => {
     const m = new Map<string, number>();
     permissions.forEach((p) => m.set(p.name, p.id));
     return m;
   }, [permissions]);
 
-  // precargar selección al cambiar user
   useEffect(() => {
     if (!user) {
-      setPermsSelected([]);
+      setPermsSelected((prev) => (prev.length ? [] : prev));
       return;
     }
 
@@ -69,8 +67,9 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
 
     if (!names.length && Array.isArray(user.permissions)) {
       const p0 = user.permissions[0];
-      if (typeof p0 === "string") names = user.permissions as string[];
-      else if (p0 && typeof p0 === "object") {
+      if (typeof p0 === "string") {
+        names = user.permissions as string[];
+      } else if (p0 && typeof p0 === "object") {
         names = (user.permissions as any[]).map((x) => x?.name).filter(Boolean);
       }
     }
@@ -79,14 +78,19 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
       .map((n) => permNameToId.get(n))
       .filter((v): v is number => typeof v === "number");
 
-    setPermsSelected(permOptions.filter((o) => ids.includes(Number(o.value))));
-  }, [user?.id, permOptions, permNameToId]);
+    const nextSelected = permOptions.filter((o) => ids.includes(Number(o.value)));
+
+    setPermsSelected((prev) => {
+      const prevValues = prev.map((x) => String(x.value)).join("|");
+      const nextValues = nextSelected.map((x) => String(x.value)).join("|");
+
+      return prevValues === nextValues ? prev : nextSelected;
+    });
+  }, [user?.id]);
 
   const handleUserSelect = (selectedUser: any) => {
     setState((prev: any) => ({ ...prev, user: selectedUser }));
     setShowBuscar(false);
-    // opcional: limpiar selección “manual” previa si te quedaba pegada
-    // setPermsSelected([]);
   };
 
   const canSave = !!user && permsSelected.length > 0 && !syncPerms.isPending;
@@ -141,10 +145,6 @@ const UserPermissionForm = ({ stateContext, dataContext, show }: any) => {
                 {
                   onSuccess: () => {
                     toast.success("Permisos guardados", toastOptions);
-
-                    // ✅ si querés refrescar el user-by-dni específico:
-                    // necesitás el dni actual del buscador; si lo tenés guardado en AddUsers, pasalo al state.
-                    // invalidateUserByDni(qc, tokenKey, dniActual);
                   },
                   onError: (e: any) => {
                     const msg = e?.message ?? e?.error ?? "Error guardando permisos";

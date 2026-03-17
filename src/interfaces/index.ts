@@ -6,4 +6,4 @@ export type { Person } from './Person'
 
 export type { BaseTable } from './Table'
 
-export type { Store, Actions, User, AppData, FrontType } from './UserContext'
+export type { Store,  User, AppData, FrontType } from './UserContext'

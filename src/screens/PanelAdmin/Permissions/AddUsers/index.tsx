@@ -9,6 +9,7 @@ import { useUserByDni } from "@/query/hooks/useUserByDni";
 import { useQueryClient } from "@tanstack/react-query";
 
 import InfoPerson from "./InfoPerson";
+import { useSessionStore } from "@/store/sessionStore";
 
 type PersonaInfo = {
   dni: number;
@@ -30,8 +31,7 @@ interface Props {
 }
 
 const AddUsers: React.FC<Props> = ({ show, onUserSelect }) => {
-  const { actions: ua } = useContext(UserContext);
-  const tokenKey = ua.token() ?? null;
+const tokenKey = useSessionStore((s) => s.token) ?? null;
 
   const qc = useQueryClient();
 
@@ -39,7 +39,7 @@ const AddUsers: React.FC<Props> = ({ show, onUserSelect }) => {
 
   const dniClean = useMemo(() => String(dni ?? "").replace(/\D/g, ""), [dni]);
 
-  // ✅ enabled:false → NO dispara al tipear, solo con refetch()
+  //  enabled:false → NO dispara al tipear, solo con refetch()
   const q = useUserByDni({ tokenKey, dni: dniClean, enabled: false });
 
   const persona: PersonaInfo | null = (q.data?.persona as any) ?? null;

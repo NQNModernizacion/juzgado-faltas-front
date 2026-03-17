@@ -28,6 +28,7 @@ import CardView from "./CardView";
 import FormView from "./FormView";
 import BadgeView from "./BadgeView";
 import { useNavigate } from "react-router-dom";
+import ChevronLeft from "@/components/Svgs/ChevronLeft";
 
 type ModalOptions = "ejemplo-tabla" | "ejemplo-form" | null;
 type FormValues = { email: string };
@@ -127,12 +128,14 @@ const DevScreen = () => {
   return (
     <>
       <Container
-        linkBack="#/"
-        title="Componentes"
-        subtitle="Vista para mostrar componentes y ejemplos"
-        className="space-y-6"
+         linkBack="#/"
+  title="Componentes"
+  subtitle="Vista para mostrar componentes y ejemplos"
+  className="space-y-6"
+  backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
+  backLabel="Volver"
       >
-       <div></div> <ButtonBase color="primary" onClick={() => nav("/")}>Volver</ButtonBase>
+       <div></div>
         {/* Acciones (TODAS coral) */}
         <div className="flex flex-wrap gap-3">
           <ButtonBase color="primary" onClick={showToast}>
