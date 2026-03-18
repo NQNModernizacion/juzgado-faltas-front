@@ -23,7 +23,7 @@ const GuestLayout = ({ children }: GuestLayoutProps) => {
             alt="Logo Neuquén Capital"
             role="button"
             className="h-16"
-            //src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
+            src="https://webservice.muninqn.gov.ar/cglobales/assets/banners/neuquen-2024.svg"
             src='https://webservice.muninqn.gov.ar/cglobales/assets/logo_rojo.svg'
           />
         </div>

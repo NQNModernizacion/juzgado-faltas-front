@@ -27,7 +27,7 @@ const InfoPerson = ({
     persona.nombreCompleto ??
     `${persona.apellidos ?? ""} ${persona.nombres ?? ""}`.trim();
 
-  // ✅ soporta ambos nombres (nuevo y legacy)
+  //  soporta ambos nombres (nuevo y legacy)
   const dni = persona.dni ?? persona.documento ?? null;
   const userId = persona.user_id ?? persona.usuarioID ?? null;
 

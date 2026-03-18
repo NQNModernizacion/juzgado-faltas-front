@@ -55,14 +55,12 @@ const CardAdmin: React.FC<CardAdminProps> = ({
               <div className="flex items-center justify-between gap-2 border-b border-border bg-primary/10 px-4 py-3">
                 <div className="text-base font-semibold text-primary-800">{g}</div>
 
-                {/* Si tu Badge todavía es simple, dejalo como span (o mejoralo después) */}
+            
                 <span className="rounded-full bg-secondary/60 px-2 py-0.5 text-xs font-semibold text-primary-900">
                   {count}
                 </span>
 
-                {/* Si upgradeás Badge en muni-ui:
-                <Badge>{count}</Badge>
-                */}
+              
               </div>
 
               {/* Body */}

@@ -10,7 +10,7 @@ export const getPermissionsForm = (permissions, user) => {
     return null;
   }
 
-  /* Primero asumimos que ningun permiso  */
+
   const permissions_form = permissions.map((p) => ({
     ...p,
     checked: false,
@@ -100,8 +100,6 @@ export async function changeUserPermissionsMulti(
 
     toast.success("Permisos guardados", toastOptions);
 
-    // opcional: reflejar en estado si querés
-    // data.permissions son NAMES, si querés mapearlos a objetos lo hacemos con catálogo
   } catch (e: any) {
     const msg = e?.response?.data?.error ?? e?.message ?? "Error guardando permisos";
     toast.error(msg, toastOptions);

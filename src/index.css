@@ -39,7 +39,7 @@ body {
 
   /* Header de sección estilo MuniExpress:
      fondo amarillo (accent) + texto coral (primary) */
-  .mx-section__title {
+      .mx-section__title {
     @apply inline-block rounded-lg bg-accent px-3 py-1
            text-primary-400 font-bold;
   }

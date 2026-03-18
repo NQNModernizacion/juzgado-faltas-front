@@ -2,9 +2,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "../../../schemas/ExampleSchema";
 
-// import FormFooter from "@/components/FormFooter";
-// import FormSection from "@/components/FormSection";
-
 import useOpciones from "@/hooks/useOptions";
 import { prioridades } from "../exampleData";
 

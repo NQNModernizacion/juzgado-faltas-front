@@ -92,11 +92,11 @@ const tokenKey = useSessionStore((s) => s.token) ?? null;
       email: userAccess.email,
       persona,
 
-      // ✅ esto sirve para precargar selects
+      //  esto sirve para precargar selects
       role_names: userAccess.roles ?? [],
       permission_names: userAccess.permissions ?? [],
 
-      // opcional legacy (si tus forms esperan objetos)
+      // opcional legacy 
       roles: (userAccess.roles ?? []).map((name) => ({
         id: -1,
         name,
@@ -110,7 +110,7 @@ const tokenKey = useSessionStore((s) => s.token) ?? null;
 
     onUserSelect(selectedUser);
 
-    // ✅ deja el buscador limpio para la próxima búsqueda
+    //  deja el buscador limpio para la próxima búsqueda
     resetLocal();
   };
 

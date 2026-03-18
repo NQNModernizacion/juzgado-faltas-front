@@ -80,7 +80,7 @@ export const findUserByDni = async (
       return null;
     }
 
-    // 👇 Shape mínimo para tu estado (user.roles lo usan varios componentes)
+
     const pickedUser = { id: userId, roles: [] };
 
     setState((s: any) => ({ ...s, user: pickedUser }));
