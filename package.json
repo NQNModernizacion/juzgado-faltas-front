@@ -1,0 +1,53 @@
+{
+    "name": "template-front-tailwind",
+    "description": "descripcion-template-front",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "vite --mode development",
+        "build": "vite build --mode production",
+        "build:replica": "vite build --mode staging",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json,scss}\" --config ./.prettierrc",
+        "preview": "vite preview",
+        "dev": "vite"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@hookform/resolvers": "^3.10.0",
+        "@mui/icons-material": "^5.14.6",
+        "@mui/material": "^5.14.6",
+        "@mui/x-data-grid": "^6.11.2",
+        "@tanstack/react-query": "^5.90.21",
+        "axios": "^1.6.8",
+        "motion": "^12.0.6",
+        "muni-ui": "file:../GitHub/muni-ui/muni-ui-0.1.0.tgz",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-hook-form": "^7.51.0",
+        "react-router-dom": "^6.22.3",
+        "react-select": "^5.8.0",
+        "react-toastify": "^10.0.4",
+        "yup": "^1.4.0",
+        "zustand": "^5.0.11"
+    },
+    "devDependencies": {
+        "@tanstack/react-query-devtools": "^5.91.3",
+        "@types/react": "^18.2.64",
+        "@types/react-dom": "^18.2.21",
+        "@typescript-eslint/eslint-plugin": "^7.1.1",
+        "@typescript-eslint/parser": "^7.1.1",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.20",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
+        "postcss": "^8.5.1",
+        "prettier": "3.4.2",
+        "tailwindcss": "^3.4.17",
+        "typescript": "^5.2.2",
+        "vite": "^5.1.6"
+    }
+}

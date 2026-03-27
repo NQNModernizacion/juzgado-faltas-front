@@ -1,0 +1,74 @@
+@import 'assets/loader.css';
+/* @import "muni-ui/tokens.css"; */
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  background-attachment: fixed !important;
+  height: 100dvh;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+@layer base {
+  .app-scope {
+    @apply text-text;
+  }
+
+  .app-scope h1,
+  .app-scope h2,
+  .app-scope h3,
+  .app-scope h4,
+  .app-scope h5,
+  .app-scope h6 {
+    @apply text-primary-400;
+  }
+}
+
+@layer components {
+  /* Bloque para secciones de formulario / tabla */
+  .mx-section {
+    @apply rounded-xl border border-border bg-surface;
+  }
+
+  /* Header de sección estilo MuniExpress:
+     fondo amarillo (accent) + texto coral (primary) */
+      .mx-section__title {
+    @apply inline-block rounded-lg bg-accent px-3 py-1
+           text-primary-400 font-bold;
+  }
+
+  .mx-section__subtitle {
+    @apply text-muted;
+  }
+}
+
+
+
+/* ===============================
+   TIPOGRAFÍA – MuniExpress
+   =============================== */
+
+/* Títulos principales
+.h1,
+.h2,
+.h3 {
+  @apply text-primary-700 font-bold;
+}
+
+/* Subtítulos */
+/* .subtitle {
+  @apply text-muted;
+} */
+
+/* Texto normal */
+/* .body-text {
+  @apply text-text;
+} */ 
+

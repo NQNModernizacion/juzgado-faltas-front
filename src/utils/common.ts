@@ -1,0 +1,67 @@
+import { GroupBase, StylesConfig } from 'react-select'
+
+/** Obtiene los query params de la url */
+export const getParams = () => {
+  const url = new URL(window.location.href)
+  const searchParams = url.searchParams
+  const keys = [...searchParams.keys()]
+
+  return keys.reduce((obj, key) => ({ ...obj, [key]: searchParams.get(key) }), {}) as any
+}
+
+/** Remueve un parametro de la URL */
+export const removeURLParameter = (url: string, parameter: string) => {
+
+  const urlparts = url.split('?')
+  if (urlparts.length >= 2) {
+    const prefix = encodeURIComponent(parameter) + '='
+    const pars = urlparts[1].split(/[&;]/g)
+
+    
+    for (let i = pars.length; i-- > 0; ) {
+     
+      if (pars[i].lastIndexOf(prefix, 0) !== -1) {
+        pars.splice(i, 1)
+      }
+    }
+
+    return urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : '')
+  }
+  return url
+}
+
+/** Verifica si un objeto se encuentra vacio */
+export const isObjectEmpty = (obj: any) => {
+  return obj && Object.keys(obj).length === 0 && Object.getPrototypeOf(obj) === Object.prototype
+}
+
+export const formatOption = (item: any, valueKey = 'id', labelKey = 'label') => {
+  if (item) {
+    return {
+      value: item[valueKey],
+      label: item[labelKey],
+
+      styles: item.styles,
+    }
+  }
+
+  return null
+}
+
+export const formatOptions = (items: any, valueKey = 'id', labelKey = 'label') => {
+  if (!items) {
+    return []
+  }
+  return items.map((item: any) => formatOption(item, valueKey, labelKey))
+}
+
+export const customStyle: StylesConfig<any, boolean, GroupBase<unknown>> = {
+  control: (provided, { selectProps }) => ({
+    ...provided,
+    ...selectProps.value?.styles,
+  }),
+  singleValue: (provided, { selectProps }) => ({
+    ...provided,
+    ...selectProps.value?.styles,
+  }),
+}
