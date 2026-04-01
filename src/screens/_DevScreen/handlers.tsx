@@ -19,7 +19,7 @@ export const dataTable = (data: any[] /* , d: DispachState */) => {
 
   return { columns, rows: data }
 }
-import type { TableColumn } from "muni-ui";
+import type { TableColumn } from "@nqnmodernizacion/muni-ui";
 
 export const dataTableMx = (data: any[]) => {
   const columns: TableColumn<any>[] = [

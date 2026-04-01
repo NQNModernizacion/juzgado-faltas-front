@@ -137,7 +137,7 @@
 
 
 //--------------------------------------------------------
-import muniPreset from "muni-ui/tailwind-preset";
+import muniPreset from "@nqnmodernizacion/muni-ui/tailwind-preset";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -146,6 +146,6 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/muni-ui/**/*.{js,ts,jsx,tsx,mjs,cjs}",
+    "./node_modules/@nqnmodernizacion/muni-ui/**/*.{js,ts,jsx,tsx,mjs,cjs}",
   ],
 };

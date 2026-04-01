@@ -1,5 +1,5 @@
 
-import { ButtonBase, Container } from 'muni-ui'
+import { ButtonBase, Container } from '@nqnmodernizacion/muni-ui'
 import { useNavigate } from 'react-router-dom'
 
 const Menu = () => {

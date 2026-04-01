@@ -1,4 +1,4 @@
-import { Card, FormSection } from "muni-ui";
+import { Card, FormSection } from "@nqnmodernizacion/muni-ui";
 
 const headerBg: Record<string, string> = {
   primary: "bg-primary-600 text-white",

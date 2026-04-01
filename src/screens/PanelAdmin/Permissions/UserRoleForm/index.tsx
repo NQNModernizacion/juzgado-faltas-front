@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ButtonBase, SelectSearch } from "muni-ui";
+import { ButtonBase, SelectSearch } from "@nqnmodernizacion/muni-ui";
 import { toast } from "react-toastify";
 
 import AddUsers from "../AddUsers";

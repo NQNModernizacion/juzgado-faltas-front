@@ -1,7 +1,7 @@
 import { toast } from "react-toastify";
 import { toastOptions } from "../../../config/toast";
 import { axios } from "../../../utils/axios";
-import { CheckboxBase } from "muni-ui";
+import { CheckboxBase } from "@nqnmodernizacion/muni-ui";
 
 /** ====== API ====== */
 

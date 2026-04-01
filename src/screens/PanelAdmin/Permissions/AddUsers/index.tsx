@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from "react";
-import { ButtonBase, InputBase } from "muni-ui";
+import { ButtonBase, InputBase } from "@nqnmodernizacion/muni-ui";
 import { toast } from "react-toastify";
 import { toastOptions } from "@/config/toast";
 

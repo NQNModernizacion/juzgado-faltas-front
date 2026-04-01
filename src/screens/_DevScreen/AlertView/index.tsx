@@ -1,4 +1,4 @@
-import { Alert, FormSection } from "muni-ui";
+import { Alert, FormSection } from "@nqnmodernizacion/muni-ui";
 import Info from "@/components/Svgs/Info";
 
 const AlertView = () => {

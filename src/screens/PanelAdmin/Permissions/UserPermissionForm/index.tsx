@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ButtonBase, SelectSearch } from "muni-ui";
+import { ButtonBase, SelectSearch } from "@nqnmodernizacion/muni-ui";
 import AddUsers from "../AddUsers";
 import Loader from "@/components/Loader";
 

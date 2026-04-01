@@ -1,4 +1,4 @@
-import { Container } from "muni-ui"
+import { Container } from "@nqnmodernizacion/muni-ui"
 
 
 const Sandbox = () => {

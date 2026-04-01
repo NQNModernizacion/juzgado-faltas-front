@@ -1,4 +1,4 @@
-import { ButtonBase } from "muni-ui";
+import { ButtonBase } from "@nqnmodernizacion/muni-ui";
 
 type PersonaInfo = {
   dni?: number;
