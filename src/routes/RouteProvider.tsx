@@ -9,6 +9,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import UserLayout from '@/components/Layouts/UserLayout'
 import GuestLayout from '@/components/Layouts/GuestLayout'
 import { AltaActa } from '@/screens/Acta/AltaActa'
+import { ListadoActas } from '@/screens/Acta/ListadoActas'
 
 const RouteProvider = () => {
   return (
@@ -38,6 +39,7 @@ const RouteProvider = () => {
    
           <Route path="/sandbox" element={<Sandbox />} />
           <Route path="/acta/alta" element={<AltaActa />} />
+          <Route path="/acta/listado" element={<ListadoActas />} />
           <Route
           
             path="/admin"

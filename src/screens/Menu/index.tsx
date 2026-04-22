@@ -11,6 +11,9 @@ const Menu = () => {
         <ButtonBase className="w-full" onClick={() => nav('/acta/alta')}>
           Alta de actas
         </ButtonBase>
+        <ButtonBase className="w-full" onClick={() => nav('/acta/listado')}>
+          Listado de actas
+        </ButtonBase>
         <ButtonBase className="w-full" onClick={() => nav('_viewcom')}>
           Componentes
         </ButtonBase>
