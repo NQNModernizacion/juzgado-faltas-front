@@ -1,7 +1,9 @@
 import ActaTabsForm from "@/components/ActaTabs";
 import { SelectField } from "@/components/Forms/SelectField";
 import ChevronLeft from "@/components/Svgs/ChevronLeft"
+import { AltaActaSchema } from "@/schemas/AltaActaSchema";
 import { onSubmitAlta } from "@/services/ActaService";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { ButtonBase, Container, FormFooter, FormSection, RHFInput, SelectBase } from "muni-ui"
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -66,7 +68,7 @@ export const AltaActa = () => {
             Infractores: createEmptyRows(),
             Infracciones: createEmptyRows(),
         },
-        // resolver: yupResolver(AltaVehiculoSchema),
+        resolver: yupResolver(AltaActaSchema),
     });
 
     return (

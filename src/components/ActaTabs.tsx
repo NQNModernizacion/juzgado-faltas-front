@@ -7,20 +7,17 @@ import {
 
 type TabType = "Padrones" | "Infractores" | "Infracciones";
 
-type BaseRow = {
+type Row = {
   tipo: string;
   identificacion: string;
   nombre: string;
-};
-
-type InfractorRow = BaseRow & {
   documento: string;
 };
 
 interface FormValues {
-  Padrones: BaseRow[];
-  Infractores: InfractorRow[];
-  Infracciones: BaseRow[];
+  Padrones: Row[];
+  Infractores: Row[];
+  Infracciones: Row[];
 }
 
 interface Props {
