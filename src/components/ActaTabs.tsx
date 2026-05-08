@@ -8,7 +8,8 @@ import {
 type TabType = "Padrones" | "Infractores" | "Infracciones";
 
 type Row = {
-  tipo: string;
+  tipo_id: string;
+  categoria: string;
   identificacion: string;
   nombre: string;
   documento: string;
@@ -26,15 +27,24 @@ interface Props {
 
 const tabs: TabType[] = ["Padrones", "Infractores", "Infracciones"];
 
-const tipoOptions = [
-  { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
-  { label: "Inmueble", value: "inmueble", tab: "Padrones" },
-  { label: "DNI", value: "dni", tab: "Infractores" },
-  { label: "CUIT", value: "cuit", tab: "Infractores" },
+let tipoOptions: any = [
+  // { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
+  // { label: "Inmueble", value: "inmueble", tab: "Padrones" },
+  // { label: "DNI", value: "dni", tab: "Infractores" },
+  // { label: "CUIT", value: "cuit", tab: "Infractores" },
 ];
 
-export default function ActaTabsForm({ control }: Props) {
-  
+const categoriaOptions = [
+  { label: "Categoria A", value: "A" },
+  { label: "Categoria B", value: "B" },
+  { label: "Categoria C", value: "C" },
+];
+
+export default function ActaTabsForm({ control, infractores, padrones }: any) {
+
+  // console.log('infractores', infractores);
+  console.log('padrones', padrones);
+
   const [activeTab, setActiveTab] = useState<TabType>("Padrones");
   const [filteredTipoOptions, setFilteredTipoOptions] = useState([
     { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
@@ -56,18 +66,28 @@ export default function ActaTabsForm({ control }: Props) {
     name: "Infracciones",
   });
 
-  const getFields = () => {
+  const getCurrentArray = () => {
     switch (activeTab) {
       case "Padrones":
-        return padronesArray.fields;
+        tipoOptions = padrones?.tipo_padron;
+        return padronesArray;
       case "Infractores":
-        return infractoresArray.fields;
+        tipoOptions = infractores?.tipo;
+        return infractoresArray;
       case "Infracciones":
-        return infraccionesArray.fields;
+        tipoOptions = infractores?.tipo;
+        return infraccionesArray;
     }
   };
 
-  const fields = getFields();
+  const addRow = () => {
+    const emptyRow = { tipo_id: "", identificacion: "", nombre: "", documento: "", categoria: "" };
+    getCurrentArray().append(emptyRow);
+  };
+
+  const removeRow = (index: number) => {
+    getCurrentArray().remove(index);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mt-6">
@@ -80,11 +100,11 @@ export default function ActaTabsForm({ control }: Props) {
             type="button"
             onClick={() => {
               setActiveTab(tab)
-              setFilteredTipoOptions(tipoOptions.filter(opt => opt.tab === tab));
+              // setFilteredTipoOptions(tipoOptions.filter(opt => opt.tab === tab));
             }}
             className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab
-                ? "border-red-400 text-red-500"
-                : "border-transparent text-gray-500"
+              ? "border-red-400 text-red-500"
+              : "border-transparent text-gray-500"
               }`}
           >
             {tab}
@@ -106,11 +126,13 @@ export default function ActaTabsForm({ control }: Props) {
 
               <th className="p-2">Identificación</th>
               <th className="p-2">Nombre</th>
+              {activeTab === "Padrones" && <th className="p-2">Categoria</th>}
+              <th className="p-2">Acciones</th>
             </tr>
           </thead>
 
           <tbody>
-            {fields.map((field, index) => {
+            {getCurrentArray().fields.map((field, index) => {
               const baseName = `${activeTab}.${index}` as const;
 
               return (
@@ -121,7 +143,7 @@ export default function ActaTabsForm({ control }: Props) {
                   <td className="p-2">
                     <Controller
                       control={control}
-                      name={`${baseName}.tipo`}
+                      name={`${baseName}.tipo_id`}
                       render={({ field }) => (
                         <select
                           {...field}
@@ -130,9 +152,9 @@ export default function ActaTabsForm({ control }: Props) {
                           <option key={""} value={""}>
                             Seleccione
                           </option>
-                          {filteredTipoOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
+                          {tipoOptions?.map((opt: any) => (
+                            <option key={opt.value} value={opt.id}>
+                              {opt.nombre}
                             </option>
                           ))}
                         </select>
@@ -184,6 +206,39 @@ export default function ActaTabsForm({ control }: Props) {
                     />
                   </td>
 
+                  {activeTab === "Padrones" && (
+                    <td className="p-2">
+                      <Controller
+                        control={control}
+                        name={`${baseName}.categoria`}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            className="w-full border rounded-lg px-3 py-1"
+                          >
+                            <option value="">Seleccione</option>
+                            {padrones?.categorias?.map((opt: any) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.nombre}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </td>
+                  )}
+
+                  {/* Acciones */}
+                  <td className="p-2">
+                    <button
+                      type="button"
+                      onClick={() => removeRow(index)}
+                      className="text-red-500 hover:text-red-700 px-2 py-1 rounded"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+
                 </tr>
               );
             })}
@@ -191,31 +246,20 @@ export default function ActaTabsForm({ control }: Props) {
 
         </table>
       </div>
+
+      {/* Botón para agregar fila */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={addRow}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          + Agregar Fila
+        </button>
+      </div>
     </div>
   );
 }
-
-// import { useState } from "react";
-// import {
-//   Control,
-//   useFieldArray,
-//   Controller,
-//   FieldValues,
-// } from "react-hook-form";
-// import { SelectField } from "./Forms/SelectField";
-
-// type TabType = "Padrones" | "Infractores" | "Infracciones";
-
-// interface Row {
-//   tipo: string;
-//   identificacion: string;
-//   nombre: string;
-// }
-
-// interface FormValues extends FieldValues {
-//   Padrones: Row[];
-//   Infractores: Row[];
-//   Infracciones: Row[];
 // }
 
 // interface Props {
