@@ -15,24 +15,6 @@ const api = axiosLib.create({
     "X-Requested-With": "XMLHttpRequest",
     Accept: "application/json",
   },
-  validateStatus: (status) => {
-    log.info("Código:", status);
-
-    switch (status) {
-      case 450:
-        window.location.href = WEBLOGIN_URL;
-        break;
-
-      case 503:
-        useSessionStore.getState().clearAppSession();
-        break;
-
-      default:
-        break;
-    }
-
-    return true;
-  },
 });
 
 api.interceptors.request.use(
@@ -52,6 +34,39 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => {
+    if ((import.meta as any).env?.DEV) {
+      log.info("Código:", response.status);
+    }
+    return response;
+  },
+  (error) => {
+    const status = error.response?.status;
+
+    if ((import.meta as any).env?.DEV && status) {
+      log.info("Código:", status);
+    }
+
+    switch (status) {
+      case 401:
+        useSessionStore.getState().clearAppSession();
+        window.location.href = WEBLOGIN_URL;
+        break;
+      case 450:
+        window.location.href = WEBLOGIN_URL;
+        break;
+      case 503:
+        useSessionStore.getState().clearAppSession();
+        break;
+      default:
+        break;
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export const axios = (overrideToken?: string | null) => {
   const token = overrideToken ?? useSessionStore.getState().token;
 
@@ -60,6 +75,5 @@ export const axios = (overrideToken?: string | null) => {
   } else {
     delete api.defaults.headers.common["Authorization"];
   }
-
   return api;
 };
