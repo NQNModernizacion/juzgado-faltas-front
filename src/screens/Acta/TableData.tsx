@@ -1,6 +1,6 @@
 
 export const TableData = (data: any, nav: any) => {
-    // console.log("data table", data);
+    console.log("data table", data);
     const columns = [
         {
             field: "id",
@@ -21,12 +21,30 @@ export const TableData = (data: any, nav: any) => {
             flex: 1,
         },
         {
-            field: "fecha_labrada",
-            headerName: "Fecha Labrada",
-            minWidth: 100,
+            field: "ultimo_movimiento",
+            headerName: "Último Movimiento",
+            minWidth: 50,
             flex: 1,
         },
-       
+        {
+            field: "juzgado",
+            headerName: "Juzgado",
+            minWidth: 50,
+            flex: 1,
+        },
+        {
+            field: "year",
+            headerName: "Año",
+            minWidth: 50,
+            flex: 1,
+        },
+        // {
+        //     field: "fecha_labrada",
+        //     headerName: "Fecha Labrada",
+        //     minWidth: 100,
+        //     flex: 1,
+        // },
+
         // {
         //     field: "estado",
         //     headerName: "Estado",
@@ -66,7 +84,7 @@ export const TableData = (data: any, nav: any) => {
 
         //     },
         // },
-        
+
         {
             field: "actions",
             headerName: "Acciones",
@@ -77,7 +95,7 @@ export const TableData = (data: any, nav: any) => {
                     <>
                         <div className="" >
                             <button
-                                onClick={() => nav(`/titular/estado-solicitud/${params.row.id}`)}
+                                onClick={() => nav(`/acta/visualizar/${params.row.id}`)}
                                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded shadow-sm transition"
                             >
                                 Ver
@@ -97,7 +115,10 @@ export const TableData = (data: any, nav: any) => {
             id: d.id,
             numero_acta: d.numero_acta,
             oficina: d.oficina,
-            fecha_labrada: d.fecha_labrada,
+            ultimo_movimiento: d.ultimo_movimiento,
+            juzgado: d.juzgado,
+            year: d.year,
+            // fecha_labrada: d.fecha_labrada,
             // fecha_labrada: d.created_at?.slice(0, 16),
             event: d.event,
         };
@@ -110,7 +131,9 @@ export const TableData = (data: any, nav: any) => {
             String(d.id)?.toString().toLowerCase().includes(value) ||
             String(d.numero_acta)?.toString().toLowerCase().includes(value) ||
             String(d.oficina)?.toString().toLowerCase().includes(value) ||
-            String(d.fecha_labrada)?.toString().toLowerCase().includes(value) ||
+            String(d.ultimo_movimiento)?.toString().toLowerCase().includes(value) ||
+            String(d.juzgado)?.toString().toLowerCase().includes(value) ||
+            String(d.year)?.toString().toLowerCase().includes(value) ||
             String(d.event)?.toString().toLowerCase().includes(value)
         );
     };

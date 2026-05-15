@@ -59,14 +59,39 @@ export const getDatosInicialesActa = async (setIsLoading: any, setDatosIniciales
 
 export const getActas = async (setActas: any, setIsLoading: any) => {
     try {
+        
         setIsLoading(true);
 
         const resp = await axios().get("actas");
         const { data, error } = resp.data;
 
+        console.log('resp', resp);
+        console.log('data', data);
+
+        // return;
+
         if (!data) throw new Error("Error al obtener las actas");
 
-        setActas(data);
+        setActas(data.data);
+    } catch (error: any) {
+        toast.error(error.message, toastOptions);
+    } finally {
+        setIsLoading(false);
+    }
+}
+
+export const getActa = async (id: any, setActa: any, setIsLoading: any) => {
+    try {
+        setIsLoading(true);
+
+        const resp = await axios().get(`actas/${id}`);
+        const { data, error } = resp.data;
+
+        console.log('data', data);
+
+        if (!data) throw new Error("Error al obtener el acta");
+
+        setActa(data);
     } catch (error: any) {
         toast.error(error.message, toastOptions);
     } finally {
