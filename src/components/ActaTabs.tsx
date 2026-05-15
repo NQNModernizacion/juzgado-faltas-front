@@ -4,15 +4,21 @@ import {
   useFieldArray,
   Controller,
 } from "react-hook-form";
+import { SelectSearch } from "muni-ui";
 
 type TabType = "Padrones" | "Infractores" | "Infracciones";
 
+type SearchOption = {
+  label: string;
+  value: string | number;
+};
+
 type Row = {
   tipo_id: string;
-  categoria: string;
-  identificacion: string;
+  categoria?: string;
+  identificacion?: string;
   nombre: string;
-  documento: string;
+  documento?: string;
 };
 
 interface FormValues {
@@ -34,16 +40,10 @@ let tipoOptions: any = [
   // { label: "CUIT", value: "cuit", tab: "Infractores" },
 ];
 
-const categoriaOptions = [
-  { label: "Categoria A", value: "A" },
-  { label: "Categoria B", value: "B" },
-  { label: "Categoria C", value: "C" },
-];
+export default function ActaTabsForm({ control, infractores, padrones, infracciones }: any) {
 
-export default function ActaTabsForm({ control, infractores, padrones }: any) {
-
-  // console.log('infractores', infractores);
-  console.log('padrones', padrones);
+  // console.log('infracciones', infracciones);
+  // console.log('padrones', padrones);
 
   const [activeTab, setActiveTab] = useState<TabType>("Padrones");
   const [filteredTipoOptions, setFilteredTipoOptions] = useState([
@@ -75,13 +75,13 @@ export default function ActaTabsForm({ control, infractores, padrones }: any) {
         tipoOptions = infractores?.tipo;
         return infractoresArray;
       case "Infracciones":
-        tipoOptions = infractores?.tipo;
+        tipoOptions = infracciones;
         return infraccionesArray;
     }
   };
 
   const addRow = () => {
-    const emptyRow = { tipo_id: "", identificacion: "", nombre: "", documento: "", categoria: "" };
+    const emptyRow = { tipo_id: "", identificacion: "", nombre: "", documento: "", categoria_padron_id: "" };
     getCurrentArray().append(emptyRow);
   };
 
@@ -118,14 +118,14 @@ export default function ActaTabsForm({ control, infractores, padrones }: any) {
 
           <thead>
             <tr className="text-left border-b text-gray-600">
-              <th className="p-2">Tipo</th>
+              <th className="p-2">{activeTab === "Infracciones" ? "Identificación" : "Tipo"}</th>
 
               {activeTab === "Infractores" && (
                 <th className="p-2">N° Documento</th>
               )}
 
-              <th className="p-2">Identificación</th>
-              <th className="p-2">Nombre</th>
+              {activeTab !== "Infracciones" && <th className="p-2">Identificación</th>}
+              {activeTab !== "Infracciones" && <th className="p-2">Nombre</th>}
               {activeTab === "Padrones" && <th className="p-2">Categoria</th>}
               <th className="p-2">Acciones</th>
             </tr>
@@ -153,7 +153,7 @@ export default function ActaTabsForm({ control, infractores, padrones }: any) {
                             Seleccione
                           </option>
                           {tipoOptions?.map((opt: any) => (
-                            <option key={opt.value} value={opt.id}>
+                            <option key={opt.id} value={opt.id}>
                               {opt.nombre}
                             </option>
                           ))}
@@ -179,53 +179,58 @@ export default function ActaTabsForm({ control, infractores, padrones }: any) {
                   )}
 
                   {/* Identificación */}
-                  <td className="p-2">
-                    <Controller
-                      control={control}
-                      name={`${baseName}.identificacion`}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          className="w-full border rounded-lg px-3 py-1"
-                        />
-                      )}
-                    />
-                  </td>
-
-                  {/* Nombre */}
-                  <td className="p-2">
-                    <Controller
-                      control={control}
-                      name={`${baseName}.nombre`}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          className="w-full border rounded-lg px-3 py-1"
-                        />
-                      )}
-                    />
-                  </td>
-
-                  {activeTab === "Padrones" && (
+                  {activeTab !== "Infracciones" && (
                     <td className="p-2">
                       <Controller
                         control={control}
-                        name={`${baseName}.categoria`}
+                        name={`${baseName}.identificacion`}
                         render={({ field }) => (
-                          <select
+                          <input
                             {...field}
                             className="w-full border rounded-lg px-3 py-1"
-                          >
-                            <option value="">Seleccione</option>
-                            {padrones?.categorias?.map((opt: any) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.nombre}
-                              </option>
-                            ))}
-                          </select>
+                          />
                         )}
                       />
                     </td>
+                  )}
+
+                  {activeTab !== "Infracciones" && (
+                    <>
+                      <td className="p-2">
+                        <Controller
+                          control={control}
+                          name={`${baseName}.nombre`}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              className="w-full border rounded-lg px-3 py-1"
+                            />
+                          )}
+                        />
+                      </td>
+
+                      {activeTab === "Padrones" && (
+                        <td className="p-2">
+                          <Controller
+                            control={control}
+                            name={`${baseName}.categoria_padron_id`}
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className="w-full border rounded-lg px-3 py-1"
+                              >
+                                <option value="">Seleccione</option>
+                                {padrones?.categorias?.map((opt: any) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.nombre}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </td>
+                      )}
+                    </>
                   )}
 
                   {/* Acciones */}

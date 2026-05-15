@@ -68,14 +68,15 @@ const inspector2 = number()
 // Validaciones para filas de arrays
 const baseRowSchema = object().shape({
   tipo: string().required('El tipo es requerido'),
-  identificacion: string().required('La identificación es requerida'),
+  identificacion: string().optional(),
   nombre: string().required('El nombre es requerido'),
+  categoria: string().optional(),
 });
 
 const infractorRowSchema = object().shape({
   tipo: string().required('El tipo es requerido'),
-  documento: string().required('El documento es requerido'),
-  identificacion: string().required('La identificación es requerida'),
+  documento: string().optional(),
+  identificacion: string().optional(),
   nombre: string().required('El nombre es requerido'),
 });
 

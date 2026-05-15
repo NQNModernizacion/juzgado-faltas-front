@@ -67,6 +67,7 @@ export const AltaActa = () => {
     } = useForm<FormValues>({
         defaultValues: {
             fecha_carga: new Date().toISOString().split("T")[0],
+            year: new Date().getFullYear().toString(),
             Padrones: createEmptyRows(),
             Infractores: createEmptyRows(),
             Infracciones: createEmptyRows(),
@@ -336,6 +337,7 @@ export const AltaActa = () => {
                             <ActaTabsForm control={control}
                                 infractores={datosIniciales?.combos?.infractores}
                                 padrones={datosIniciales?.combos?.padrones}
+                                infracciones={datosIniciales?.combos?.infracciones}
                             />
                         </FormSection>
 
