@@ -15,7 +15,7 @@ type SearchOption = {
 
 type Row = {
   tipo_id: string;
-  categoria?: string;
+  categoria_padron_id?: string;
   identificacion?: string;
   nombre: string;
   documento?: string;
@@ -221,7 +221,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                               >
                                 <option value="">Seleccione</option>
                                 {padrones?.categorias?.map((opt: any) => (
-                                  <option key={opt.value} value={opt.value}>
+                                  <option key={opt.id} value={opt.id}>
                                     {opt.nombre}
                                   </option>
                                 ))}

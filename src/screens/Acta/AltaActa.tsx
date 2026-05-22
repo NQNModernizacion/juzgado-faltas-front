@@ -6,7 +6,7 @@ import { AltaActaSchema } from "@/schemas/AltaActaSchema";
 import { getDatosInicialesActa, onSubmitAlta } from "@/services/ActaService";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ButtonBase, Container, FormFooter, FormSection, RHFInput, SelectBase } from "muni-ui"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
@@ -39,11 +39,6 @@ interface FormValues {
     inspector_2_id?: number;
 }
 
-const opciones = [
-    { value: "1", label: "Si" },
-    { value: "0", label: "No" },
-];
-
 const createEmptyRows = () =>
     Array.from({ length: 1 }, () => ({
         tipo_id: "",
@@ -67,13 +62,44 @@ export const AltaActa = () => {
     } = useForm<FormValues>({
         defaultValues: {
             fecha_carga: new Date().toISOString().split("T")[0],
+            fecha_notificado: new Date().toISOString().split("T")[0],
             year: new Date().getFullYear().toString(),
             Padrones: createEmptyRows(),
             Infractores: createEmptyRows(),
             Infracciones: createEmptyRows(),
+            oficina_id: undefined,
+            inspector_1_id: undefined,
+            inspector_2_id: undefined,
         },
-        // resolver: yupResolver(AltaActaSchema),
+        resolver: yupResolver(AltaActaSchema),
     });
+
+    const selectedOfficeId = watch("oficina_id") as string | number | undefined;
+
+    const inspectorOptions = useMemo(() => {
+        const inspectors = datosIniciales?.combos?.inspectores ?? [];
+
+        if (selectedOfficeId === undefined || selectedOfficeId === "") {
+            return inspectors.map((inspector: any) => ({
+                value: inspector.id,
+                label: inspector.nombre,
+            }));
+        }
+
+        return inspectors
+            .filter((inspector: any) => String(inspector.oficina_id) === String(selectedOfficeId))
+            .map((inspector: any) => ({
+                value: inspector.id,
+                label: inspector.nombre,
+            }));
+    }, [datosIniciales?.combos?.inspectores, selectedOfficeId]);
+
+    useEffect(() => {
+        if (selectedOfficeId !== undefined) {
+            setValue("inspector_1_id", undefined);
+            setValue("inspector_2_id", undefined);
+        }
+    }, [selectedOfficeId, setValue]);
 
     useEffect(() => {
         getDatosInicialesActa(setIsLoading, setDatosIniciales);
@@ -223,7 +249,7 @@ export const AltaActa = () => {
                             name="codigo_calle"
                             label="Código de la Calle"
                         /> */}
-                                 <SelectField
+                                <SelectField
                                     label="Cruce de Calles"
                                     name="cruce_id"
                                     control={control}
@@ -233,7 +259,7 @@ export const AltaActa = () => {
                                     ]}
                                     error={errors.cruce_id}
                                 />
-                             
+
 
                                 <SelectField
                                     label="Estado"
@@ -307,9 +333,7 @@ export const AltaActa = () => {
                                     label="Inspector"
                                     name="inspector_1_id"
                                     control={control}
-                                    options={[
-                                        { value: 1, label: "Comercio" },
-                                    ]}
+                                    options={inspectorOptions}
                                     error={errors.inspector_1_id}
                                 />
 
@@ -322,9 +346,7 @@ export const AltaActa = () => {
                                     label="2° Inspector"
                                     name="inspector_2_id"
                                     control={control}
-                                    options={[
-                                        { value: 1, label: "Comercio" },
-                                    ]}
+                                    options={inspectorOptions}
                                     error={errors.inspector_2_id}
                                 />
 

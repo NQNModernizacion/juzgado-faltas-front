@@ -1,23 +1,34 @@
 import { toastOptions } from "@/config/toast";
 import { axios } from "@/utils/axios";
+import { formatoFecha } from "@/utils/date";
 import { toast } from "react-toastify";
 
 export const onSubmitAlta = async (formData: any, setIsLoading: any, nav: any) => {
 
     try {
 
-        console.log('formData', formData);
 
         formData.padrones = formData.Padrones;
         formData.infractores = formData.Infractores;
-        formData.infracciones = [1];
-        // formData.infracciones = formData.Infracciones;
+        formData.infracciones = Array.isArray(formData.Infracciones)
+            ? formData.Infracciones.map((item: any) => item.tipo_id)
+            : [];
 
+        formData.fecha_labrada = new Date(formData.fecha_labrada).toISOString().split("T")[0];
+        formData.fecha_carga = new Date(formData.fecha_carga).toISOString().split("T")[0];
+        formData.fecha_notificado = formData.fecha_notificado ?
+            new Date(formData.fecha_notificado).toISOString().split("T")[0] : null;
+
+        // formData.fecha_labrada = '2026-05-19 00:00:00';
+        // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
+        // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
+
+        console.log('formData', formData);
         // return;
 
         const resp = await axios().post("/registrar_acta", formData);
         const { data, error } = resp.data;
-    
+
 
         console.log('data', data);
 
@@ -59,7 +70,7 @@ export const getDatosInicialesActa = async (setIsLoading: any, setDatosIniciales
 
 export const getActas = async (setActas: any, setIsLoading: any) => {
     try {
-        
+
         setIsLoading(true);
 
         const resp = await axios().get("actas");
