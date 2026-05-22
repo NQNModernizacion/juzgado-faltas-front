@@ -4,7 +4,7 @@ import { useState, ChangeEvent } from "react";
 interface DataType {
   rows: any[];
   columns: GridColDef[];
-  filter?: any;
+  filter?: (row: any, value: string) => boolean;
 }
 
 interface TableBackPaginationProps {
@@ -48,21 +48,21 @@ const TableBackPagination = ({
     setState(event.target.value);
   };
 
+  const filteredRows = state && data.filter
+    ? rows.filter((row) => data.filter!(row, state))
+    : rows;
+
   return (
     <>
       {search && (
-        <div className="mb-1 d-flex flex-row float-start">
+        <div className="mb-2 d-flex justify-content-end align-items-center gap-2 w-100">
           {render && render()}
 
-          <div
-            className={`d-flex flex-row p-2 ${
-              msAutoSerach ? "ms-auto" : ""
-            }`}
-          >
+          <div className="d-flex flex-row p-2">
             <input
               id="search"
               type="search"
-              className="form-control"
+              className="form-control border rounded p-2"
               value={state}
               placeholder="Buscar..."
               onChange={changeValue}
@@ -79,7 +79,7 @@ const TableBackPagination = ({
           paginationModel={{ page, pageSize }}
           onPaginationModelChange={(model) => setPage(model.page)}
           onRowClick={rowClick ?? (() => {})}
-          rows={rows}
+          rows={filteredRows}
           columns={columns}
           pageSizeOptions={[pageSize]}
           loading={loading}
