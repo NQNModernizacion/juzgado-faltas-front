@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { schema } from "@/schemas/LoginSchema";
 import { useLoginMutation } from "@/query/mutations/useAuthMutations";
 
-import { ButtonBase, RHFInput } from "muni-ui";
+import { ButtonBase, RHFInput } from "@nqnmodernizacion/muni-ui";
 
 type LoginFormData = {
   _id: string;

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ButtonBase, SelectSearch } from "muni-ui";
+import { ButtonBase, SelectSearch } from "@nqnmodernizacion/muni-ui";
 import { UserContext } from "@/context/UserWrapper";
 import { useSyncRolePermissions } from "@/query/mutations/useAdminMutations";
 import { useSessionStore } from "@/store/sessionStore";

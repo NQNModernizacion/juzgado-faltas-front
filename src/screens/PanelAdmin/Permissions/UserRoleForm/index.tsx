@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ButtonBase, SelectSearch } from "muni-ui";
+import { ButtonBase, SelectSearch } from "@nqnmodernizacion/muni-ui";
 import { toast } from "react-toastify";
 
 import AddUsers from "../AddUsers";
@@ -74,7 +74,7 @@ const UserRoleForm: React.FC<Props> = ({ stateContext, dataContext, show }) => {
     if (users.length > 2000) return [];
 
     return users.map((u) => ({
-      label: String(u.id),
+      label: String(u.id) + " - " + u.email,
       value: u.id,
     }));
   }, [users]);

@@ -3,9 +3,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const dic = {
-  development: '/apps/juzgado-faltas/',
-  staging: '/apps/juzgado-faltas/',
-  production: '/apps/juzgado-faltas/',
+  development: '/apps/template-front-tailwind/',
+  staging: '/apps/template-front-tailwind/',
+  production: '/apps/prueba-template-front/',
 }
 
 

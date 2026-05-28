@@ -21,7 +21,7 @@ import {
   TableModal,
   FormSection,
   type TableColumn,
-} from "muni-ui";
+} from "@nqnmodernizacion/muni-ui";
 
 import AlertView from "./AlertView";
 import CardView from "./CardView";

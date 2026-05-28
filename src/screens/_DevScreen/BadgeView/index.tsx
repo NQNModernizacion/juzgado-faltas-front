@@ -1,6 +1,6 @@
 // import Badge from '@/components/Badge'
 //import FormSection from '@/components/FormSection'
-import { Badge, FormSection } from 'muni-ui'
+import { Badge, FormSection } from '@nqnmodernizacion/muni-ui'
 
 type BadgeViewProps = {}
 

@@ -5,24 +5,23 @@ import { schema } from "../../../schemas/ExampleSchema";
 import useOpciones from "@/hooks/useOptions";
 import { prioridades } from "../exampleData";
 
-import { FormFooter, FormSection, RHFCheckbox, RHFInput, RHFSelect, RHFSelectSearch } from "muni-ui";
+import { FormFooter, FormSection, RHFCheckbox, RHFInput, RHFSelect, RHFSelectSearch } from "@nqnmodernizacion/muni-ui";
 
 const FormView = ({ onCancel }) => {
   const {
-    handleSubmit,
-    control,
-    formState: { isLoading },
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      asunto: "",
-      asunto2: "",
-      prioridad_id: "",
-      prioridad: [],     // multi
-      prioridad2: "",    // single
-    },
-  });
-
+  handleSubmit,
+  control,
+  formState: { isSubmitting },
+} = useForm({
+  resolver: yupResolver(schema),
+  defaultValues: {
+    asunto: "",
+    asunto2: "",
+    prioridad_id: "",
+    prioridad: [],
+    prioridad2: "",
+  },
+});
   const optionsPropiedades = useOpciones(
     prioridades,
     (item) => `${item.label}`,
@@ -73,11 +72,11 @@ const FormView = ({ onCancel }) => {
 
       </FormSection>
 
-      <FormFooter
-        submitButtonText="Guardar"
-        isSubmitting={isLoading}
-        onCancel={onCancel}
-      />
+     <FormFooter
+  submitButtonText="Guardar"
+  isSubmitting={isSubmitting}
+  onCancel={onCancel}
+/>
     </form>
   );
 };

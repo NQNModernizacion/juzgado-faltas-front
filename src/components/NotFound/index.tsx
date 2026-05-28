@@ -6,7 +6,7 @@ import Home from '../Svgs/Home'
 //import error404 from '@/assets/404_not_found.png'
 import error404 from "@/assets/404_not_found.png.png";
 
-import { Container } from 'muni-ui'
+import { Container } from '@nqnmodernizacion/muni-ui'
 
 export const NotFound = () => {
   const nav = useNavigate()

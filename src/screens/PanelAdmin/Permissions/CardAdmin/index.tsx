@@ -1,7 +1,7 @@
 import React from "react";
 import Tooltip from "../../components/Tooltip";
 
-import { Card, CheckboxBase /*, Badge*/ } from "muni-ui";
+import { Card, CheckboxBase /*, Badge*/ } from "@nqnmodernizacion/muni-ui";
 
 type Role = {
   id: number;

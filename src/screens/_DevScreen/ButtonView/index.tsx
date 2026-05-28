@@ -1,4 +1,4 @@
-import { ButtonBase, FormSection } from "muni-ui";
+import { ButtonBase, FormSection } from "@nqnmodernizacion/muni-ui";
 
 const ButtonView = () => {
   return (

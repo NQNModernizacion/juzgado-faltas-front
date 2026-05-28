@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client'
 
-import "muni-ui/tokens.css";
-import "muni-ui/styles.css";
+import "@nqnmodernizacion/muni-ui/tokens.css";
+import "@nqnmodernizacion/muni-ui/styles.css";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 
