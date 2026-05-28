@@ -8,10 +8,12 @@ import NotFound from '@/components/NotFound'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import UserLayout from '@/components/Layouts/UserLayout'
 import GuestLayout from '@/components/Layouts/GuestLayout'
+import { AltaActa } from '@/screens/Acta/AltaActa'
+import { ListadoActas } from '@/screens/Acta/ListadoActas'
+import { VisualizarActa } from '@/screens/Acta/VisualizarActa'
 
 const RouteProvider = () => {
   return (
-   
     <HashRouter
       future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
     >
@@ -34,23 +36,24 @@ const RouteProvider = () => {
           }
         >
           <Route path="/" element={<Menu />} />
-   
+
           <Route path="/sandbox" element={<Sandbox />} />
+          <Route path="/acta/alta" element={<AltaActa />} />
+          <Route path="/acta/listado" element={<ListadoActas />} />
+          <Route path="/acta/visualizar/:id" element={<VisualizarActa />} />
           <Route
-          
             path="/admin"
             element={
-               <ProtectedRoute
-                 requiredRoles={['admin']}
-                 requiredPermissions={['admin.permission.view']}
-
+              <ProtectedRoute
+                requiredRoles={['admin']}
+                requiredPermissions={['admin.permission.view']}
               >
                 <PanelAdmin />
-               </ProtectedRoute>
+              </ProtectedRoute>
             }
           />
 
-         <Route path="/_viewcom" element={<DevScreen />} />
+          <Route path="/_viewcom" element={<DevScreen />} />
           {/* <Route
   path="/_viewcom"
   element={
@@ -59,7 +62,6 @@ const RouteProvider = () => {
      </ProtectedRoute>
   }
 /> */}
-
         </Route>
 
         <Route
