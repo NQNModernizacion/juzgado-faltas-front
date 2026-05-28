@@ -1,97 +1,101 @@
-import { useState } from "react";
-import {
-  Control,
-  useFieldArray,
-  Controller,
-} from "react-hook-form";
-import { SelectSearch } from "muni-ui";
+import { useState } from 'react'
+import { Control, useFieldArray, Controller } from 'react-hook-form'
+import { SelectSearch } from '@nqnmodernizacion/muni-ui'
 
-type TabType = "Padrones" | "Infractores" | "Infracciones";
+type TabType = 'Padrones' | 'Infractores' | 'Infracciones'
 
 type SearchOption = {
-  label: string;
-  value: string | number;
-};
+  label: string
+  value: string | number
+}
 
 type Row = {
-  tipo_id: string;
-  categoria_padron_id?: string;
-  identificacion?: string;
-  nombre: string;
-  documento?: string;
-};
+  tipo_id: string
+  categoria_padron_id?: string
+  identificacion?: string
+  nombre: string
+  documento?: string
+}
 
 interface FormValues {
-  Padrones: Row[];
-  Infractores: Row[];
-  Infracciones: Row[];
+  Padrones: Row[]
+  Infractores: Row[]
+  Infracciones: Row[]
 }
 
 interface Props {
-  control: Control<FormValues>;
+  control: Control<FormValues>
 }
 
-const tabs: TabType[] = ["Padrones", "Infractores", "Infracciones"];
+const tabs: TabType[] = ['Padrones', 'Infractores', 'Infracciones']
 
 let tipoOptions: any = [
   // { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
   // { label: "Inmueble", value: "inmueble", tab: "Padrones" },
   // { label: "DNI", value: "dni", tab: "Infractores" },
   // { label: "CUIT", value: "cuit", tab: "Infractores" },
-];
+]
 
-export default function ActaTabsForm({ control, infractores, padrones, infracciones }: any) {
-
-  // console.log('infracciones', infracciones);
+export default function ActaTabsForm({
+  control,
+  infractores,
+  padrones,
+  infracciones,
+}: any) {
   // console.log('padrones', padrones);
 
-  const [activeTab, setActiveTab] = useState<TabType>("Padrones");
+  const [activeTab, setActiveTab] = useState<TabType>('Padrones')
   const [filteredTipoOptions, setFilteredTipoOptions] = useState([
-    { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
-    { label: "Inmueble", value: "inmueble", tab: "Padrones" },
-  ]);
+    { label: 'Zoonosis', value: 'zoonosis', tab: 'Padrones' },
+    { label: 'Inmueble', value: 'inmueble', tab: 'Padrones' },
+  ])
 
   const padronesArray = useFieldArray({
     control,
-    name: "Padrones",
-  });
+    name: 'Padrones',
+  })
 
   const infractoresArray = useFieldArray({
     control,
-    name: "Infractores",
-  });
+    name: 'Infractores',
+  })
 
   const infraccionesArray = useFieldArray({
     control,
-    name: "Infracciones",
-  });
+    name: 'Infracciones',
+  })
 
   const getCurrentArray = () => {
     switch (activeTab) {
-      case "Padrones":
-        tipoOptions = padrones?.tipo_padron;
-        return padronesArray;
-      case "Infractores":
-        tipoOptions = infractores?.tipo;
-        return infractoresArray;
-      case "Infracciones":
-        tipoOptions = infracciones;
-        return infraccionesArray;
+      case 'Padrones':
+        tipoOptions = padrones?.tipo_padron
+        return padronesArray
+      case 'Infractores':
+        tipoOptions = infractores?.tipo
+        return infractoresArray
+      case 'Infracciones':
+        tipoOptions = infracciones
+        return infraccionesArray
     }
-  };
+  }
 
   const addRow = () => {
-    const emptyRow = { tipo_id: "", identificacion: "", nombre: "", documento: "", categoria_padron_id: "" };
-    getCurrentArray().append(emptyRow);
-  };
+    const emptyRow = {
+      tipo_id: '',
+      identificacion: '',
+      nombre: '',
+      documento: '',
+      categoria_padron_id: '',
+    }
+    getCurrentArray().append(emptyRow)
+  }
 
   const removeRow = (index: number) => {
-    getCurrentArray().remove(index);
-  };
+    getCurrentArray().remove(index)
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-
       {/* Tabs */}
       <div className="flex border-b mb-4">
         {tabs.map((tab) => (
@@ -102,10 +106,11 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
               setActiveTab(tab)
               // setFilteredTipoOptions(tipoOptions.filter(opt => opt.tab === tab));
             }}
-            className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab
-              ? "border-red-400 text-red-500"
-              : "border-transparent text-gray-500"
-              }`}
+            className={`px-4 py-2 font-medium border-b-2 ${
+              activeTab === tab
+                ? 'border-red-400 text-red-500'
+                : 'border-transparent text-gray-500'
+            }`}
           >
             {tab}
           </button>
@@ -115,29 +120,31 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
       {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-
           <thead>
             <tr className="text-left border-b text-gray-600">
-              <th className="p-2">{activeTab === "Infracciones" ? "Identificación" : "Tipo"}</th>
+              <th className="p-2">
+                {activeTab === 'Infracciones' ? 'Identificación' : 'Tipo'}
+              </th>
 
-              {activeTab === "Infractores" && (
+              {activeTab === 'Infractores' && (
                 <th className="p-2">N° Documento</th>
               )}
 
-              {activeTab !== "Infracciones" && <th className="p-2">Identificación</th>}
-              {activeTab !== "Infracciones" && <th className="p-2">Nombre</th>}
-              {activeTab === "Padrones" && <th className="p-2">Categoria</th>}
+              {activeTab !== 'Infracciones' && (
+                <th className="p-2">Identificación</th>
+              )}
+              {activeTab !== 'Infracciones' && <th className="p-2">Nombre</th>}
+              {activeTab === 'Padrones' && <th className="p-2">Categoria</th>}
               <th className="p-2">Acciones</th>
             </tr>
           </thead>
 
           <tbody>
             {getCurrentArray().fields.map((field, index) => {
-              const baseName = `${activeTab}.${index}` as const;
+              const baseName = `${activeTab}.${index}` as const
 
               return (
                 <tr key={field.id} className="border-b">
-
                   {/* Tipo (SELECT) */}
 
                   <td className="p-2">
@@ -149,7 +156,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                           {...field}
                           className="w-full border rounded-lg px-3 py-1"
                         >
-                          <option key={""} value={""}>
+                          <option key={''} value={''}>
                             Seleccione
                           </option>
                           {tipoOptions?.map((opt: any) => (
@@ -163,7 +170,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                   </td>
 
                   {/* Documento SOLO en Infractores */}
-                  {activeTab === "Infractores" && (
+                  {activeTab === 'Infractores' && (
                     <td className="p-2">
                       <Controller
                         control={control}
@@ -179,7 +186,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                   )}
 
                   {/* Identificación */}
-                  {activeTab !== "Infracciones" && (
+                  {activeTab !== 'Infracciones' && (
                     <td className="p-2">
                       <Controller
                         control={control}
@@ -194,7 +201,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                     </td>
                   )}
 
-                  {activeTab !== "Infracciones" && (
+                  {activeTab !== 'Infracciones' && (
                     <>
                       <td className="p-2">
                         <Controller
@@ -209,7 +216,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                         />
                       </td>
 
-                      {activeTab === "Padrones" && (
+                      {activeTab === 'Padrones' && (
                         <td className="p-2">
                           <Controller
                             control={control}
@@ -243,12 +250,10 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                       Eliminar
                     </button>
                   </td>
-
                 </tr>
-              );
+              )
             })}
           </tbody>
-
         </table>
       </div>
 
@@ -263,7 +268,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
         </button>
       </div>
     </div>
-  );
+  )
 }
 // }
 
