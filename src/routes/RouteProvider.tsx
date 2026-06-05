@@ -11,6 +11,7 @@ import GuestLayout from '@/components/Layouts/GuestLayout'
 import { AltaActa } from '@/screens/Acta/AltaActa'
 import { ListadoActas } from '@/screens/Acta/ListadoActas'
 import { VisualizarActa } from '@/screens/Acta/VisualizarActa'
+import Grupos from '@/screens/Grupos'
 
 const RouteProvider = () => {
   return (
@@ -41,6 +42,7 @@ const RouteProvider = () => {
           <Route path="/acta/alta" element={<AltaActa />} />
           <Route path="/acta/listado" element={<ListadoActas />} />
           <Route path="/acta/visualizar/:id" element={<VisualizarActa />} />
+          <Route path="/grupos" element={<Grupos />} />
           <Route
             path="/admin"
             element={
