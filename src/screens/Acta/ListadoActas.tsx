@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react'
 import { TableData } from './TableData'
 import { useNavigate } from 'react-router-dom'
 import MuniSpinner from '@/components/MuniSpinner'
-import { getActas } from '@/services/ActaService'
+import { getActas, postAgruparActas } from '@/services/ActaService'
 import TableBackPagination from '@/components/TableBackPagination'
 
 export const ListadoActas = () => {
   const nav = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
   const [actas, setActas] = useState([])
+  const [selectedActas, setSelectedActas] = useState<any[]>([])
 
   const [filtro, setFiltro] = useState({
     estado_id: null,
@@ -73,6 +74,21 @@ export const ListadoActas = () => {
   useEffect(() => {
     getActas(setActas, setIsLoading)
   }, [])
+
+  const handleAgruparActas = () => {
+    // if (selectedActas.length < 2) {
+    //   alert("Debe seleccionar al menos 2 actas para agrupar")
+    //   return
+    // }
+    postAgruparActas(
+      selectedActas,
+      () => {
+        setSelectedActas([])
+        getActas(setActas, setIsLoading)
+      },
+      setIsLoading
+    )
+  }
 
   return (
     <Container title={'Listado de Actas'} linkBack="#/">
@@ -155,6 +171,19 @@ export const ListadoActas = () => {
             pageSize={pageSize}
             setPage={setPage}
             // loading={isLoading}
+            onSelectionModelChange={setSelectedActas}
+            render={() =>
+              selectedActas.length > 0 ? (
+                <button
+                  onClick={handleAgruparActas}
+                  className="btn btn-primary btn-sm px-3 shadow-sm rounded-pill font-semibold"
+                >
+                  Agrupar {selectedActas.length} actas
+                </button>
+              ) : (
+                <span />
+              )
+            }
           />
         </>
       )}
