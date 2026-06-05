@@ -26,12 +26,15 @@ interface TableProps {
   search?: boolean
   height?: string | number
   msAutoSerach?: boolean
-  onRowSelectionModelChange?: ((rowSelectionModel: GRSM, details: GCD<any>) => void) | undefined
+  onRowSelectionModelChange?:
+    | ((rowSelectionModel: GRSM, details: GCD<any>) => void)
+    | undefined
   onSelectionModelChange?: (params: any) => void
   disabledSearch?: boolean
   sx?: any
   getRowHeight?: (params: GridRowHeightParams) => GridRowHeightReturnValue
   trigger?: boolean
+  noResultsMessage?: string
 }
 
 export const Table: React.FC<TableProps> = ({
@@ -48,6 +51,7 @@ export const Table: React.FC<TableProps> = ({
   sx = {},
   getRowHeight,
   trigger = true,
+  noResultsMessage = 'No se encontraron resultados',
 }) => {
   const { rows, columns } = data
   const [state, setState] = useState('')
@@ -110,6 +114,13 @@ export const Table: React.FC<TableProps> = ({
           hideFooterSelectedRowCount
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           onCellClick={onCellClick ? onCellClick : () => {}}
+          slots={{
+            noResultsOverlay: () => (
+              <div className="flex h-full items-center justify-center">
+                {noResultsMessage}
+              </div>
+            ),
+          }}
           sx={{
             '.MuiDataGrid-cell': {
               padding: '0 5px',
@@ -135,10 +146,15 @@ export const Table: React.FC<TableProps> = ({
             ...sx,
           }}
           checkboxSelection={onSelectionModelChange ? true : false}
-          onRowSelectionModelChange={onSelectionModelChange ? onSelectionModelChange : () => {}}
+          onRowSelectionModelChange={
+            onSelectionModelChange ? onSelectionModelChange : () => {}
+          }
           getRowHeight={getRowHeight}
           getRowClassName={
-            getRowClassName ? getRowClassName : (params: GridRowClassNameParams<any>) => (params.indexRelativeToCurrentPage % 2 ? '' : 'oddRow')
+            getRowClassName
+              ? getRowClassName
+              : (params: GridRowClassNameParams<any>) =>
+                  params.indexRelativeToCurrentPage % 2 ? '' : 'oddRow'
           }
         />
       </div>
