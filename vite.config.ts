@@ -3,11 +3,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 const dic = {
-  development: '/apps/template-front-tailwind/',
-  staging: '/apps/template-front-tailwind/',
-  production: '/apps/prueba-template-front/',
+  development: '/apps/tribunal-faltas/',
+  staging: '/apps/tribunal-faltas/',
+  production: 'apps/tribunal-faltas/',
 }
-
 
 export default defineConfig(({ mode }) => ({
   base: dic[mode],
