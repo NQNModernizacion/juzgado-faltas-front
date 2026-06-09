@@ -16,12 +16,12 @@ const Menu = () => {
         <ButtonBase className="w-full" onClick={() => nav('/grupos')}>
           Grupos
         </ButtonBase>
-        <ButtonBase className="w-full" onClick={() => nav('_viewcom')}>
+        {/* <ButtonBase className="w-full" onClick={() => nav('_viewcom')}>
           Componentes
-        </ButtonBase>
-        <ButtonBase className="w-full" onClick={() => nav('admin')}>
+        </ButtonBase> */}
+        {/* <ButtonBase className="w-full" onClick={() => nav('admin')}>
           Panel admin
-        </ButtonBase>
+        </ButtonBase> */}
       </div>
     </Container>
   )
