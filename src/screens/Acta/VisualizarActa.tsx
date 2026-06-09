@@ -72,7 +72,7 @@ export const VisualizarActa = () => {
   return (
     <Container title={'Visualizar Acta'} linkBack="#/acta/listado">
       {isLoading ? (
-        <MuniSpinner />
+        <MuniSpinner file="muniexpress.svg" />
       ) : acta ? (
         <>
           <BannerAgrupacion
