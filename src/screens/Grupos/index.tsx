@@ -83,9 +83,7 @@ const Grupos = () => {
           row.estado?.label ?? row.estado?.nombre ?? row.estado ?? ''
         ).toLowerCase()
         const obsStr = String(row.observacion ?? '').toLowerCase()
-        return (
-          idStr.includes(q) || estadoStr.includes(q) || obsStr.includes(q)
-        )
+        return idStr.includes(q) || estadoStr.includes(q) || obsStr.includes(q)
       },
     }
   }, [grupos, columnsGrupos])
@@ -108,7 +106,7 @@ const Grupos = () => {
   return (
     <Container title="Listado de Grupos" linkBack="#/">
       {isLoading && grupos.length === 0 ? (
-        <MuniSpinner />
+        <MuniSpinner file="muniexpress.svg" />
       ) : (
         <TableBackPagination
           search
