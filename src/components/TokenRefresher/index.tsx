@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react'
 import { WEBLOGIN_URL } from '@/config'
 import { useSessionStore } from '@/store/sessionStore'
 import { useRefreshTokenMutation } from '@/query/mutations/useAuthMutations'
+import { useQueryClient } from '@tanstack/react-query'
 
 const CHECK_INTERVAL_MS = 1 * 60 * 1000
-const REFRESH_THRESHOLD_SECONDS = 6 * 60
+const REFRESH_THRESHOLD_SECONDS = 4 * 60 // El backend exige que falten < 5 min para aceptar el refresh.
 
 const TokenRefresher = () => {
   const token = useSessionStore((s) => s.token)
@@ -14,7 +15,8 @@ const TokenRefresher = () => {
   const setSession = useSessionStore((s) => s.setSession)
   const clearAppSession = useSessionStore((s) => s.clearAppSession)
 
-  const refreshMutation = useRefreshTokenMutation()
+  const { mutateAsync: refreshToken } = useRefreshTokenMutation()
+  const qc = useQueryClient()
   const intervalRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -34,15 +36,20 @@ const TokenRefresher = () => {
     intervalRef.current = window.setInterval(async () => {
       try {
         if (expiresAt) {
-          const expiresTime = new Date(expiresAt).getTime()
+          // Normalize date string for Safari compatibility if it's not ISO
+          const normalizedDate = expiresAt.replace(' ', 'T')
+          const expiresTime = new Date(normalizedDate).getTime()
           const secondsLeftLocal = (expiresTime - Date.now()) / 1000
 
           if (secondsLeftLocal > REFRESH_THRESHOLD_SECONDS) {
             return
           }
+        } else {
+          // If there is no expiresAt, do not spam the refresh endpoint every minute.
+          return
         }
 
-        const data = await refreshMutation.mutateAsync()
+        const data = await refreshToken()
 
         if (data.refreshed === false) {
           setSession({
@@ -61,6 +68,7 @@ const TokenRefresher = () => {
             expiresAt: data.expires_at ?? null,
             user,
           })
+          qc.invalidateQueries({ queryKey: ['auth'] })
           return
         }
 
@@ -85,7 +93,8 @@ const TokenRefresher = () => {
     expiresAt,
     setSession,
     clearAppSession,
-    refreshMutation,
+    refreshToken,
+    qc,
   ])
 
   return null
