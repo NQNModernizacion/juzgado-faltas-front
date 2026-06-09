@@ -49,7 +49,7 @@ api.interceptors.response.use(
     const responseData = error.response?.data
 
     if (responseData) {
-      console.log(typeof responseData.error === 'object')
+      // console.log(typeof responseData.error === 'object')
 
       if (
         typeof responseData.error === 'object' &&
