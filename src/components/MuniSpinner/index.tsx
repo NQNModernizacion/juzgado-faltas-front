@@ -1,4 +1,3 @@
-
 import { CircularProgress } from '@mui/material'
 import { ASSETS_URL } from '../../config'
 
@@ -6,7 +5,7 @@ type RFC = React.FC<{
   size?: number
   circularProgressSize?: number
   textoSpinner?: string
-  file?: 'bola.png' | 'bola-blanco.png'
+  file?: 'bola.png' | 'bola-blanco.png' | String
   color?: string
 }>
 
@@ -20,7 +19,9 @@ const MuniSpinner: RFC = ({
   return (
     <div className="flex items-center justify-center gap-4">
       {textoSpinner !== '' && (
-        <h2 className="text-lg font-semibold text-primary-700">{textoSpinner}</h2>
+        <h2 className="text-lg font-semibold text-primary-700">
+          {textoSpinner}
+        </h2>
       )}
 
       <div className="relative flex items-center justify-center">
