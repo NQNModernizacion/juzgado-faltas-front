@@ -124,7 +124,7 @@ export const AltaActa = () => {
       backLabel="Volver"
     >
       {isLoading ? (
-        <MuniSpinner />
+        <MuniSpinner file="muniexpress.svg" />
       ) : (
         <form
           className="mt-2"
@@ -229,10 +229,14 @@ export const AltaActa = () => {
                 label="Calle"
                 name="calle_id"
                 control={control}
-                options={[
-                  { value: 1, label: 'Calle 1' },
-                  { value: 2, label: 'Calle 2' },
-                ]}
+                options={datosIniciales?.combos?.calles?.map((calle: any) => ({
+                  value: calle.id,
+                  label: calle.nombre,
+                }))}
+                // options={[
+                //   { value: 1, label: 'Calle 1' },
+                //   { value: 2, label: 'Calle 2' },
+                // ]}
                 error={errors.calle_id}
               />
               {/* <RHFInput
@@ -244,10 +248,10 @@ export const AltaActa = () => {
                 label="Cruce de Calles"
                 name="cruce_id"
                 control={control}
-                options={[
-                  { value: 1, label: 'Cruce 1' },
-                  { value: 2, label: 'Cruce 2' },
-                ]}
+                options={datosIniciales?.combos?.calles?.map((calle: any) => ({
+                  value: calle.id,
+                  label: calle.nombre,
+                }))}
                 error={errors.cruce_id}
               />
 
