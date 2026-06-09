@@ -16,13 +16,8 @@ export function useLoginMutation() {
 }
 
 export function useRefreshTokenMutation() {
-  const qc = useQueryClient();
-
   return useMutation({
     mutationFn: refreshTokenRequest,
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["auth"] });
-    },
   });
 }
 
