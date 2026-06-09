@@ -93,7 +93,7 @@ export const ListadoActas = () => {
   return (
     <Container title={'Listado de Actas'} linkBack="#/">
       {isLoading ? (
-        <MuniSpinner />
+        <MuniSpinner file="muniexpress.svg" />
       ) : (
         <>
           <div className="mb-4 d-flex align-items-center gap-3 p-3 border rounded-3 bg-light shadow-sm">
