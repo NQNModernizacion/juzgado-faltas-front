@@ -43,7 +43,7 @@ export const DetalleGrupo = ({ grupoId, onBack }: DetalleGrupoProps) => {
       backLabel="Volver al Listado"
       onBack={onBack}
     >
-      {isLoading && <MuniSpinner />}
+      {isLoading && <MuniSpinner file="muniexpress.svg" />}
 
       {!isLoading && grupoDetail && (
         <div className="space-y-6">
