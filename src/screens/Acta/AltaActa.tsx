@@ -1,5 +1,6 @@
 import ActaTabsForm from '@/components/ActaTabs'
 import { SelectField } from '@/components/Forms/SelectField'
+import ColorSelect from '@/components/Forms/ColorSelect'
 import MuniSpinner from '@/components/MuniSpinner'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
 import { AltaActaSchema } from '@/schemas/AltaActaSchema'
@@ -42,6 +43,8 @@ interface FormValues {
   estado_acta_id?: number
   fecha_notificado?: string
   desestimada?: number
+  color?: string
+  caratula?: string
   inspector_1_id?: number
   inspector_2_id?: number
 }
@@ -73,11 +76,13 @@ export const AltaActa = () => {
       Padrones: createEmptyRows(),
       Infractores: createEmptyRows(),
       Infracciones: createEmptyRows(),
+      color: undefined,
+      caratula: '',
       oficina_id: undefined,
       inspector_1_id: undefined,
       inspector_2_id: undefined,
     },
-    resolver: yupResolver(AltaActaSchema),
+    // resolver: yupResolver(AltaActaSchema),
   })
 
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
@@ -145,6 +150,10 @@ export const AltaActa = () => {
                   name="numero_acta"
                   label="Número de Acta"
                 />
+              </div>
+
+              <div className="mt-2">
+                <RHFInput control={control} name="caratula" label="Carátula" />
               </div>
 
               <SelectField
@@ -253,6 +262,20 @@ export const AltaActa = () => {
                   label: calle.nombre,
                 }))}
                 error={errors.cruce_id}
+              />
+
+              <ColorSelect
+                label="Color"
+                name="color"
+                control={control}
+                options={[
+                  { value: '#E53935', label: 'Rojo' },
+                  { value: '#1E88E5', label: 'Azul' },
+                  { value: '#43A047', label: 'Verde' },
+                  { value: '#FDD835', label: 'Amarillo' },
+                  { value: '#8E24AA', label: 'Morado' },
+                  { value: '#FB8C00', label: 'Naranja' },
+                ]}
               />
 
               <SelectField

@@ -3,18 +3,19 @@ import { axios } from '@/utils/axios'
 import { formatoFecha } from '@/utils/date'
 import { toast } from 'react-toastify'
 
-export const onSubmitAlta = async (
-  formData: any,
-  setIsLoading: any,
-  nav: any
-) => {
+export const onSubmitAlta = async (formData: any, setIsLoading: any, nav: any) => {
   try {
+
+    
+    console.log('formData', formData)
+    // return;
+
     formData.padrones = formData.Padrones
     formData.infractores = formData.Infractores
     formData.infracciones = Array.isArray(formData.Infracciones)
       ? formData.Infracciones.map((item: any) => ({
-          infraccion_id: item.tipo_id,
-        }))
+        infraccion_id: item.tipo_id,
+      }))
       : []
 
     formData.fecha_labrada = new Date(formData.fecha_labrada)
@@ -31,8 +32,6 @@ export const onSubmitAlta = async (
     // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
     // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
 
-    console.log('formData', formData)
-    // return;
 
     const resp = await axios().post('/registrar_acta', formData)
     const { data, error } = resp.data

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { SelectField } from '@/components/Forms/SelectField'
+import ColorSelect from '@/components/Forms/ColorSelect'
 import ActaTabsForm from '@/components/ActaTabs'
 import { MovimientosTab } from './components/MovimientosTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
@@ -147,6 +148,24 @@ export const VisualizarActa = () => {
                       control={control}
                       name="numero_acta"
                       label="Número del Acta"
+                    />
+                    <RHFInput
+                      control={control}
+                      name="caratula"
+                      label="Carátula"
+                    />
+                    <ColorSelect
+                      label="Color"
+                      name="color"
+                      control={control}
+                      options={[
+                        { value: '#E53935', label: 'Rojo' },
+                        { value: '#1E88E5', label: 'Azul' },
+                        { value: '#43A047', label: 'Verde' },
+                        { value: '#FDD835', label: 'Amarillo' },
+                        { value: '#8E24AA', label: 'Morado' },
+                        { value: '#FB8C00', label: 'Naranja' },
+                      ]}
                     />
                     <SelectField
                       label="Oficina"
