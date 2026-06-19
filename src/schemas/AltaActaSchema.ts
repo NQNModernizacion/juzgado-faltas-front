@@ -112,6 +112,8 @@ const infractorRowSchema = object().shape({
   documento: string().optional(),
   identificacion: string().optional(),
   nombre: string().required('El nombre es requerido'),
+  categoria_padron_id: string().optional(),
+  observacion: string().optional(),
 });
 
 const infraccionesRowSchema = array()

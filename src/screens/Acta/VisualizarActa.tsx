@@ -88,22 +88,20 @@ export const VisualizarActa = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('info')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
-                  activeTab === 'info'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'info'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Información del Acta
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('movimientos')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
-                  activeTab === 'movimientos'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'movimientos'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Movimientos
               </button>
@@ -111,11 +109,10 @@ export const VisualizarActa = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab('grupo')}
-                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
-                    activeTab === 'grupo'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'grupo'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                   Grupo
                 </button>
@@ -128,6 +125,20 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">Información Básica</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <RHFInput
+                        control={control}
+                        disabled
+                        name="id"
+                        label="Número de Causa"
+                      />
+                      <RHFInput
+                        control={control}
+                        disabled
+                        name="numero_acta"
+                        label="Número del Acta"
+                      />
+                    </div>
                     <RHFInput
                       control={control}
                       name="juzgado"
@@ -139,34 +150,38 @@ export const VisualizarActa = () => {
                       name="year"
                       label="Año del Acta"
                     />
-                    <RHFInput
-                      control={control}
-                      name="id"
-                      label="Número de Causa"
-                    />
-                    <RHFInput
-                      control={control}
-                      name="numero_acta"
-                      label="Número del Acta"
-                    />
+
                     <RHFInput
                       control={control}
                       name="caratula"
                       label="Carátula"
                     />
-                    <ColorSelect
-                      label="Color"
-                      name="color"
-                      control={control}
-                      options={[
-                        { value: '#E53935', label: 'Rojo' },
-                        { value: '#1E88E5', label: 'Azul' },
-                        { value: '#43A047', label: 'Verde' },
-                        { value: '#FDD835', label: 'Amarillo' },
-                        { value: '#8E24AA', label: 'Morado' },
-                        { value: '#FB8C00', label: 'Naranja' },
-                      ]}
-                    />
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <ColorSelect
+                        label="Color"
+                        name="color"
+                        control={control}
+                        options={[
+                          { value: '#E53935', label: 'Rojo' },
+                          { value: '#1E88E5', label: 'Azul' },
+                          { value: '#43A047', label: 'Verde' },
+                          { value: '#FDD835', label: 'Amarillo' },
+                          { value: '#8E24AA', label: 'Morado' },
+                          { value: '#FB8C00', label: 'Naranja' },
+                        ]}
+                      />
+                      <SelectField
+                        label="Estado"
+                        name="estado_acta_id"
+                        control={control}
+                        options={[
+                          { value: 1, label: 'Baja' },
+                          { value: 2, label: 'Genero Causa' },
+                          { value: 3, label: 'Notificado' },
+                        ]}
+                        error={errors.estado_acta_id}
+                      />
+                    </div>
                     <SelectField
                       label="Oficina"
                       name="oficina_id"
@@ -178,17 +193,6 @@ export const VisualizarActa = () => {
                         })
                       )}
                       error={errors.oficina_id}
-                    />
-                    <SelectField
-                      label="Estado"
-                      name="estado_acta_id"
-                      control={control}
-                      options={[
-                        { value: 1, label: 'Baja' },
-                        { value: 2, label: 'Genero Causa' },
-                        { value: 3, label: 'Notificado' },
-                      ]}
-                      error={errors.estado_acta_id}
                     />
                   </div>
                 </div>
@@ -230,7 +234,7 @@ export const VisualizarActa = () => {
                       )}
                       error={errors.ley_id}
                     />
-                    <SelectField
+                    {/* <SelectField
                       label="Desestimada"
                       name="desestimada"
                       control={control}
@@ -239,7 +243,7 @@ export const VisualizarActa = () => {
                         { value: 2, label: 'No' },
                       ]}
                       error={errors.desestimada}
-                    />
+                    /> */}
                   </div>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
@@ -289,6 +293,41 @@ export const VisualizarActa = () => {
                       type="text"
                       disabled
                     />
+
+                    <SelectField
+                      label="Juez Subrogante"
+                      name="juez_subrogante_id"
+                      control={control}
+                      options={datosIniciales?.combos?.jueces
+                        ?.filter(
+                          (juez: any) =>
+                            juez.id === 3 || juez.id === 4
+                        )
+                        .map(
+                          (juez: any) => ({
+                            value: juez.id,
+                            label: juez.nombre,
+                          })
+                        )}
+                      error={errors.juez_subrogante_id}
+                    />
+
+                    <SelectField
+                      label="Secretaria subrogante"
+                      name="secretaria_subrogante_id"
+                      control={control}
+                      options={datosIniciales?.combos?.secretarias
+                        ?.filter(
+                          (secretaria: any) =>
+                            secretaria.secretaria === 'Secretaria Subrogante'
+                        )
+                        .map((secretaria: any) => ({
+                          value: secretaria.id,
+                          label: secretaria.descripcion,
+                        }))}
+                      error={errors.secretaria_subrogante_id}
+                    />
+
                   </div>
                 </div>
 
@@ -308,12 +347,12 @@ export const VisualizarActa = () => {
                       label="Fecha de Carga"
                       type="date"
                     />
-                    <RHFInput
+                    {/* <RHFInput
                       control={control}
                       name="fecha_notificado"
                       label="Fecha Notificado"
                       type="date"
-                    />
+                    /> */}
                   </div>
                 </div>
 

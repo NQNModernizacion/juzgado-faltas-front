@@ -13,9 +13,10 @@ import {
   FormSection,
   RHFInput,
   SelectBase,
+  TextareaBase,
 } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 interface Row {
@@ -23,6 +24,7 @@ interface Row {
   identificacion: string
   nombre: string
   documento: string
+  observacion: string
 }
 
 interface FormValues {
@@ -45,6 +47,7 @@ interface FormValues {
   desestimada?: number
   color?: string
   caratula?: string
+  observacion?: string
   inspector_1_id?: number
   inspector_2_id?: number
 }
@@ -55,6 +58,7 @@ const createEmptyRows = () =>
     identificacion: '',
     nombre: '',
     documento: '',
+    observacion: '',
   }))
 
 export const AltaActa = () => {
@@ -183,7 +187,7 @@ export const AltaActa = () => {
                   name="fecha_carga"
                   label="Fecha de Carga"
                   type="date"
-                  // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
+                // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
                 />
               </div>
 
@@ -264,31 +268,33 @@ export const AltaActa = () => {
                 error={errors.cruce_id}
               />
 
-              <ColorSelect
-                label="Color"
-                name="color"
-                control={control}
-                options={[
-                  { value: '#E53935', label: 'Rojo' },
-                  { value: '#1E88E5', label: 'Azul' },
-                  { value: '#43A047', label: 'Verde' },
-                  { value: '#FDD835', label: 'Amarillo' },
-                  { value: '#8E24AA', label: 'Morado' },
-                  { value: '#FB8C00', label: 'Naranja' },
-                ]}
-              />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <ColorSelect
+                  label="Color"
+                  name="color"
+                  control={control}
+                  options={[
+                    { value: '#E53935', label: 'Rojo' },
+                    { value: '#1E88E5', label: 'Azul' },
+                    { value: '#43A047', label: 'Verde' },
+                    { value: '#FDD835', label: 'Amarillo' },
+                    { value: '#8E24AA', label: 'Morado' },
+                    { value: '#FB8C00', label: 'Naranja' },
+                  ]}
+                />
 
-              <SelectField
-                label="Estado"
-                name="estado_acta_id"
-                control={control}
-                options={[
-                  { value: 1, label: 'Baja' },
-                  { value: 2, label: 'Genero Causa' },
-                  { value: 3, label: 'Notificado' },
-                ]}
-                error={errors.estado_acta_id}
-              />
+                <SelectField
+                  label="Estado"
+                  name="estado_acta_id"
+                  control={control}
+                  options={[
+                    { value: 1, label: 'Baja' },
+                    { value: 2, label: 'Genero Causa' },
+                    { value: 3, label: 'Notificado' },
+                  ]}
+                  error={errors.estado_acta_id}
+                />
+              </div>
               {/* <RHFInput
                             control={control}
                             name="estado"
@@ -302,7 +308,7 @@ export const AltaActa = () => {
                         /> */}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <RHFInput
+                {/* <RHFInput
                   control={control}
                   name="fecha_notificado"
                   label="Fecha Notificado"
@@ -318,6 +324,25 @@ export const AltaActa = () => {
                     { value: 2, label: 'No' },
                   ]}
                   error={errors.desestimada}
+                /> */}
+              </div>
+
+              <div className="mt-2">
+                <Controller
+                  control={control}
+                  name="observacion"
+                  render={({ field }) => (
+                    <div>
+                      <label className="mx-label">
+                        Observación
+                      </label>
+                      <textarea
+                        {...field}
+                        className="w-full border rounded-lg px-3 py-2"
+                        rows={4}
+                      />
+                    </div>
+                  )}
                 />
               </div>
 

@@ -1,20 +1,16 @@
 import { useState } from 'react'
 import { Control, useFieldArray, Controller } from 'react-hook-form'
-import { SelectSearch } from '@nqnmodernizacion/muni-ui'
 
 type TabType = 'Padrones' | 'Infractores' | 'Infracciones'
-
-type SearchOption = {
-  label: string
-  value: string | number
-}
 
 type Row = {
   tipo_id: string
   categoria_padron_id?: string
+  categoria_infractor_id?: string
   identificacion?: string
   nombre: string
   documento?: string
+  observaciones?: string
 }
 
 interface FormValues {
@@ -86,6 +82,8 @@ export default function ActaTabsForm({
       nombre: '',
       documento: '',
       categoria_padron_id: '',
+      categoria_infractor_id: '',
+      observaciones: '',
     }
     getCurrentArray().append(emptyRow)
   }
@@ -112,7 +110,7 @@ export default function ActaTabsForm({
                 : 'border-transparent text-gray-500'
             }`}
           >
-            {tab}
+            {tab === 'Infractores' ? 'Imputados' : tab}
           </button>
         ))}
       </div>
@@ -130,10 +128,11 @@ export default function ActaTabsForm({
                 <th className="p-2">N° Documento</th>
               )}
 
-              {activeTab !== 'Infracciones' && (
-                <th className="p-2">Identificación</th>
-              )}
-              {activeTab !== 'Infracciones' && <th className="p-2">Nombre</th>}
+              {activeTab === 'Padrones' && <th className="p-2">Identificación</th>}
+              {activeTab === 'Padrones' && <th className="p-2">Nombre</th>}
+              {activeTab === 'Infractores' && <th className="p-2">Nombre</th>}
+              {activeTab === 'Infractores' && <th className="p-2">Observaciones</th>}
+              {activeTab === 'Infractores' && <th className="p-2">Categoria</th>}
               {activeTab === 'Padrones' && <th className="p-2">Categoria</th>}
               <th className="p-2">Acciones</th>
             </tr>
@@ -203,18 +202,58 @@ export default function ActaTabsForm({
 
                   {activeTab !== 'Infracciones' && (
                     <>
-                      <td className="p-2">
-                        <Controller
-                          control={control}
-                          name={`${baseName}.nombre`}
-                          render={({ field }) => (
-                            <input
-                              {...field}
-                              className="w-full border rounded-lg px-3 py-1"
-                            />
-                          )}
-                        />
-                      </td>
+                      {activeTab === 'Padrones' && (
+                        <td className="p-2">
+                          <Controller
+                            control={control}
+                            name={`${baseName}.nombre`}
+                            render={({ field }) => (
+                              <input
+                                {...field}
+                                className="w-full border rounded-lg px-3 py-1"
+                              />
+                            )}
+                          />
+                        </td>
+                      )}
+
+                      {activeTab === 'Infractores' && (
+                        <td className="p-2">
+                          <Controller
+                            control={control}
+                            name={`${baseName}.observaciones`}
+                            render={({ field }) => (
+                              <textarea
+                                {...field}
+                                className="w-full border rounded-lg px-3 py-1"
+                                rows={2}
+                              />
+                            )}
+                          />
+                        </td>
+                      )}
+
+                      {activeTab === 'Infractores' && (
+                        <td className="p-2">
+                          <Controller
+                            control={control}
+                            name={`${baseName}.categoria_infractor_id`}
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className="w-full border rounded-lg px-3 py-1"
+                              >
+                                <option value="">Seleccione</option>
+                                {(infractores?.categorias ?? padrones?.categorias)?.map((opt: any) => (
+                                  <option key={opt.id} value={opt.id}>
+                                    {opt.nombre}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </td>
+                      )}
 
                       {activeTab === 'Padrones' && (
                         <td className="p-2">
