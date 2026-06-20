@@ -187,7 +187,7 @@ export const AltaActa = () => {
                   name="fecha_carga"
                   label="Fecha de Carga"
                   type="date"
-                // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
+                  // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
                 />
               </div>
 
@@ -287,11 +287,12 @@ export const AltaActa = () => {
                   label="Estado"
                   name="estado_acta_id"
                   control={control}
-                  options={[
-                    { value: 1, label: 'Baja' },
-                    { value: 2, label: 'Genero Causa' },
-                    { value: 3, label: 'Notificado' },
-                  ]}
+                  options={datosIniciales?.combos?.estado_acta?.map(
+                    (estado: any) => ({
+                      value: estado.id,
+                      label: estado.nombre,
+                    })
+                  )}
                   error={errors.estado_acta_id}
                 />
               </div>
@@ -333,9 +334,7 @@ export const AltaActa = () => {
                   name="observacion"
                   render={({ field }) => (
                     <div>
-                      <label className="mx-label">
-                        Observación
-                      </label>
+                      <label className="mx-label">Observación</label>
                       <textarea
                         {...field}
                         className="w-full border rounded-lg px-3 py-2"
