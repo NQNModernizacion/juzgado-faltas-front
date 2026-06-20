@@ -3,10 +3,12 @@ import { axios } from '@/utils/axios'
 import { formatoFecha } from '@/utils/date'
 import { toast } from 'react-toastify'
 
-export const onSubmitAlta = async (formData: any, setIsLoading: any, nav: any) => {
+export const onSubmitAlta = async (
+  formData: any,
+  setIsLoading: any,
+  nav: any
+) => {
   try {
-
-    
     console.log('formData', formData)
     // return;
 
@@ -14,8 +16,8 @@ export const onSubmitAlta = async (formData: any, setIsLoading: any, nav: any) =
     formData.infractores = formData.Infractores
     formData.infracciones = Array.isArray(formData.Infracciones)
       ? formData.Infracciones.map((item: any) => ({
-        infraccion_id: item.tipo_id,
-      }))
+          infraccion_id: item.tipo_id,
+        }))
       : []
 
     formData.fecha_labrada = new Date(formData.fecha_labrada)
@@ -31,7 +33,6 @@ export const onSubmitAlta = async (formData: any, setIsLoading: any, nav: any) =
     // formData.fecha_labrada = '2026-05-19 00:00:00';
     // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
     // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
-
 
     const resp = await axios().post('/registrar_acta', formData)
     const { data, error } = resp.data
@@ -237,10 +238,7 @@ export const getGrupoActa = async (
   }
 }
 
-export const getGruposActas = async (
-  setGrupos: any,
-  setIsLoading: any
-) => {
+export const getGruposActas = async (setGrupos: any, setIsLoading: any) => {
   try {
     setIsLoading(true)
     const resp = await axios().get('grupos_actas')
@@ -248,7 +246,10 @@ export const getGruposActas = async (
     if (!data) throw new Error('Error al obtener los grupos de actas')
     setGrupos(data)
   } catch (error: any) {
-    toast.error(error.message || 'Error al obtener los grupos de actas', toastOptions)
+    toast.error(
+      error.message || 'Error al obtener los grupos de actas',
+      toastOptions
+    )
   } finally {
     setIsLoading(false)
   }
@@ -266,7 +267,10 @@ export const getGrupoActaDetail = async (
     if (!data) throw new Error('Error al obtener el detalle del grupo')
     setGrupoDetail(data)
   } catch (error: any) {
-    toast.error(error.message || 'Error al obtener el detalle del grupo', toastOptions)
+    toast.error(
+      error.message || 'Error al obtener el detalle del grupo',
+      toastOptions
+    )
   } finally {
     setIsLoading(false)
   }
