@@ -38,7 +38,7 @@ export default function ActaTabsForm({
   padrones,
   infracciones,
 }: any) {
-  // console.log('padrones', padrones);
+  console.log('infractores', infractores)
 
   const [activeTab, setActiveTab] = useState<TabType>('Padrones')
   const [filteredTipoOptions, setFilteredTipoOptions] = useState([
@@ -128,11 +128,16 @@ export default function ActaTabsForm({
                 <th className="p-2">N° Documento</th>
               )}
 
-              {activeTab === 'Padrones' && <th className="p-2">Identificación</th>}
-              {activeTab === 'Padrones' && <th className="p-2">Nombre</th>}
-              {activeTab === 'Infractores' && <th className="p-2">Nombre</th>}
-              {activeTab === 'Infractores' && <th className="p-2">Observaciones</th>}
-              {activeTab === 'Infractores' && <th className="p-2">Categoria</th>}
+              {activeTab === 'Padrones' && (
+                <th className="p-2">Identificación</th>
+              )}
+              {activeTab !== 'Infracciones' && <th className="p-2">Nombre</th>}
+              {activeTab === 'Infractores' && (
+                <th className="p-2">Observaciones</th>
+              )}
+              {activeTab === 'Infractores' && (
+                <th className="p-2">Categoria</th>
+              )}
               {activeTab === 'Padrones' && <th className="p-2">Categoria</th>}
               <th className="p-2">Acciones</th>
             </tr>
@@ -185,7 +190,7 @@ export default function ActaTabsForm({
                   )}
 
                   {/* Identificación */}
-                  {activeTab !== 'Infracciones' && (
+                  {activeTab === 'Padrones' && (
                     <td className="p-2">
                       <Controller
                         control={control}
@@ -202,20 +207,18 @@ export default function ActaTabsForm({
 
                   {activeTab !== 'Infracciones' && (
                     <>
-                      {activeTab === 'Padrones' && (
-                        <td className="p-2">
-                          <Controller
-                            control={control}
-                            name={`${baseName}.nombre`}
-                            render={({ field }) => (
-                              <input
-                                {...field}
-                                className="w-full border rounded-lg px-3 py-1"
-                              />
-                            )}
-                          />
-                        </td>
-                      )}
+                      <td className="p-2">
+                        <Controller
+                          control={control}
+                          name={`${baseName}.nombre`}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              className="w-full border rounded-lg px-3 py-1"
+                            />
+                          )}
+                        />
+                      </td>
 
                       {activeTab === 'Infractores' && (
                         <td className="p-2">
@@ -244,11 +247,13 @@ export default function ActaTabsForm({
                                 className="w-full border rounded-lg px-3 py-1"
                               >
                                 <option value="">Seleccione</option>
-                                {(infractores?.categorias ?? padrones?.categorias)?.map((opt: any) => (
-                                  <option key={opt.id} value={opt.id}>
-                                    {opt.nombre}
-                                  </option>
-                                ))}
+                                {infractores?.categoria_infractor?.map(
+                                  (opt: any) => (
+                                    <option key={opt.id} value={opt.id}>
+                                      {opt.nombre}
+                                    </option>
+                                  )
+                                )}
                               </select>
                             )}
                           />
