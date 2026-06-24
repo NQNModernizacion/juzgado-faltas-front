@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import MuniSpinner from '@/components/MuniSpinner'
 import { getActas, postAgruparActas } from '@/services/ActaService'
 import TableBackPagination from '@/components/TableBackPagination'
+import ChevronLeft from '@/components/Svgs/ChevronLeft'
 
 export const ListadoActas = () => {
   const nav = useNavigate()
@@ -50,21 +51,21 @@ export const ListadoActas = () => {
     if (
       filtro.oficina &&
       String(acta.oficina).toLowerCase() !==
-        String(filtro.oficina).toLowerCase()
+      String(filtro.oficina).toLowerCase()
     ) {
       return false
     }
     if (
       filtro.juzgado &&
       String(acta.juzgado).toLowerCase() !==
-        String(filtro.juzgado).toLowerCase()
+      String(filtro.juzgado).toLowerCase()
     ) {
       return false
     }
     if (
       filtro.ultimo_movimiento &&
       String(acta.ultimo_movimiento).toLowerCase() !==
-        String(filtro.ultimo_movimiento).toLowerCase()
+      String(filtro.ultimo_movimiento).toLowerCase()
     ) {
       return false
     }
@@ -91,7 +92,10 @@ export const ListadoActas = () => {
   }
 
   return (
-    <Container title={'Listado de Actas'} linkBack="#/">
+    <Container title={'Listado de Actas'}
+      linkBack="#/"
+      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
+    >
       {isLoading ? (
         <MuniSpinner file="muniexpress.svg" />
       ) : (

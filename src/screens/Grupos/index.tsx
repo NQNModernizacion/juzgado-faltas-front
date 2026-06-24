@@ -4,6 +4,7 @@ import MuniSpinner from '@/components/MuniSpinner'
 import TableBackPagination from '@/components/TableBackPagination'
 import { getGruposActas } from '@/services/ActaService'
 import { DetalleGrupo } from './components/DetalleGrupo'
+import ChevronLeft from '@/components/Svgs/ChevronLeft'
 
 const Grupos = () => {
   const [grupos, setGrupos] = useState<any[]>([])
@@ -104,7 +105,10 @@ const Grupos = () => {
   }
 
   return (
-    <Container title="Listado de Grupos" linkBack="#/">
+    <Container title="Listado de Grupos"
+      linkBack="#/"
+      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
+    >
       {isLoading && grupos.length === 0 ? (
         <MuniSpinner file="muniexpress.svg" />
       ) : (

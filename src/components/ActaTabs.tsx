@@ -45,6 +45,7 @@ export default function ActaTabsForm({
     { label: 'Zoonosis', value: 'zoonosis', tab: 'Padrones' },
     { label: 'Inmueble', value: 'inmueble', tab: 'Padrones' },
   ])
+  const [infraccionesSearch, setInfraccionesSearch] = useState<Record<number, string>>({})
 
   const padronesArray = useFieldArray({
     control,
@@ -155,21 +156,49 @@ export default function ActaTabsForm({
                     <Controller
                       control={control}
                       name={`${baseName}.tipo_id`}
-                      render={({ field }) => (
-                        <select
-                          {...field}
-                          className="w-full border rounded-lg px-3 py-1"
-                        >
-                          <option key={''} value={''}>
-                            Seleccione
-                          </option>
-                          {tipoOptions?.map((opt: any) => (
-                            <option key={opt.id} value={opt.id}>
-                              {opt.nombre}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                      render={({ field }) => {
+                        const searchValue = infraccionesSearch[index] || ''
+                        const filteredOptions =
+                          activeTab === 'Infracciones' && tipoOptions
+                            ? tipoOptions.filter((opt: any) =>
+                                opt.nombre
+                                  .toString()
+                                  .toLowerCase()
+                                  .includes(searchValue.toLowerCase())
+                              )
+                            : tipoOptions
+
+                        return (
+                          <div className="space-y-2">
+                            {activeTab === 'Infracciones' && (
+                              <input
+                                value={searchValue}
+                                onChange={(event) =>
+                                  setInfraccionesSearch((prev) => ({
+                                    ...prev,
+                                    [index]: event.target.value,
+                                  }))
+                                }
+                                placeholder="Buscar..."
+                                className="w-full border rounded-lg px-3 py-1"
+                              />
+                            )}
+                            <select
+                              {...field}
+                              className="w-full border rounded-lg px-3 py-1"
+                            >
+                              <option key={''} value={''}>
+                                Seleccione
+                              </option>
+                              {filteredOptions?.map((opt: any) => (
+                                <option key={opt.id} value={opt.id}>
+                                  {opt.nombre}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )
+                      }}
                     />
                   </td>
 

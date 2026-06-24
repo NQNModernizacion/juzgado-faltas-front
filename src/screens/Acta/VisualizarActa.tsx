@@ -10,6 +10,7 @@ import ActaTabsForm from '@/components/ActaTabs'
 import { MovimientosTab } from './components/MovimientosTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
+import ChevronLeft from '@/components/Svgs/ChevronLeft'
 
 export const VisualizarActa = () => {
   const { id } = useParams()
@@ -71,7 +72,10 @@ export const VisualizarActa = () => {
   }
 
   return (
-    <Container title={'Visualizar Acta'} linkBack="#/acta/listado">
+    <Container title={'Visualizar Acta'}
+      linkBack="#/acta/listado"
+      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />
+      }>
       {isLoading ? (
         <MuniSpinner file="muniexpress.svg" />
       ) : acta ? (
