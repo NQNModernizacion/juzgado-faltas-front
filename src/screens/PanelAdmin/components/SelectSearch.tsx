@@ -22,6 +22,10 @@ type SelectSearchProps<T> = {
   customStyles?: SelectProps<T, boolean, GroupBase<T>>['styles']
   invalidMsg?: string
   buttonLabel?: () => JSX.Element
+  menuPortalTarget?: HTMLElement | null
+  menuPosition?: 'absolute' | 'fixed'
+  placeholder?: string
+  noOptionsMessage?: (obj: { inputValue: string }) => string
 }
 
 const SelectSearch = <T,>({
@@ -40,6 +44,10 @@ const SelectSearch = <T,>({
   customStyles,
   invalidMsg,
   buttonLabel,
+  menuPortalTarget,
+  menuPosition,
+  placeholder,
+  noOptionsMessage,
 }: SelectSearchProps<T>) => {
   const selectStyles: SelectProps<T, boolean, GroupBase<T>>['styles'] = {
     control: (base, state) => ({
@@ -103,6 +111,11 @@ const SelectSearch = <T,>({
       ...base,
       backgroundColor: 'rgb(var(--mx-border))',
     }),
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
   }
 
   const selectTheme = (theme: any) => ({
@@ -146,6 +159,10 @@ const SelectSearch = <T,>({
         onChange={onChange}
         styles={customStyles ?? selectStyles}
         theme={selectTheme}
+        menuPortalTarget={menuPortalTarget}
+        menuPosition={menuPosition}
+        placeholder={placeholder}
+        noOptionsMessage={noOptionsMessage}
       />
 
       {invalidMsg && <span className="mt-1 text-sm text-red-600">{invalidMsg}</span>}
