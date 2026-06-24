@@ -1,5 +1,5 @@
 import MuniSpinner from '@/components/MuniSpinner'
-import { getActa, getDatosInicialesActa } from '@/services/ActaService'
+import { editarActa, getActa, getDatosInicialesActa } from '@/services/ActaService'
 import { Container, RHFInput } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -86,7 +86,10 @@ export const VisualizarActa = () => {
             onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)}
             setIsLoadingGlobal={setIsLoading}
           />
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(
+            // (formData) => console.log('formData', formData)
+            (formData) => editarActa(formData, setIsLoading)
+          )} className="space-y-6">
             {/* TABS PRINCIPALES */}
             <div className="flex border-b">
               <button
@@ -178,11 +181,12 @@ export const VisualizarActa = () => {
                         label="Estado"
                         name="estado_acta_id"
                         control={control}
-                        options={[
-                          { value: 1, label: 'Baja' },
-                          { value: 2, label: 'Genero Causa' },
-                          { value: 3, label: 'Notificado' },
-                        ]}
+                        options={datosIniciales?.combos?.estado_acta?.map(
+                          (estado: any) => ({
+                            value: estado.id,
+                            label: estado.nombre,
+                          })
+                        )}
                         error={errors.estado_acta_id}
                       />
                     </div>
@@ -434,19 +438,20 @@ export const VisualizarActa = () => {
                 </div>
 
                 {/* BOTONES DE ACCIÓN */}
-                <div className="flex gap-4 mb-6">
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
-                  >
-                    Guardar Cambios
-                  </button>
-                  <button
+                <div className="flex justify-end gap-4 mb-6">
+
+                  {/* <button
                     type="button"
                     onClick={() => reset(acta)}
                     className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-semibold"
                   >
                     Descartar Cambios
+                  </button> */}
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                  >
+                    Guardar Cambios
                   </button>
                 </div>
               </div>

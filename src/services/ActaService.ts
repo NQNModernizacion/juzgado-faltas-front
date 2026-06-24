@@ -275,3 +275,51 @@ export const getGrupoActaDetail = async (
     setIsLoading(false)
   }
 }
+
+export const editarActa = async (
+  formData: any,
+  setIsLoading: any,
+  // nav: any
+) => {
+  try {
+    console.log('formData', formData)
+    // return;
+
+    formData.padrones = formData.Padrones
+    formData.infractores = formData.Infractores
+    formData.infracciones = Array.isArray(formData.Infracciones)
+      ? formData.Infracciones.map((item: any) => ({
+          infraccion_id: item.tipo_id,
+        }))
+      : []
+
+    formData.fecha_labrada = new Date(formData.fecha_labrada)
+      .toISOString()
+      .split('T')[0]
+    formData.fecha_carga = new Date(formData.fecha_carga)
+      .toISOString()
+      .split('T')[0]
+    formData.fecha_notificado = formData.fecha_notificado
+      ? new Date(formData.fecha_notificado).toISOString().split('T')[0]
+      : null
+
+    // formData.fecha_labrada = '2026-05-19 00:00:00';
+    // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
+    // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
+
+    const resp = await axios().put('/actas/' + formData.id, formData)
+    const { data, error } = resp.data
+
+    console.log('data', data)
+
+    if (!data) throw new Error('Error al actualizar causa')
+
+    toast.success('Causa actualizada correctamente', toastOptions)
+
+    // nav(`/acta/listado`);
+  } catch (error: any) {
+    toast.error(error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
