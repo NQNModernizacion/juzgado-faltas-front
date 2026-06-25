@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Control, useFieldArray, Controller } from 'react-hook-form'
+import SelectSearch from '@/screens/PanelAdmin/components/SelectSearch'
 
 type TabType = 'Padrones' | 'Infractores' | 'Infracciones'
 
@@ -32,12 +33,7 @@ let tipoOptions: any = [
   // { label: "CUIT", value: "cuit", tab: "Infractores" },
 ]
 
-export default function ActaTabsForm({
-  control,
-  infractores,
-  padrones,
-  infracciones,
-}: any) {
+export default function ActaTabsForm({ control, infractores, padrones, infracciones }: any) {
   console.log('infractores', infractores)
 
   const [activeTab, setActiveTab] = useState<TabType>('Padrones')
@@ -45,7 +41,6 @@ export default function ActaTabsForm({
     { label: 'Zoonosis', value: 'zoonosis', tab: 'Padrones' },
     { label: 'Inmueble', value: 'inmueble', tab: 'Padrones' },
   ])
-  const [infraccionesSearch, setInfraccionesSearch] = useState<Record<number, string>>({})
 
   const padronesArray = useFieldArray({
     control,
@@ -105,11 +100,7 @@ export default function ActaTabsForm({
               setActiveTab(tab)
               // setFilteredTipoOptions(tipoOptions.filter(opt => opt.tab === tab));
             }}
-            className={`px-4 py-2 font-medium border-b-2 ${
-              activeTab === tab
-                ? 'border-red-400 text-red-500'
-                : 'border-transparent text-gray-500'
-            }`}
+            className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500'}`}
           >
             {tab === 'Infractores' ? 'Imputados' : tab}
           </button>
@@ -121,24 +112,14 @@ export default function ActaTabsForm({
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left border-b text-gray-600">
-              <th className="p-2">
-                {activeTab === 'Infracciones' ? 'Identificación' : 'Tipo'}
-              </th>
+              <th className="p-2">{activeTab === 'Infracciones' ? 'Identificación' : 'Tipo'}</th>
 
-              {activeTab === 'Infractores' && (
-                <th className="p-2">N° Documento</th>
-              )}
+              {activeTab === 'Infractores' && <th className="p-2">N° Documento</th>}
 
-              {activeTab === 'Padrones' && (
-                <th className="p-2">Identificación</th>
-              )}
+              {activeTab === 'Padrones' && <th className="p-2">Identificación</th>}
               {activeTab !== 'Infracciones' && <th className="p-2">Nombre</th>}
-              {activeTab === 'Infractores' && (
-                <th className="p-2">Observaciones</th>
-              )}
-              {activeTab === 'Infractores' && (
-                <th className="p-2">Categoria</th>
-              )}
+              {activeTab === 'Infractores' && <th className="p-2">Observaciones</th>}
+              {activeTab === 'Infractores' && <th className="p-2">Categoria</th>}
               {activeTab === 'Padrones' && <th className="p-2">Categoria</th>}
               <th className="p-2">Acciones</th>
             </tr>
@@ -157,46 +138,43 @@ export default function ActaTabsForm({
                       control={control}
                       name={`${baseName}.tipo_id`}
                       render={({ field }) => {
-                        const searchValue = infraccionesSearch[index] || ''
-                        const filteredOptions =
-                          activeTab === 'Infracciones' && tipoOptions
-                            ? tipoOptions.filter((opt: any) =>
-                                opt.nombre
-                                  .toString()
-                                  .toLowerCase()
-                                  .includes(searchValue.toLowerCase())
-                              )
-                            : tipoOptions
+                        if (activeTab === 'Infracciones') {
+                          const mappedOptions = tipoOptions?.map((opt: any) => ({
+                            value: opt.id,
+                            label: opt.nombre,
+                          })) || []
+
+                          return (
+                            <SelectSearch
+                              id={`${baseName}.tipo_id`}
+                              options={mappedOptions}
+                              value={mappedOptions.find((opt: any) => String(opt.value) === String(field.value)) || null}
+                              onChange={(selectedOption: any) => field.onChange(selectedOption?.value || '')}
+                              isSearchable={true}
+                              isClearable={true}
+                              className={{ container: '' }}
+                              menuPortalTarget={document.body}
+                              menuPosition="fixed"
+                              placeholder="Buscar tipo..."
+                              noOptionsMessage={() => 'No se encontraron resultados'}
+                            />
+                          )
+                        }
 
                         return (
-                          <div className="space-y-2">
-                            {activeTab === 'Infracciones' && (
-                              <input
-                                value={searchValue}
-                                onChange={(event) =>
-                                  setInfraccionesSearch((prev) => ({
-                                    ...prev,
-                                    [index]: event.target.value,
-                                  }))
-                                }
-                                placeholder="Buscar..."
-                                className="w-full border rounded-lg px-3 py-1"
-                              />
-                            )}
-                            <select
-                              {...field}
-                              className="w-full border rounded-lg px-3 py-1"
-                            >
-                              <option key={''} value={''}>
-                                Seleccione
+                          <select
+                            {...field}
+                            className="w-full border rounded-lg px-3 py-1"
+                          >
+                            <option key={''} value={''}>
+                              Seleccione
+                            </option>
+                            {tipoOptions?.map((opt: any) => (
+                              <option key={opt.id} value={opt.id}>
+                                {opt.nombre}
                               </option>
-                              {filteredOptions?.map((opt: any) => (
-                                <option key={opt.id} value={opt.id}>
-                                  {opt.nombre}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                            ))}
+                          </select>
                         )
                       }}
                     />
@@ -205,63 +183,26 @@ export default function ActaTabsForm({
                   {/* Documento SOLO en Infractores */}
                   {activeTab === 'Infractores' && (
                     <td className="p-2">
-                      <Controller
-                        control={control}
-                        name={`${baseName}.documento`}
-                        render={({ field }) => (
-                          <input
-                            {...field}
-                            className="w-full border rounded-lg px-3 py-1"
-                          />
-                        )}
-                      />
+                      <Controller control={control} name={`${baseName}.documento`} render={({ field }) => <input {...field} className="w-full border rounded-lg px-3 py-1" />} />
                     </td>
                   )}
 
                   {/* Identificación */}
                   {activeTab === 'Padrones' && (
                     <td className="p-2">
-                      <Controller
-                        control={control}
-                        name={`${baseName}.identificacion`}
-                        render={({ field }) => (
-                          <input
-                            {...field}
-                            className="w-full border rounded-lg px-3 py-1"
-                          />
-                        )}
-                      />
+                      <Controller control={control} name={`${baseName}.identificacion`} render={({ field }) => <input {...field} className="w-full border rounded-lg px-3 py-1" />} />
                     </td>
                   )}
 
                   {activeTab !== 'Infracciones' && (
                     <>
                       <td className="p-2">
-                        <Controller
-                          control={control}
-                          name={`${baseName}.nombre`}
-                          render={({ field }) => (
-                            <input
-                              {...field}
-                              className="w-full border rounded-lg px-3 py-1"
-                            />
-                          )}
-                        />
+                        <Controller control={control} name={`${baseName}.nombre`} render={({ field }) => <input {...field} className="w-full border rounded-lg px-3 py-1" />} />
                       </td>
 
                       {activeTab === 'Infractores' && (
                         <td className="p-2">
-                          <Controller
-                            control={control}
-                            name={`${baseName}.observaciones`}
-                            render={({ field }) => (
-                              <textarea
-                                {...field}
-                                className="w-full border rounded-lg px-3 py-1"
-                                rows={2}
-                              />
-                            )}
-                          />
+                          <Controller control={control} name={`${baseName}.observaciones`} render={({ field }) => <textarea {...field} className="w-full border rounded-lg px-3 py-1" rows={2} />} />
                         </td>
                       )}
 
@@ -271,18 +212,13 @@ export default function ActaTabsForm({
                             control={control}
                             name={`${baseName}.categoria_infractor_id`}
                             render={({ field }) => (
-                              <select
-                                {...field}
-                                className="w-full border rounded-lg px-3 py-1"
-                              >
+                              <select {...field} className="w-full border rounded-lg px-3 py-1">
                                 <option value="">Seleccione</option>
-                                {infractores?.categoria_infractor?.map(
-                                  (opt: any) => (
-                                    <option key={opt.id} value={opt.id}>
-                                      {opt.nombre}
-                                    </option>
-                                  )
-                                )}
+                                {infractores?.categoria_infractor?.map((opt: any) => (
+                                  <option key={opt.id} value={opt.id}>
+                                    {opt.nombre}
+                                  </option>
+                                ))}
                               </select>
                             )}
                           />
@@ -295,10 +231,7 @@ export default function ActaTabsForm({
                             control={control}
                             name={`${baseName}.categoria_padron_id`}
                             render={({ field }) => (
-                              <select
-                                {...field}
-                                className="w-full border rounded-lg px-3 py-1"
-                              >
+                              <select {...field} className="w-full border rounded-lg px-3 py-1">
                                 <option value="">Seleccione</option>
                                 {padrones?.categorias?.map((opt: any) => (
                                   <option key={opt.id} value={opt.id}>
@@ -315,11 +248,7 @@ export default function ActaTabsForm({
 
                   {/* Acciones */}
                   <td className="p-2">
-                    <button
-                      type="button"
-                      onClick={() => removeRow(index)}
-                      className="text-red-500 hover:text-red-700 px-2 py-1 rounded"
-                    >
+                    <button type="button" onClick={() => removeRow(index)} className="text-red-500 hover:text-red-700 px-2 py-1 rounded">
                       Eliminar
                     </button>
                   </td>
@@ -332,11 +261,7 @@ export default function ActaTabsForm({
 
       {/* Botón para agregar fila */}
       <div className="mt-4">
-        <button
-          type="button"
-          onClick={addRow}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
+        <button type="button" onClick={addRow} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
           + Agregar Fila
         </button>
       </div>
