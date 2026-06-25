@@ -9,8 +9,6 @@ export const onSubmitAlta = async (
   nav: any
 ) => {
   try {
-    console.log('formData', formData)
-    // return;
 
     formData.padrones = formData.Padrones
     formData.infractores = formData.Infractores
@@ -30,14 +28,8 @@ export const onSubmitAlta = async (
       ? new Date(formData.fecha_notificado).toISOString().split('T')[0]
       : null
 
-    // formData.fecha_labrada = '2026-05-19 00:00:00';
-    // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
-    // formData.fecha_labrada = new Date(formData.fecha_labrada).toLocaleDateString();
-
     const resp = await axios().post('/registrar_acta', formData)
     const { data, error } = resp.data
-
-    console.log('data', data)
 
     if (!data) throw new Error('Error al registrar el acta')
 
@@ -59,10 +51,6 @@ export const getDatosInicialesActa = async (
     const resp = await axios().get('/datos_acta')
     const { data, error } = resp.data
 
-    console.log('data', data)
-
-    // return;
-
     if (!data) throw new Error('Error al obtener los datos iniciales')
 
     setDatosIniciales(data)
@@ -80,11 +68,6 @@ export const getActas = async (setActas: any, setIsLoading: any) => {
     const resp = await axios().get('actas')
     const { data, error } = resp.data
 
-    console.log('resp', resp)
-    console.log('data', data)
-
-    // return;
-
     if (!data) throw new Error('Error al obtener las actas')
 
     setActas(data.data)
@@ -101,8 +84,6 @@ export const getActa = async (id: any, setActa: any, setIsLoading: any) => {
 
     const resp = await axios().get(`actas/${id}`)
     const { data, error } = resp.data
-
-    console.log('data', data)
 
     if (!data) throw new Error('Error al obtener el acta')
 

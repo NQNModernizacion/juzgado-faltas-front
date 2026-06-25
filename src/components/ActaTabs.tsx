@@ -1,46 +1,17 @@
 import { useState } from 'react'
-import { Control, useFieldArray, Controller } from 'react-hook-form'
+import { useFieldArray, Controller } from 'react-hook-form'
 import SelectSearch from '@/screens/PanelAdmin/components/SelectSearch'
 
-type TabType = 'Padrones' | 'Infractores' | 'Infracciones'
+type TabType = 'Padrones' | 'Infractores' | 'Infracciones';
 
-type Row = {
-  tipo_id: string
-  categoria_padron_id?: string
-  categoria_infractor_id?: string
-  identificacion?: string
-  nombre: string
-  documento?: string
-  observaciones?: string
-}
-
-interface FormValues {
-  Padrones: Row[]
-  Infractores: Row[]
-  Infracciones: Row[]
-}
-
-interface Props {
-  control: Control<FormValues>
-}
 
 const tabs: TabType[] = ['Padrones', 'Infractores', 'Infracciones']
 
-let tipoOptions: any = [
-  // { label: "Zoonosis", value: "zoonosis", tab: "Padrones" },
-  // { label: "Inmueble", value: "inmueble", tab: "Padrones" },
-  // { label: "DNI", value: "dni", tab: "Infractores" },
-  // { label: "CUIT", value: "cuit", tab: "Infractores" },
-]
+let tipoOptions: any = [];
 
 export default function ActaTabsForm({ control, infractores, padrones, infracciones }: any) {
-  console.log('infractores', infractores)
 
-  const [activeTab, setActiveTab] = useState<TabType>('Padrones')
-  const [filteredTipoOptions, setFilteredTipoOptions] = useState([
-    { label: 'Zoonosis', value: 'zoonosis', tab: 'Padrones' },
-    { label: 'Inmueble', value: 'inmueble', tab: 'Padrones' },
-  ])
+  const [activeTab, setActiveTab] = useState<TabType>('Padrones');
 
   const padronesArray = useFieldArray({
     control,
@@ -96,10 +67,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
           <button
             key={tab}
             type="button"
-            onClick={() => {
-              setActiveTab(tab)
-              // setFilteredTipoOptions(tipoOptions.filter(opt => opt.tab === tab));
-            }}
+            onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500'}`}
           >
             {tab === 'Infractores' ? 'Imputados' : tab}
@@ -268,136 +236,3 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
     </div>
   )
 }
-// }
-
-// interface Props {
-//   control: Control<FormValues>;
-// }
-
-// const tabs: TabType[] = ["Padrones", "Infractores", "Infracciones"];
-
-// export default function ActaTabsForm({ control }: Props) {
-//   const [activeTab, setActiveTab] = useState<TabType>("Padrones");
-
-//   // ⚠️ Mejor usar 3 arrays separados (más estable)
-//   const padronesArray = useFieldArray({
-//     control,
-//     name: "Padrones",
-//   });
-
-//   const infractoresArray = useFieldArray({
-//     control,
-//     name: "Infractores",
-//   });
-
-//   const infraccionesArray = useFieldArray({
-//     control,
-//     name: "Infracciones",
-//   });
-
-//   const getCurrentArray = () => {
-//     switch (activeTab) {
-//       case "Padrones":
-//         return padronesArray;
-//       case "Infractores":
-//         return infractoresArray;
-//       case "Infracciones":
-//         return infraccionesArray;
-//     }
-//   };
-
-//   const { fields } = getCurrentArray();
-
-//   return (
-//     <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-
-//       {/* Tabs */}
-//       <div className="flex border-b mb-4">
-//         {tabs.map((tab) => (
-//           <button
-//             key={tab}
-//             type="button"
-//             onClick={() => setActiveTab(tab)}
-//             className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab
-//                 ? "border-red-400 text-red-500"
-//                 : "border-transparent text-gray-500"
-//               }`}
-//           >
-//             {tab}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* Tabla */}
-//       <div className="overflow-x-auto">
-//         <table className="w-full text-sm">
-
-//           <thead>
-//             <tr className="text-left border-b text-gray-600">
-//               <th className="p-2">Tipo</th>
-//               <th className="p-2">Identificación</th>
-//               <th className="p-2">Nombre</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {fields.map((field, index) => (
-//               <tr key={field.id} className="border-b">
-
-//                 <td className="p-2">
-//                   <SelectField
-//                     name={`${activeTab}.${index}.tipo`}
-//                     control={control}
-//                     options={[
-//                       { value: 1, label: "Zoonosis" },
-//                       { value: 2, label: "Inmuebles" },
-//                       { value: 3, label: "Comercios" },
-//                     ]}
-//                   />
-//                   <Controller
-//                     control={control}
-//                     name={`${activeTab}.${index}.tipo`}
-//                     render={({ field }) => (
-//                       <input
-//                         {...field}
-//                         className="w-full border rounded-lg px-3 py-1"
-//                       />
-//                     )}
-//                   />
-//                 </td>
-
-//                 <td className="p-2">
-//                   <Controller
-//                     control={control}
-//                     name={`${activeTab}.${index}.identificacion`}
-//                     render={({ field }) => (
-//                       <input
-//                         {...field}
-//                         className="w-full border rounded-lg px-3 py-1"
-//                       />
-//                     )}
-//                   />
-//                 </td>
-
-//                 <td className="p-2">
-//                   <Controller
-//                     control={control}
-//                     name={`${activeTab}.${index}.nombre`}
-//                     render={({ field }) => (
-//                       <input
-//                         {...field}
-//                         className="w-full border rounded-lg px-3 py-1"
-//                       />
-//                     )}
-//                   />
-//                 </td>
-
-//               </tr>
-//             ))}
-//           </tbody>
-
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }

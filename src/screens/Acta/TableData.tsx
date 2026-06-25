@@ -1,5 +1,4 @@
 export const TableData = (data: any, nav: any) => {
-  console.log('data table', data)
   const columns = [
     {
       field: 'id',
@@ -58,53 +57,6 @@ export const TableData = (data: any, nav: any) => {
       minWidth: 1,
       flex: 0.5,
     },
-    // {
-    //     field: "fecha_labrada",
-    //     headerName: "Fecha Labrada",
-    //     minWidth: 100,
-    //     flex: 1,
-    // },
-
-    // {
-    //     field: "estado",
-    //     headerName: "Estado",
-    //     minWidth: 100,
-    //     flex: 1,
-    //     renderCell: (params: any) => {
-
-    //         let clase =
-    //             "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-blue-500";
-
-    //         if (params.row.estado.id === 21)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-blue-500";
-    //         if (params.row.estado.id === 19)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-orange-500";
-    //         if (params.row.estado.id === 20)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-green-500";
-    //         if (params.row.estado.id === 22)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-red-500";
-    //         if (params.row.estado.id === 23)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-orange-500";
-    //         if (params.row.estado.id === 24)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-green-500";
-    //         if (params.row.estado.id === 25)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-orange-500";
-    //         if (params.row.estado.id === 26)
-    //             clase =
-    //                 "mb-0 inline-block px-3 py-1 rounded text-xs font-medium text-white bg-blue-500";
-
-    //         return <p className={clase}>{params.row.estado.label}</p>;
-
-    //     },
-    // },
-
     {
       field: 'actions',
       headerName: 'Acciones',

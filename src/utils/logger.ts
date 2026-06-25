@@ -2,7 +2,7 @@ const isDev = import.meta.env.DEV;
 
 export const log = {
   info: (...args: any[]) => {
-    if (isDev) console.info(...args);
+    // if (isDev) console.info(...args);
   },
 
   warn: (...args: any[]) => {

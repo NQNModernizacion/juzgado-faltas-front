@@ -170,7 +170,7 @@ export const VisualizarActa = () => {
                         ]}
                       />
                       <SelectField
-                        label="Estado"
+                        label="Datos Adic."
                         name="estado_acta_id"
                         control={control}
                         options={datosIniciales?.combos?.estado_acta?.map(
@@ -234,16 +234,6 @@ export const VisualizarActa = () => {
                       )}
                       error={errors.ley_id}
                     />
-                    {/* <SelectField
-                      label="Desestimada"
-                      name="desestimada"
-                      control={control}
-                      options={[
-                        { value: 1, label: 'Si' },
-                        { value: 2, label: 'No' },
-                      ]}
-                      error={errors.desestimada}
-                    /> */}
                   </div>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow">
@@ -347,12 +337,7 @@ export const VisualizarActa = () => {
                       label="Fecha de Carga"
                       type="date"
                     />
-                    {/* <RHFInput
-                      control={control}
-                      name="fecha_notificado"
-                      label="Fecha Notificado"
-                      type="date"
-                    /> */}
+                   
                   </div>
                 </div>
 

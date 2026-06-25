@@ -12,8 +12,6 @@ import {
   FormFooter,
   FormSection,
   RHFInput,
-  SelectBase,
-  TextareaBase,
 } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -168,10 +166,6 @@ export const AltaActa = () => {
                   value: oficina.id,
                   label: oficina.descripcion,
                 }))}
-                // options={[
-                //     { value: 1, label: "Transito" },
-                //     { value: 2, label: "Comercio" },
-                // ]}
                 error={errors.oficina_id}
               />
 
@@ -187,7 +181,7 @@ export const AltaActa = () => {
                   name="fecha_carga"
                   label="Fecha de Carga"
                   type="date"
-                  // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
+                // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
                 />
               </div>
 
@@ -198,11 +192,6 @@ export const AltaActa = () => {
                 options={datosIniciales?.combos?.tipos_acta?.map(
                   (tipo: any) => ({ value: tipo.id, label: tipo.nombre })
                 )}
-                // options={[
-                //     { value: 1, label: "Limpieza Urbana" },
-                //     { value: 2, label: "Transporte" },
-                //     { value: 3, label: "Otro" },
-                // ]}
                 error={errors.tipo_id}
               />
               <SelectField
@@ -213,10 +202,6 @@ export const AltaActa = () => {
                   value: sub.id,
                   label: sub.nombre,
                 }))}
-                // options={[
-                //     { value: 1, label: "Centro Carga Acta" },
-                //     { value: 2, label: "Tribunal Faltas" },
-                // ]}
                 error={errors.sub_tipo_id}
               />
               <SelectField
@@ -227,10 +212,6 @@ export const AltaActa = () => {
                   value: ley.id,
                   label: ley.nombre,
                 }))}
-                // options={[
-                //     { value: 1, label: "Ordenanza 8833" },
-                //     { value: 2, label: "Ley 12018" },
-                // ]}
                 error={errors.ley_id}
               />
             </FormSection>
@@ -246,17 +227,9 @@ export const AltaActa = () => {
                   value: calle.id,
                   label: calle.nombre,
                 }))}
-                // options={[
-                //   { value: 1, label: 'Calle 1' },
-                //   { value: 2, label: 'Calle 2' },
-                // ]}
                 error={errors.calle_id}
               />
-              {/* <RHFInput
-                            control={control}
-                            name="codigo_calle"
-                            label="Código de la Calle"
-                        /> */}
+
               <SelectField
                 label="Cruce de Calles"
                 name="cruce_id"
@@ -284,7 +257,7 @@ export const AltaActa = () => {
                 />
 
                 <SelectField
-                  label="Estado"
+                  label="Datos Adic."
                   name="estado_acta_id"
                   control={control}
                   options={datosIniciales?.combos?.estado_acta?.map(
@@ -296,37 +269,7 @@ export const AltaActa = () => {
                   error={errors.estado_acta_id}
                 />
               </div>
-              {/* <RHFInput
-                            control={control}
-                            name="estado"
-                            label="Estado"
-                        /> */}
-              {/* <RHFInput
-                            control={control}
-                            name="fecha_estado"
-                            label="Fecha del Estado"
-                            type="date"
-                        /> */}
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* <RHFInput
-                  control={control}
-                  name="fecha_notificado"
-                  label="Fecha Notificado"
-                  type="date"
-                />
-
-                <SelectField
-                  label="Desestimada"
-                  name="desestimada"
-                  control={control}
-                  options={[
-                    { value: 1, label: 'Si' },
-                    { value: 2, label: 'No' },
-                  ]}
-                  error={errors.desestimada}
-                /> */}
-              </div>
 
               <div className="mt-2">
                 <Controller
@@ -345,18 +288,6 @@ export const AltaActa = () => {
                 />
               </div>
 
-              {/* <SelectField
-                            label="Desestimada"
-                            control={control}
-                            options={opciones}
-                        // error={errors.es_desestimada}
-                        /> */}
-
-              {/* <SelectBase
-                            control={control}
-                            label="desestimada"
-                            options={opciones}
-                        /> */}
             </FormSection>
           </div>
 
@@ -400,17 +331,6 @@ export const AltaActa = () => {
             </ButtonBase>
           </FormFooter>
 
-          {/* <div className="flex justify-end mt-4">
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`w-full md:w-auto px-6 py-2 rounded-md font-semibold text-white bg-blue-800 hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                        {"Grabar Acta"}
-
-                    </button>
-
-                </div> */}
         </form>
       )}
     </Container>
