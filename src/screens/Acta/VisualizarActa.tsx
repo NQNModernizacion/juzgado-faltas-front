@@ -66,19 +66,12 @@ export const VisualizarActa = () => {
     }
   }, [acta, reset])
 
-  const onSubmit = (data: any) => {
-    console.log('Acta modificada:', data)
-    // Aquí irá la lógica para guardar los cambios
-  }
-
   return (
     <Container title={'Visualizar Acta'}
       linkBack="#/acta/listado"
       backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />
       }>
-      {isLoading ? (
-        <MuniSpinner file="muniexpress.svg" />
-      ) : acta ? (
+      {acta ? (
         <>
           <BannerAgrupacion
             actaId={id}
@@ -87,7 +80,6 @@ export const VisualizarActa = () => {
             setIsLoadingGlobal={setIsLoading}
           />
           <form onSubmit={handleSubmit(
-            // (formData) => console.log('formData', formData)
             (formData) => editarActa(formData, setIsLoading)
           )} className="space-y-6">
             {/* TABS PRINCIPALES */}
@@ -449,7 +441,8 @@ export const VisualizarActa = () => {
                   </button> */}
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                    disabled={isLoading}
+                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Guardar Cambios
                   </button>
