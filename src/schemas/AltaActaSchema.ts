@@ -103,17 +103,17 @@ const observacion = string().optional();
 
 // Validaciones para filas de arrays
 const baseRowSchema = object().shape({
-  tipo_id: string().optional(),
-  identificacion: string().optional(),
-  nombre: string().optional(),
+  tipo_id: string().required('El tipo es requerido'),
+  identificacion: string().required('La identificación es requerida'),
+  nombre: string().required('El nombre es requerido'),
   categoria_padron_id: string().optional(),
 });
 
 const infractorRowSchema = object().shape({
-  tipo_id: string().optional(),
-  documento: string().optional(),
+  tipo_id: string().required('El tipo es requerido'),
+  documento: string().required('El documento es requerido'),
   identificacion: string().optional(),
-  nombre: string().optional(),
+  nombre: string().required('El nombre es requerido'),
   categoria_infractor_id: string().optional(),
   observaciones: string().optional(),
 });
@@ -121,7 +121,7 @@ const infractorRowSchema = object().shape({
 const infraccionesRowSchema = array()
   .of(
     object().shape({
-      tipo_id: string().optional(),
+      tipo_id: string().required('El tipo es requerido'),
     })
   )
   .min(1, 'Debe ingresar al menos una infracción');
