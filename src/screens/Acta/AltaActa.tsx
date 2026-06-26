@@ -84,7 +84,7 @@ export const AltaActa = () => {
       inspector_1_id: undefined,
       inspector_2_id: undefined,
     },
-    // resolver: yupResolver(AltaActaSchema),
+    resolver: yupResolver(AltaActaSchema),
   })
 
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
@@ -319,6 +319,7 @@ export const AltaActa = () => {
           <FormSection fullWidth className="p-2 mt-2">
             <ActaTabsForm
               control={control}
+              errors={errors}
               infractores={datosIniciales?.combos?.infractores}
               padrones={datosIniciales?.combos?.padrones}
               infracciones={datosIniciales?.combos?.infracciones}

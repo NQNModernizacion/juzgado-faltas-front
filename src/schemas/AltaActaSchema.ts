@@ -76,14 +76,12 @@ const estado_acta_id = number()
   .integer('Debe ser un número entero');
 
 const fecha_notificado = string()
-  // .transform(toDate)
   .optional()
   .typeError('Fecha inválida');
 
 const desestimada = number()
   .transform(toNumber)
-  .required('El campo desestimada es requerido')
-  .oneOf([1, 2], 'Valor inválido')
+  .optional()
   .typeError('El valor debe ser un número')
   .integer('Debe ser un número entero');
 
@@ -99,25 +97,33 @@ const inspector_2_id = number()
   .typeError('El inspector debe ser un número')
   .integer('Debe ser un número entero');
 
+const color = string().optional();
+const caratula = string().optional();
+const observacion = string().optional();
+
 // Validaciones para filas de arrays
 const baseRowSchema = object().shape({
-  tipo_id: string().required('El tipo es requerido'),
+  tipo_id: string().optional(),
   identificacion: string().optional(),
-  nombre: string().required('El nombre es requerido'),
+  nombre: string().optional(),
   categoria_padron_id: string().optional(),
 });
 
 const infractorRowSchema = object().shape({
-  tipo_id: string().required('El tipo es requerido'),
+  tipo_id: string().optional(),
   documento: string().optional(),
   identificacion: string().optional(),
-  nombre: string().required('El nombre es requerido'),
-  categoria_padron_id: string().optional(),
-  observacion: string().optional(),
+  nombre: string().optional(),
+  categoria_infractor_id: string().optional(),
+  observaciones: string().optional(),
 });
 
 const infraccionesRowSchema = array()
-  .of(object().shape({}))
+  .of(
+    object().shape({
+      tipo_id: string().optional(),
+    })
+  )
   .min(1, 'Debe ingresar al menos una infracción');
 
 // Esquema principal
@@ -138,6 +144,9 @@ export const AltaActaSchema = object({
   desestimada,
   inspector_1_id,
   inspector_2_id,
+  color,
+  caratula,
+  observacion,
   Padrones: array().of(baseRowSchema),
   Infractores: array().of(infractorRowSchema),
   Infracciones: infraccionesRowSchema,
