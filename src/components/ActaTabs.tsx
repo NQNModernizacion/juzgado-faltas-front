@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFieldArray, Controller, useWatch, FieldErrors } from 'react-hook-form'
 import SelectSearch from '@/screens/PanelAdmin/components/SelectSearch'
 import { buscarInfractorDni, buscarPadronDni } from '@/services/ActaService'
@@ -20,6 +20,18 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
   const [searchingInfractor, setSearchingInfractor] = useState<Record<number, boolean>>({});
   const padronesValues = useWatch({ control, name: 'Padrones' });
   const infractoresValues = useWatch({ control, name: 'Infractores' });
+
+  useEffect(() => {
+    if (errors) {
+      if (errors.Padrones) {
+        setActiveTab('Padrones');
+      } else if (errors.Infractores) {
+        setActiveTab('Infractores');
+      } else if (errors.Infracciones) {
+        setActiveTab('Infracciones');
+      }
+    }
+  }, [errors]);
 
   const padronesArray = useFieldArray({
     control,
