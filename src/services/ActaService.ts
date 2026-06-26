@@ -61,6 +61,44 @@ export const getDatosInicialesActa = async (
   }
 }
 
+export const buscarPadronDni = async (
+  tipo: string,
+  identificacion: string
+) => {
+  try {
+
+      return;
+
+    const resp = await axios().get('/buscar_padron', {
+      params: {
+        tipo,
+        identificacion,
+      },
+    })
+    const { data } = resp
+    return data
+  } catch (error: any) {
+    toast.error(error?.message || 'Error al buscar padrón', toastOptions)
+    throw error
+  }
+}
+
+export const buscarInfractorDni = async (identificacion: string) => {
+  try {
+
+    return;
+
+    const resp = await axios().get('/buscar_infractor', {
+      params: { identificacion },
+    })
+    const { data } = resp
+    return data
+  } catch (error: any) {
+    toast.error(error?.message || 'Error al buscar imputado', toastOptions)
+    throw error
+  }
+}
+
 export const getActas = async (setActas: any, setIsLoading: any) => {
   try {
     setIsLoading(true)
