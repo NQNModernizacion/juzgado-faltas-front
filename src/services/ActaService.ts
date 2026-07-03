@@ -133,6 +133,46 @@ export const getActa = async (id: any, setActa: any, setIsLoading: any) => {
   }
 }
 
+export const getEstadosProcesalesActa = async (
+  id: any,
+  setEstados: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    const resp = await axios().get(`actas/${id}/estados-procesales`)
+    const data = resp.data.data || resp.data
+
+    if (!data) throw new Error('Error al obtener los estados procesales')
+
+    setEstados(data)
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const getPruebasActa = async (
+  id: any,
+  setPruebas: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    const resp = await axios().get(`actas/${id}/pruebas`)
+    const data = resp.data.data || resp.data
+
+    if (!data) throw new Error('Error al obtener las pruebas')
+
+    setPruebas(data)
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
 export const getMovimientosActa = async (
   id: any,
   setMovimientos: any,
