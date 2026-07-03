@@ -1,5 +1,6 @@
 import ActaTabsForm from '@/components/ActaTabs'
 import { SelectField } from '@/components/Forms/SelectField'
+import { MultiSelectField } from '@/components/Forms/MultiSelectField'
 import ColorSelect from '@/components/Forms/ColorSelect'
 import MuniSpinner from '@/components/MuniSpinner'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
@@ -37,6 +38,7 @@ interface FormValues {
   tipo_id?: number
   sub_tipo_id?: number
   ley_id?: number
+  medida_cautelar_id?: number[]
   lugar?: string
   calle_id?: number
   cruce_id?: string
@@ -56,7 +58,6 @@ const createEmptyRows = () =>
     identificacion: '',
     nombre: '',
     documento: '',
-    observacion: '',
   }))
 
 export const AltaActa = () => {
@@ -84,7 +85,7 @@ export const AltaActa = () => {
       inspector_1_id: undefined,
       inspector_2_id: undefined,
     },
-    resolver: yupResolver(AltaActaSchema),
+    // resolver: yupResolver(AltaActaSchema),
   })
 
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
@@ -214,10 +215,26 @@ export const AltaActa = () => {
                 }))}
                 error={errors.ley_id}
               />
+              
             </FormSection>
 
             {/* LADO DERECHO */}
             <FormSection fullWidth className="p-2">
+
+              
+              <MultiSelectField
+                label="Medida Cautelar"
+                name="medida_cautelar_id"
+                control={control}
+                options={datosIniciales?.combos?.estado_acta?.map(
+                  (medida: any) => ({
+                    value: medida.id,
+                    label: medida.nombre,
+                  })
+                )}
+                error={errors.medida_cautelar_id}
+              />
+
               <RHFInput control={control} name="lugar" label="Lugar" />
               <SelectField
                 label="Calle"
@@ -257,7 +274,7 @@ export const AltaActa = () => {
                 />
 
                 <SelectField
-                  label="Datos Adic."
+                  label="Estado"
                   name="estado_acta_id"
                   control={control}
                   options={datosIniciales?.combos?.estado_acta?.map(
