@@ -1,13 +1,15 @@
-import MuniSpinner from '@/components/MuniSpinner'
 import { editarActa, getActa, getDatosInicialesActa } from '@/services/ActaService'
 import { Container, RHFInput } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { SelectField } from '@/components/Forms/SelectField'
+import { MultiSelectField } from '@/components/Forms/MultiSelectField'
 import ColorSelect from '@/components/Forms/ColorSelect'
 import ActaTabsForm from '@/components/ActaTabs'
 import { MovimientosTab } from './components/MovimientosTab'
+import { EstadoProcesalTab } from './components/EstadoProcesalTab'
+import { PruebasTab } from './components/PruebasTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
@@ -17,7 +19,7 @@ export const VisualizarActa = () => {
   const [acta, setActa] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [datosIniciales, setDatosIniciales] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'info' | 'movimientos' | 'grupo'>(
+  const [activeTab, setActiveTab] = useState<'info' | 'movimientos' | 'estados' | 'pruebas' | 'grupo'>(
     'info'
   )
 
@@ -29,6 +31,7 @@ export const VisualizarActa = () => {
   } = useForm({
     defaultValues: {},
   })
+  const fieldErrors = errors as any
 
   useEffect(() => {
     getActa(id, setActa, setIsLoading)
@@ -47,6 +50,11 @@ export const VisualizarActa = () => {
         fecha_labrada: formatDate(acta.fecha_labrada),
         fecha_carga: formatDate(acta.fecha_carga),
         fecha_notificado: formatDate(acta.fecha_notificado),
+        medida_cautelar_id: Array.isArray(acta.medida_cautelar_id)
+          ? acta.medida_cautelar_id
+          : acta.medida_cautelar_id != null && acta.medida_cautelar_id !== ''
+            ? [acta.medida_cautelar_id]
+            : [],
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
         Infractores: acta.infractores || [],
@@ -103,6 +111,26 @@ export const VisualizarActa = () => {
                   }`}
               >
                 Movimientos
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('estados')}
+                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'estados'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                Estado Procesal
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('pruebas')}
+                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'pruebas'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                Pruebas
               </button>
               {acta.grupo_acta_id && (
                 <button
@@ -170,7 +198,7 @@ export const VisualizarActa = () => {
                         ]}
                       />
                       <SelectField
-                        label="Datos Adic."
+                        label="Estado"
                         name="estado_acta_id"
                         control={control}
                         options={datosIniciales?.combos?.estado_acta?.map(
@@ -179,21 +207,22 @@ export const VisualizarActa = () => {
                             label: estado.nombre,
                           })
                         )}
-                        error={errors.estado_acta_id}
+                        error={fieldErrors.estado_acta_id}
                       />
                     </div>
-                    <SelectField
-                      label="Oficina"
-                      name="oficina_id"
+                    <MultiSelectField
+                      label="Medida Cautelar"
+                      name="medida_cautelar_id"
                       control={control}
-                      options={datosIniciales?.oficinas?.map(
-                        (oficina: any) => ({
-                          value: oficina.id,
-                          label: oficina.descripcion,
+                      options={datosIniciales?.combos?.estado_acta?.map(
+                        (medida: any) => ({
+                          value: medida.id,
+                          label: medida.nombre,
                         })
                       )}
-                      error={errors.oficina_id}
+                      error={fieldErrors.medida_cautelar_id}
                     />
+
                   </div>
                 </div>
 
@@ -208,7 +237,7 @@ export const VisualizarActa = () => {
                       options={datosIniciales?.combos?.tipos_acta?.map(
                         (tipo: any) => ({ value: tipo.id, label: tipo.nombre })
                       )}
-                      error={errors.tipo_id}
+                      error={fieldErrors.tipo_id}
                     />
                     <SelectField
                       label="Subtipo de Acta"
@@ -220,7 +249,7 @@ export const VisualizarActa = () => {
                           label: sub.nombre,
                         })
                       )}
-                      error={errors.sub_tipo_id}
+                      error={fieldErrors.sub_tipo_id}
                     />
                     <SelectField
                       label="Ley"
@@ -232,7 +261,19 @@ export const VisualizarActa = () => {
                           label: ley.nombre,
                         })
                       )}
-                      error={errors.ley_id}
+                      error={fieldErrors.ley_id}
+                    />
+                    <SelectField
+                      label="Oficina"
+                      name="oficina_id"
+                      control={control}
+                      options={datosIniciales?.oficinas?.map(
+                        (oficina: any) => ({
+                          value: oficina.id,
+                          label: oficina.descripcion,
+                        })
+                      )}
+                      error={fieldErrors.oficina_id}
                     />
                   </div>
                 </div>
@@ -299,7 +340,7 @@ export const VisualizarActa = () => {
                             label: juez.nombre,
                           })
                         )}
-                      error={errors.juez_subrogante_id}
+                      error={fieldErrors.juez_subrogante_id}
                     />
 
                     <SelectField
@@ -315,7 +356,7 @@ export const VisualizarActa = () => {
                           value: secretaria.id,
                           label: secretaria.descripcion,
                         }))}
-                      error={errors.secretaria_subrogante_id}
+                      error={fieldErrors.secretaria_subrogante_id}
                     />
 
                   </div>
@@ -337,7 +378,7 @@ export const VisualizarActa = () => {
                       label="Fecha de Carga"
                       type="date"
                     />
-                   
+
                   </div>
                 </div>
 
@@ -356,7 +397,7 @@ export const VisualizarActa = () => {
                           label: ley.nombre,
                         })
                       )}
-                      error={errors.calle_id}
+                      error={fieldErrors.calle_id}
                     />
                     <SelectField
                       label="Cruce de Calle"
@@ -368,7 +409,7 @@ export const VisualizarActa = () => {
                           label: ley.nombre,
                         })
                       )}
-                      error={errors.cruce_id}
+                      error={fieldErrors.cruce_id}
                     />
                   </div>
                 </div>
@@ -387,7 +428,7 @@ export const VisualizarActa = () => {
                           label: inspector.nombre,
                         })
                       )}
-                      error={errors.inspector_1_id}
+                      error={fieldErrors.inspector_1_id}
                     />
                     <SelectField
                       label="2° Inspector"
@@ -399,7 +440,7 @@ export const VisualizarActa = () => {
                           label: inspector.nombre,
                         })
                       )}
-                      error={errors.inspector_2_id}
+                      error={fieldErrors.inspector_2_id}
                     />
                   </div>
                 </div>
@@ -441,6 +482,14 @@ export const VisualizarActa = () => {
                 oficinas={datosIniciales?.combos?.oficinas_internas || []}
                 setIsLoadingGlobal={setIsLoading}
               />
+            )}
+
+            {activeTab === 'estados' && (
+              <EstadoProcesalTab actaId={id} />
+            )}
+
+            {activeTab === 'pruebas' && (
+              <PruebasTab actaId={id} />
             )}
 
             {activeTab === 'grupo' && (
