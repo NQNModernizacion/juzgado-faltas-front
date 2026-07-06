@@ -44,3 +44,7 @@ package-lock.json
 
 *.zip
 src.zip
+
+.agents
+agents.md
+skills-lock.json
