@@ -13,6 +13,7 @@ interface SelectFieldProps {
   options: Option[];
   error?: FieldError;
   disabled?: boolean;
+  onChange?: (value: string) => void;
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -22,6 +23,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   options,
   error,
   disabled = false,
+  onChange,
 }) => {
   return (
     <div className="w-full">
@@ -37,6 +39,10 @@ export const SelectField: React.FC<SelectFieldProps> = ({
             {...field}
             disabled={disabled}
             className="mx-select"
+            onChange={(e) => {
+              field.onChange(e);
+              onChange?.(e.target.value);
+            }}
           >
             <option value="">Seleccione una opción</option>
 
