@@ -70,7 +70,6 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
       documento: '',
       categoria_padron_id: '',
       categoria_infractor_id: '',
-      observaciones: '',
     }
     getCurrentArray().append(emptyRow)
   }
@@ -160,7 +159,6 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
               {activeTab === 'Padrones' && <th className="p-1">Identificación</th>}
               {activeTab !== 'Infracciones' && <th className="p-1">Nombre</th>}
-              {activeTab === 'Infractores' && <th className="p-1">Observaciones</th>}
               {activeTab === 'Infractores' && <th className="p-1">Categoria</th>}
               {activeTab === 'Padrones' && <th className="p-1">Categoria</th>}
               <th className="p-1">Acciones</th>
@@ -321,26 +319,6 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                           )
                         }} />
                       </td>
-
-                      {activeTab === 'Infractores' && (
-                        <td className="p-1">
-                          <Controller
-                            control={control}
-                            name={`${baseName}.observaciones`}
-                            render={({ field }) => {
-                              const fieldError = errors?.[activeTab]?.[index]?.observaciones
-                              return (
-                                <div>
-                                  <textarea {...field} className={`w-full border rounded-lg px-3 py-1 ${fieldError ? 'border-red-500' : ''}`} rows={2} />
-                                  {fieldError && (
-                                    <p className="text-red-500 text-xs mt-1">{fieldError.message}</p>
-                                  )}
-                                </div>
-                              )
-                            }}
-                          />
-                        </td>
-                      )}
 
                       {activeTab === 'Infractores' && (
                         <td className="p-1">
