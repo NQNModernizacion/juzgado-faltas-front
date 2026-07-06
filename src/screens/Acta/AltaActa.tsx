@@ -3,6 +3,7 @@ import { SelectField } from '@/components/Forms/SelectField'
 import { MultiSelectField } from '@/components/Forms/MultiSelectField'
 import ColorSelect from '@/components/Forms/ColorSelect'
 import MuniSpinner from '@/components/MuniSpinner'
+import { COLOR_OPTIONS } from '@/config/actaOptions'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
 import { AltaActaSchema } from '@/schemas/AltaActaSchema'
 import { getDatosInicialesActa, onSubmitAlta } from '@/services/ActaService'
@@ -91,32 +92,36 @@ export const AltaActa = () => {
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
 
   const inspectorOptions = useMemo(() => {
-    const inspectors = datosIniciales?.combos?.inspectores ?? []
+    const inspectors: any[] = datosIniciales?.combos?.inspectores ?? []
+    const result: { value: any; label: string }[] = []
+    const noFilter =
+      selectedOfficeId === undefined || selectedOfficeId === ''
 
-    if (selectedOfficeId === undefined || selectedOfficeId === '') {
-      return inspectors.map((inspector: any) => ({
-        value: inspector.id,
-        label: inspector.nombre,
-      }))
+    for (const inspector of inspectors) {
+      if (
+        noFilter ||
+        String(inspector.oficina_id) === String(selectedOfficeId)
+      ) {
+        result.push({ value: inspector.id, label: inspector.nombre })
+      }
     }
-
-    return inspectors
-      .filter(
-        (inspector: any) =>
-          String(inspector.oficina_id) === String(selectedOfficeId)
-      )
-      .map((inspector: any) => ({
-        value: inspector.id,
-        label: inspector.nombre,
-      }))
+    return result
   }, [datosIniciales?.combos?.inspectores, selectedOfficeId])
 
-  useEffect(() => {
-    if (selectedOfficeId !== undefined) {
-      setValue('inspector_1_id', undefined)
-      setValue('inspector_2_id', undefined)
+  const opciones = useMemo(() => {
+    const mapOptions = (items: any[] = []) =>
+      items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion }))
+
+    return {
+      oficinas: mapOptions(datosIniciales?.oficinas),
+      tiposActa: mapOptions(datosIniciales?.combos?.tipos_acta),
+      subTipos: mapOptions(datosIniciales?.combos?.sub_tipos),
+      leyes: mapOptions(datosIniciales?.combos?.leyes),
+      medidasCautelares: mapOptions(datosIniciales?.combos?.medida_cautelar_acta),
+      calles: mapOptions(datosIniciales?.combos?.calles),
+      estadosActa: mapOptions(datosIniciales?.combos?.estados_procesales),
     }
-  }, [selectedOfficeId, setValue])
+  }, [datosIniciales])
 
   useEffect(() => {
     getDatosInicialesActa(setIsLoading, setDatosIniciales)
@@ -163,11 +168,12 @@ export const AltaActa = () => {
                 label="Oficina"
                 name="oficina_id"
                 control={control}
-                options={datosIniciales?.oficinas?.map((oficina: any) => ({
-                  value: oficina.id,
-                  label: oficina.descripcion,
-                }))}
+                options={opciones.oficinas}
                 error={errors.oficina_id}
+                onChange={() => {
+                  setValue('inspector_1_id', undefined)
+                  setValue('inspector_2_id', undefined)
+                }}
               />
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -190,29 +196,21 @@ export const AltaActa = () => {
                 label="Tipo de Acta"
                 name="tipo_id"
                 control={control}
-                options={datosIniciales?.combos?.tipos_acta?.map(
-                  (tipo: any) => ({ value: tipo.id, label: tipo.nombre })
-                )}
+                options={opciones.tiposActa}
                 error={errors.tipo_id}
               />
               <SelectField
                 label="Subtipo de Acta"
                 name="sub_tipo_id"
                 control={control}
-                options={datosIniciales?.combos?.sub_tipos?.map((sub: any) => ({
-                  value: sub.id,
-                  label: sub.nombre,
-                }))}
+                options={opciones.subTipos}
                 error={errors.sub_tipo_id}
               />
               <SelectField
                 label="Ley"
                 name="ley_id"
                 control={control}
-                options={datosIniciales?.combos?.leyes?.map((ley: any) => ({
-                  value: ley.id,
-                  label: ley.nombre,
-                }))}
+                options={opciones.leyes}
                 error={errors.ley_id}
               />
               
@@ -226,12 +224,7 @@ export const AltaActa = () => {
                 label="Medida Cautelar"
                 name="medida_cautelar_id"
                 control={control}
-                options={datosIniciales?.combos?.estado_acta?.map(
-                  (medida: any) => ({
-                    value: medida.id,
-                    label: medida.nombre,
-                  })
-                )}
+                options={opciones.medidasCautelares}
                 error={errors.medida_cautelar_id}
               />
 
@@ -240,10 +233,7 @@ export const AltaActa = () => {
                 label="Calle"
                 name="calle_id"
                 control={control}
-                options={datosIniciales?.combos?.calles?.map((calle: any) => ({
-                  value: calle.id,
-                  label: calle.nombre,
-                }))}
+                options={opciones.calles}
                 error={errors.calle_id}
               />
 
@@ -251,10 +241,7 @@ export const AltaActa = () => {
                 label="Cruce de Calles"
                 name="cruce_id"
                 control={control}
-                options={datosIniciales?.combos?.calles?.map((calle: any) => ({
-                  value: calle.id,
-                  label: calle.nombre,
-                }))}
+                options={opciones.calles}
                 error={errors.cruce_id}
               />
 
@@ -263,26 +250,14 @@ export const AltaActa = () => {
                   label="Color"
                   name="color"
                   control={control}
-                  options={[
-                    { value: '#E53935', label: 'Rojo' },
-                    { value: '#1E88E5', label: 'Azul' },
-                    { value: '#43A047', label: 'Verde' },
-                    { value: '#FDD835', label: 'Amarillo' },
-                    { value: '#8E24AA', label: 'Morado' },
-                    { value: '#FB8C00', label: 'Naranja' },
-                  ]}
+                  options={COLOR_OPTIONS}
                 />
 
                 <SelectField
                   label="Estado"
                   name="estado_acta_id"
                   control={control}
-                  options={datosIniciales?.combos?.estado_acta?.map(
-                    (estado: any) => ({
-                      value: estado.id,
-                      label: estado.nombre,
-                    })
-                  )}
+                  options={opciones.estadosActa}
                   error={errors.estado_acta_id}
                 />
               </div>
