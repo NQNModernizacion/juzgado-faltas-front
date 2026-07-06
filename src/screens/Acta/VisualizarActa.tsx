@@ -1,12 +1,13 @@
 import { editarActa, getActa, getDatosInicialesActa } from '@/services/ActaService'
 import { Container, RHFInput } from '@nqnmodernizacion/muni-ui'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { SelectField } from '@/components/Forms/SelectField'
 import { MultiSelectField } from '@/components/Forms/MultiSelectField'
 import ColorSelect from '@/components/Forms/ColorSelect'
 import ActaTabsForm from '@/components/ActaTabs'
+import { COLOR_OPTIONS } from '@/config/actaOptions'
 import { MovimientosTab } from './components/MovimientosTab'
 import { EstadoProcesalTab } from './components/EstadoProcesalTab'
 import { PruebasTab } from './components/PruebasTab'
@@ -14,24 +15,170 @@ import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
 
+interface SelectOption {
+  id: number
+  nombre?: string
+  descripcion?: string
+}
+
+interface SecretariaCombo {
+  id: number
+  secretaria?: string
+  descripcion?: string
+}
+
+interface DatosActaResponse {
+  oficinas?: SelectOption[]
+  combos?: {
+    estados_procesales?: SelectOption[]
+    tipos_acta?: SelectOption[]
+    sub_tipos?: SelectOption[]
+    leyes?: SelectOption[]
+    calles?: SelectOption[]
+    inspectores?: SelectOption[]
+    jueces?: SelectOption[]
+    secretarias?: SecretariaCombo[]
+    oficinas_internas?: unknown[]
+    infractores?: unknown[]
+    padrones?: unknown[]
+    infracciones?: unknown[],
+    medida_cautelar_acta?: SelectOption[]
+  }
+}
+
+interface Acta {
+  id: number | string
+  numero_acta?: string
+  year?: string
+  caratula?: string
+  color?: string
+  estado_acta_id?: number
+  medida_cautelar_id?: number | number[]
+  tipo_id?: number
+  sub_tipo_id?: number
+  ley_id?: number
+  oficina_id?: number
+  fecha_labrada?: string
+  fecha_carga?: string
+  fecha_notificado?: string
+  lugar?: string
+  calle_id?: number
+  cruce_id?: string
+  inspector_1_id?: number
+  inspector_2_id?: number
+  grupo_acta_id?: number
+  grupo?: unknown
+  juzgado?: { descripcion?: string } | null
+  secretaria?: { codigo?: string; descripcion?: string } | null
+  juez?: { codigo?: string; nombre?: string } | null
+  ultimo_movimiento?: {
+    oficina_destino?: { codigo?: string; descripcion?: string }
+  } | null
+  padrones?: any[]
+  infractores?: any[]
+  infracciones?: any[]
+}
+
+interface VisualizarActaValues {
+  id?: number | string
+  numero_acta?: string
+  year?: string
+  caratula?: string
+  color?: string
+  estado_acta_id?: number
+  medida_cautelar_id?: number[]
+  tipo_id?: number
+  sub_tipo_id?: number
+  ley_id?: number
+  oficina_id?: number
+  fecha_labrada?: string
+  fecha_carga?: string
+  fecha_notificado?: string
+  lugar?: string
+  calle_id?: number
+  cruce_id?: string
+  inspector_1_id?: number
+  inspector_2_id?: number
+  juzgado?: string
+  secretaria_codigo?: string
+  secretaria_descripcion?: string
+  juez_codigo?: string
+  juez_nombre?: string
+  oficina_interna_codigo?: string
+  oficina_interna_descripcion?: string
+  juez_subrogante_id?: number
+  secretaria_subrogante_id?: number
+  Padrones?: any[]
+  Infractores?: any[]
+  Infracciones?: any[]
+}
+
+type TabId = 'info' | 'movimientos' | 'estados' | 'pruebas' | 'grupo'
+
+interface TabDef {
+  id: TabId
+  label: string
+  visible?: (acta: Acta) => boolean
+}
+
+const TABS: TabDef[] = [
+  { id: 'info', label: 'Información del Acta' },
+  { id: 'movimientos', label: 'Movimientos' },
+  { id: 'estados', label: 'Estado Procesal' },
+  { id: 'pruebas', label: 'Pruebas' },
+  { id: 'grupo', label: 'Grupo', visible: (acta) => Boolean(acta.grupo_acta_id) },
+]
+
+const TAB_BASE = 'px-6 py-3 font-semibold border-b-2 transition-colors'
+const TAB_ACTIVE = 'border-blue-500 text-blue-600'
+const TAB_INACTIVE = 'border-transparent text-gray-500 hover:text-gray-700'
+
+const formatDate = (value: unknown): string => {
+  if (!value) return ''
+  const date = value instanceof Date ? value : new Date(value as string)
+  return !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''
+}
+
+const mapOptions = (items: SelectOption[] = []) =>
+  items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion ?? '' }))
+
 export const VisualizarActa = () => {
   const { id } = useParams()
-  const [acta, setActa] = useState<any>(null)
+  const [acta, setActa] = useState<Acta | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [datosIniciales, setDatosIniciales] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'info' | 'movimientos' | 'estados' | 'pruebas' | 'grupo'>(
-    'info'
-  )
+  const [datosIniciales, setDatosIniciales] = useState<DatosActaResponse | null>(null)
+  const [activeTab, setActiveTab] = useState<TabId>('info')
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<VisualizarActaValues>({
     defaultValues: {},
   })
-  const fieldErrors = errors as any
+
+
+
+  const opciones = useMemo(() => {
+    const combos = datosIniciales?.combos
+    return {
+      estadosActa: mapOptions(combos?.estados_procesales),
+      medidasCautelares: mapOptions(combos?.medida_cautelar_acta),
+      tiposActa: mapOptions(combos?.tipos_acta),
+      subTipos: mapOptions(combos?.sub_tipos),
+      leyes: mapOptions(combos?.leyes),
+      oficinas: mapOptions(datosIniciales?.oficinas),
+      calles: mapOptions(combos?.calles),
+      inspectores: mapOptions(combos?.inspectores),
+      juecesSubrogantes: (combos?.jueces ?? [])
+        .filter((j) => j.id === 3 || j.id === 4)
+        .map((j) => ({ value: j.id, label: j.nombre ?? '' })),
+      secretariasSubrogantes: (combos?.secretarias ?? [])
+        .filter((s) => s.secretaria === 'Secretaria Subrogante')
+        .map((s) => ({ value: s.id, label: s.descripcion ?? '' })),
+    }
+  }, [datosIniciales])
 
   useEffect(() => {
     getActa(id, setActa, setIsLoading)
@@ -40,11 +187,6 @@ export const VisualizarActa = () => {
 
   useEffect(() => {
     if (acta) {
-      const formatDate = (value: any) => {
-        if (!value) return ''
-        const date = value instanceof Date ? value : new Date(value)
-        return !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''
-      }
       reset({
         ...acta,
         fecha_labrada: formatDate(acta.fecha_labrada),
@@ -52,7 +194,7 @@ export const VisualizarActa = () => {
         fecha_notificado: formatDate(acta.fecha_notificado),
         medida_cautelar_id: Array.isArray(acta.medida_cautelar_id)
           ? acta.medida_cautelar_id
-          : acta.medida_cautelar_id != null && acta.medida_cautelar_id !== ''
+          : acta.medida_cautelar_id != null
             ? [acta.medida_cautelar_id]
             : [],
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
@@ -75,10 +217,11 @@ export const VisualizarActa = () => {
   }, [acta, reset])
 
   return (
-    <Container title={'Visualizar Acta'}
+    <Container
+      title="Visualizar Acta"
       linkBack="#/acta/listado"
-      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />
-      }>
+      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
+    >
       {acta ? (
         <>
           <BannerAgrupacion
@@ -87,63 +230,28 @@ export const VisualizarActa = () => {
             onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)}
             setIsLoadingGlobal={setIsLoading}
           />
-          <form onSubmit={handleSubmit(
-            (formData) => editarActa(formData, setIsLoading)
-          )} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(
+              (formData) => editarActa(formData, setIsLoading)
+            )}
+            className="space-y-6"
+          >
             {/* TABS PRINCIPALES */}
             <div className="flex border-b">
-              <button
-                type="button"
-                onClick={() => setActiveTab('info')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'info'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Información del Acta
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('movimientos')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'movimientos'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Movimientos
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('estados')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'estados'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Estado Procesal
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('pruebas')}
-                className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'pruebas'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Pruebas
-              </button>
-              {acta.grupo_acta_id && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('grupo')}
-                  className={`px-6 py-3 font-semibold border-b-2 transition-colors ${activeTab === 'grupo'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                  Grupo
-                </button>
-              )}
+              {TABS.filter((t) => !t.visible || t.visible(acta)).map((t) => {
+                const isActive = activeTab === t.id
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setActiveTab(t.id)}
+                    className={`${TAB_BASE} ${isActive ? TAB_ACTIVE : TAB_INACTIVE
+                      }`}
+                  >
+                    {t.label}
+                  </button>
+                )
+              })}
             </div>
 
             {activeTab === 'info' && (
@@ -177,7 +285,6 @@ export const VisualizarActa = () => {
                       name="year"
                       label="Año del Acta"
                     />
-
                     <RHFInput
                       control={control}
                       name="caratula"
@@ -188,41 +295,23 @@ export const VisualizarActa = () => {
                         label="Color"
                         name="color"
                         control={control}
-                        options={[
-                          { value: '#E53935', label: 'Rojo' },
-                          { value: '#1E88E5', label: 'Azul' },
-                          { value: '#43A047', label: 'Verde' },
-                          { value: '#FDD835', label: 'Amarillo' },
-                          { value: '#8E24AA', label: 'Morado' },
-                          { value: '#FB8C00', label: 'Naranja' },
-                        ]}
+                        options={COLOR_OPTIONS}
                       />
                       <SelectField
                         label="Estado"
                         name="estado_acta_id"
                         control={control}
-                        options={datosIniciales?.combos?.estado_acta?.map(
-                          (estado: any) => ({
-                            value: estado.id,
-                            label: estado.nombre,
-                          })
-                        )}
-                        error={fieldErrors.estado_acta_id}
+                        options={opciones.estadosActa}
+                        error={errors.estado_acta_id}
                       />
                     </div>
                     <MultiSelectField
                       label="Medida Cautelar"
                       name="medida_cautelar_id"
                       control={control}
-                      options={datosIniciales?.combos?.estado_acta?.map(
-                        (medida: any) => ({
-                          value: medida.id,
-                          label: medida.nombre,
-                        })
-                      )}
-                      error={fieldErrors.medida_cautelar_id}
+                      options={opciones.medidasCautelares}
+                      error={errors.medida_cautelar_id}
                     />
-
                   </div>
                 </div>
 
@@ -234,49 +323,34 @@ export const VisualizarActa = () => {
                       label="Tipo de Acta"
                       name="tipo_id"
                       control={control}
-                      options={datosIniciales?.combos?.tipos_acta?.map(
-                        (tipo: any) => ({ value: tipo.id, label: tipo.nombre })
-                      )}
-                      error={fieldErrors.tipo_id}
+                      options={opciones.tiposActa}
+                      error={errors.tipo_id}
                     />
                     <SelectField
                       label="Subtipo de Acta"
                       name="sub_tipo_id"
                       control={control}
-                      options={datosIniciales?.combos?.sub_tipos?.map(
-                        (sub: any) => ({
-                          value: sub.id,
-                          label: sub.nombre,
-                        })
-                      )}
-                      error={fieldErrors.sub_tipo_id}
+                      options={opciones.subTipos}
+                      error={errors.sub_tipo_id}
                     />
                     <SelectField
                       label="Ley"
                       name="ley_id"
                       control={control}
-                      options={datosIniciales?.combos?.leyes?.map(
-                        (ley: any) => ({
-                          value: ley.id,
-                          label: ley.nombre,
-                        })
-                      )}
-                      error={fieldErrors.ley_id}
+                      options={opciones.leyes}
+                      error={errors.ley_id}
                     />
                     <SelectField
                       label="Oficina"
                       name="oficina_id"
                       control={control}
-                      options={datosIniciales?.oficinas?.map(
-                        (oficina: any) => ({
-                          value: oficina.id,
-                          label: oficina.descripcion,
-                        })
-                      )}
-                      error={fieldErrors.oficina_id}
+                      options={opciones.oficinas}
+                      error={errors.oficina_id}
                     />
                   </div>
                 </div>
+
+                {/* SECCIÓN: Juzgado y Secretaría */}
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">
                     Juzgado y Secretaría
@@ -324,41 +398,20 @@ export const VisualizarActa = () => {
                       type="text"
                       disabled
                     />
-
                     <SelectField
                       label="Juez Subrogante"
                       name="juez_subrogante_id"
                       control={control}
-                      options={datosIniciales?.combos?.jueces
-                        ?.filter(
-                          (juez: any) =>
-                            juez.id === 3 || juez.id === 4
-                        )
-                        .map(
-                          (juez: any) => ({
-                            value: juez.id,
-                            label: juez.nombre,
-                          })
-                        )}
-                      error={fieldErrors.juez_subrogante_id}
+                      options={opciones.juecesSubrogantes}
+                      error={errors.juez_subrogante_id}
                     />
-
                     <SelectField
                       label="Secretaria subrogante"
                       name="secretaria_subrogante_id"
                       control={control}
-                      options={datosIniciales?.combos?.secretarias
-                        ?.filter(
-                          (secretaria: any) =>
-                            secretaria.secretaria === 'Secretaria Subrogante'
-                        )
-                        .map((secretaria: any) => ({
-                          value: secretaria.id,
-                          label: secretaria.descripcion,
-                        }))}
-                      error={fieldErrors.secretaria_subrogante_id}
+                      options={opciones.secretariasSubrogantes}
+                      error={errors.secretaria_subrogante_id}
                     />
-
                   </div>
                 </div>
 
@@ -378,7 +431,6 @@ export const VisualizarActa = () => {
                       label="Fecha de Carga"
                       type="date"
                     />
-
                   </div>
                 </div>
 
@@ -391,25 +443,15 @@ export const VisualizarActa = () => {
                       label="Calle"
                       name="calle_id"
                       control={control}
-                      options={datosIniciales?.combos?.calles?.map(
-                        (ley: any) => ({
-                          value: ley.id,
-                          label: ley.nombre,
-                        })
-                      )}
-                      error={fieldErrors.calle_id}
+                      options={opciones.calles}
+                      error={errors.calle_id}
                     />
                     <SelectField
                       label="Cruce de Calle"
                       name="cruce_id"
                       control={control}
-                      options={datosIniciales?.combos?.calles?.map(
-                        (ley: any) => ({
-                          value: ley.id,
-                          label: ley.nombre,
-                        })
-                      )}
-                      error={fieldErrors.cruce_id}
+                      options={opciones.calles}
+                      error={errors.cruce_id}
                     />
                   </div>
                 </div>
@@ -422,25 +464,15 @@ export const VisualizarActa = () => {
                       label="Inspector"
                       name="inspector_1_id"
                       control={control}
-                      options={datosIniciales?.combos?.inspectores?.map(
-                        (inspector: any) => ({
-                          value: inspector.id,
-                          label: inspector.nombre,
-                        })
-                      )}
-                      error={fieldErrors.inspector_1_id}
+                      options={opciones.inspectores}
+                      error={errors.inspector_1_id}
                     />
                     <SelectField
                       label="2° Inspector"
                       name="inspector_2_id"
                       control={control}
-                      options={datosIniciales?.combos?.inspectores?.map(
-                        (inspector: any) => ({
-                          value: inspector.id,
-                          label: inspector.nombre,
-                        })
-                      )}
-                      error={fieldErrors.inspector_2_id}
+                      options={opciones.inspectores}
+                      error={errors.inspector_2_id}
                     />
                   </div>
                 </div>
@@ -457,14 +489,6 @@ export const VisualizarActa = () => {
 
                 {/* BOTONES DE ACCIÓN */}
                 <div className="flex justify-end gap-4 mb-6">
-
-                  {/* <button
-                    type="button"
-                    onClick={() => reset(acta)}
-                    className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-semibold"
-                  >
-                    Descartar Cambios
-                  </button> */}
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -484,13 +508,9 @@ export const VisualizarActa = () => {
               />
             )}
 
-            {activeTab === 'estados' && (
-              <EstadoProcesalTab actaId={id} />
-            )}
+            {activeTab === 'estados' && <EstadoProcesalTab actaId={id} />}
 
-            {activeTab === 'pruebas' && (
-              <PruebasTab actaId={id} />
-            )}
+            {activeTab === 'pruebas' && <PruebasTab actaId={id} />}
 
             {activeTab === 'grupo' && (
               <GrupoTab actaId={acta.id} grupo={acta.grupo} />
