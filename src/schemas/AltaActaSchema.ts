@@ -100,6 +100,10 @@ const inspector_2_id = number()
 const color = string().optional();
 const caratula = string().optional();
 const observacion = string().optional();
+const medida_cautelar_id = number()
+  .transform(toNumber)
+  .optional()
+  .typeError('Debe ser un número');
 
 // Validaciones para filas de arrays
 const baseRowSchema = object().shape({
@@ -147,6 +151,7 @@ export const AltaActaSchema = object({
   color,
   caratula,
   observacion,
+  medida_cautelar_id,
   Padrones: array().of(baseRowSchema),
   Infractores: array().of(infractorRowSchema),
   Infracciones: infraccionesRowSchema,
