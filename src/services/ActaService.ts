@@ -374,3 +374,20 @@ export const editarActa = async (
     setIsLoading(false)
   }
 }
+
+export interface CaratulaResponse {
+  data: {
+    type: string
+    file_name: string
+    size: number
+    file: string
+  }
+}
+
+export const getCaratulaActa = async (
+  actaId: string | number
+): Promise<CaratulaResponse> => {
+  const resp = await axios().get(`/generar_caratula/${actaId}`)
+  return resp.data
+}
+
