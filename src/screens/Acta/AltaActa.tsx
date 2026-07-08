@@ -43,7 +43,6 @@ interface FormValues {
   lugar?: string
   calle_id?: number
   cruce_id?: string
-  estado_acta_id?: number
   fecha_notificado?: string
   desestimada?: number
   color?: string
@@ -51,6 +50,7 @@ interface FormValues {
   observacion?: string
   inspector_1_id?: number
   inspector_2_id?: number
+  oficina_destino_id?: number
 }
 
 const createEmptyRows = () =>
@@ -65,6 +65,9 @@ export const AltaActa = () => {
   const [isLoading, setIsLoading] = useState(false)
   const nav = useNavigate()
   const [datosIniciales, setDatosIniciales] = useState<any>(null)
+  const [estadoActaVisual, setEstadoActaVisual] = useState<
+    string | number | undefined
+  >(undefined)
 
   const {
     control,
@@ -85,6 +88,7 @@ export const AltaActa = () => {
       oficina_id: undefined,
       inspector_1_id: undefined,
       inspector_2_id: undefined,
+      oficina_destino_id: undefined,
     },
     // resolver: yupResolver(AltaActaSchema),
   })
@@ -114,6 +118,7 @@ export const AltaActa = () => {
 
     return {
       oficinas: mapOptions(datosIniciales?.oficinas),
+      oficinasInternas: mapOptions(datosIniciales?.combos?.oficinas_internas),
       tiposActa: mapOptions(datosIniciales?.combos?.tipos_acta),
       subTipos: mapOptions(datosIniciales?.combos?.sub_tipos),
       leyes: mapOptions(datosIniciales?.combos?.leyes),
@@ -126,6 +131,12 @@ export const AltaActa = () => {
   useEffect(() => {
     getDatosInicialesActa(setIsLoading, setDatosIniciales)
   }, [])
+
+  useEffect(() => {
+    if (estadoActaVisual === undefined && opciones.estadosActa.length > 0) {
+      setEstadoActaVisual(opciones.estadosActa[0]?.value)
+    }
+  }, [opciones.estadosActa, estadoActaVisual])
 
   return (
     <Container
@@ -253,15 +264,34 @@ export const AltaActa = () => {
                   options={COLOR_OPTIONS}
                 />
 
-                <SelectField
-                  label="Estado"
-                  name="estado_acta_id"
-                  control={control}
-                  options={opciones.estadosActa}
-                  error={errors.estado_acta_id}
-                />
+                <div className="w-full">
+                  <label className="mx-label">Estado</label>
+                  <select
+                    className="mx-select"
+                    disabled
+                    value={estadoActaVisual ?? ''}
+                    onChange={() => {}}
+                  >
+                    <option value="">Seleccione una opción</option>
+                    {opciones.estadosActa?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
+
+              <div className="mt-2">
+                <SelectField
+                  label="Ubicación"
+                  name="oficina_destino_id"
+                  control={control}
+                  options={opciones.oficinasInternas}
+                  error={errors.oficina_destino_id}
+                />
+              </div>
 
               <div className="mt-2">
                 <Controller
@@ -273,7 +303,7 @@ export const AltaActa = () => {
                       <textarea
                         {...field}
                         className="w-full border rounded-lg px-3 py-2"
-                        rows={4}
+                        rows={3}
                       />
                     </div>
                   )}

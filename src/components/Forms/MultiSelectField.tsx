@@ -93,7 +93,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <label className="mx-label">{label}</label>
+      <label className="mx-label mb-1">{label}</label>
 
       <Controller
         name={name}
