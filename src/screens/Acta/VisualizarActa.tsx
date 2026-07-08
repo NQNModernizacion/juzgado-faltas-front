@@ -1,4 +1,4 @@
-import { editarActa, getActa, getDatosInicialesActa, getCaratulaActa } from '@/services/ActaService'
+import { editarActa, getActa, getDatosInicialesActa, getCaratulaActa, postMoverCausa } from '@/services/ActaService'
 import { Container, RHFInput, Modal, ModalHeader, ModalContent } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -40,7 +40,7 @@ interface DatosActaResponse {
     inspectores?: SelectOption[]
     jueces?: SelectOption[]
     secretarias?: SecretariaCombo[]
-    oficinas_internas?: unknown[]
+    oficinas_internas?: SelectOption[]
     infractores?: unknown[]
     padrones?: unknown[]
     infracciones?: unknown[],
@@ -56,6 +56,7 @@ interface Acta {
   color?: string
   estado_acta_id?: number
   medida_cautelar_id?: number | number[]
+  cautelares?: SelectOption[]
   tipo_id?: number
   sub_tipo_id?: number
   ley_id?: number
@@ -110,6 +111,7 @@ interface VisualizarActaValues {
   oficina_interna_descripcion?: string
   juez_subrogante_id?: number
   secretaria_subrogante_id?: number
+  movimiento_destino_id?: number
   Padrones?: any[]
   Infractores?: any[]
   Infracciones?: any[]
@@ -212,6 +214,8 @@ export const VisualizarActa = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<VisualizarActaValues>({
     defaultValues: {},
@@ -228,6 +232,7 @@ export const VisualizarActa = () => {
       subTipos: mapOptions(combos?.sub_tipos),
       leyes: mapOptions(combos?.leyes),
       oficinas: mapOptions(datosIniciales?.oficinas),
+      oficinasInternas: mapOptions(combos?.oficinas_internas),
       calles: mapOptions(combos?.calles),
       inspectores: mapOptions(combos?.inspectores),
       juecesSubrogantes: (combos?.jueces ?? [])
@@ -251,11 +256,9 @@ export const VisualizarActa = () => {
         fecha_labrada: formatDate(acta.fecha_labrada),
         fecha_carga: formatDate(acta.fecha_carga),
         fecha_notificado: formatDate(acta.fecha_notificado),
-        medida_cautelar_id: Array.isArray(acta.medida_cautelar_id)
-          ? acta.medida_cautelar_id
-          : acta.medida_cautelar_id != null
-            ? [acta.medida_cautelar_id]
-            : [],
+        medida_cautelar_id: Array.isArray(acta.cautelares)
+          ? acta.cautelares.map((c) => c.id)
+          : [],
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
         Infractores: acta.infractores || [],
@@ -274,6 +277,19 @@ export const VisualizarActa = () => {
       })
     }
   }, [acta, reset])
+
+  const handleMovimientoRapido = () => {
+    const destino = watch('movimiento_destino_id')
+    if (!destino) return
+    postMoverCausa(
+      { acta_id: id, oficina_id_destino: destino },
+      () => {
+        setValue('movimiento_destino_id', undefined)
+        getActa(id, setActa, setIsLoading)
+      },
+      setIsLoading
+    )
+  }
 
   return (
     <Container
@@ -338,8 +354,21 @@ export const VisualizarActa = () => {
                       )}
                     </button>
                   </div>
+
+                  <div className="gap-4 mb-4">
+                    <MultiSelectField
+                      label="Medida Cautelar"
+                      name="medida_cautelar_id"
+                      control={control}
+                      options={opciones.medidasCautelares}
+                      error={errors.medida_cautelar_id}
+                    />
+
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
                       <RHFInput
                         control={control}
                         disabled
@@ -369,28 +398,47 @@ export const VisualizarActa = () => {
                       name="caratula"
                       label="Carátula"
                     />
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <ColorSelect
-                        label="Color"
-                        name="color"
-                        control={control}
-                        options={COLOR_OPTIONS}
-                      />
-                      <SelectField
-                        label="Estado"
-                        name="estado_acta_id"
-                        control={control}
-                        options={opciones.estadosActa}
-                        error={errors.estado_acta_id}
-                      />
-                    </div>
-                    <MultiSelectField
-                      label="Medida Cautelar"
-                      name="medida_cautelar_id"
+                    <ColorSelect
+                      label="Color"
+                      name="color"
                       control={control}
-                      options={opciones.medidasCautelares}
-                      error={errors.medida_cautelar_id}
+                      options={COLOR_OPTIONS}
                     />
+                    <SelectField
+                      label="Estado"
+                      name="estado_acta_id"
+                      control={control}
+                      options={opciones.estadosActa}
+                      error={errors.estado_acta_id}
+                    />
+                  </div>
+                </div>
+
+                {/* SECCIÓN: Mover Causa */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                  <h3 className="text-lg font-bold mb-4">Mover Causa</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <RHFInput
+                      control={control}
+                      name="oficina_interna_descripcion"
+                      label="Oficina Actual"
+                      disabled
+                    />
+                    <SelectField
+                      label="Oficina Destino"
+                      name="movimiento_destino_id"
+                      control={control}
+                      options={opciones.oficinasInternas}
+                      error={errors.movimiento_destino_id}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleMovimientoRapido}
+                      disabled={isLoading}
+                      className="h-10 px-4 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Confirmar Movimiento
+                    </button>
                   </div>
                 </div>
 
@@ -587,7 +635,13 @@ export const VisualizarActa = () => {
               />
             )}
 
-            {activeTab === 'estados' && <EstadoProcesalTab actaId={id} />}
+            {activeTab === 'estados' && (
+              <EstadoProcesalTab
+                actaId={id}
+                estadosProcesales={opciones.estadosActa}
+                setIsLoadingGlobal={setIsLoading}
+              />
+            )}
 
             {activeTab === 'pruebas' && <PruebasTab actaId={id} />}
 

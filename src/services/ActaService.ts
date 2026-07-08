@@ -140,12 +140,29 @@ export const getEstadosProcesalesActa = async (
 ) => {
   try {
     setIsLoading(true)
-    const resp = await axios().get(`actas/${id}/estados-procesales`)
+    const resp = await axios().get(`actas/${id}/estados_procesales`)
     const data = resp.data.data || resp.data
 
     if (!data) throw new Error('Error al obtener los estados procesales')
 
     setEstados(data)
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const postEstadoProcesal = async (
+  payload: any,
+  onSuccess: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    await axios().post('registrar_estado_procesal', payload)
+    toast.success('Estado procesal registrado correctamente', toastOptions)
+    if (onSuccess) onSuccess()
   } catch (error: any) {
     toast.error(error?.response?.data?.message || error.message, toastOptions)
   } finally {
