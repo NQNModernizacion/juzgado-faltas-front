@@ -1,8 +1,6 @@
 import { editarActa, getActa, getDatosInicialesActa, getCaratulaActa, postMoverCausa } from '@/services/ActaService'
 import { Container, RHFInput, Modal, ModalHeader, ModalContent } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
-import { toastOptions } from '@/config/toast'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { SelectField } from '@/components/Forms/SelectField'
@@ -15,6 +13,7 @@ import { EstadoProcesalTab } from './components/EstadoProcesalTab'
 import { PruebasTab } from './components/PruebasTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
+import { BotonCaratula } from './components/BotonCaratula'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
 
 interface SelectOption {
@@ -43,7 +42,7 @@ interface DatosActaResponse {
     oficinas_internas?: SelectOption[]
     infractores?: unknown[]
     padrones?: unknown[]
-    infracciones?: unknown[],
+    infracciones?: unknown[]
     medida_cautelar_acta?: SelectOption[]
   }
 }
@@ -143,8 +142,7 @@ const formatDate = (value: unknown): string => {
   return !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : ''
 }
 
-const mapOptions = (items: SelectOption[] = []) =>
-  items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion ?? '' }))
+const mapOptions = (items: SelectOption[] = []) => items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion ?? '' }))
 
 export const VisualizarActa = () => {
   const { id } = useParams()
@@ -152,63 +150,6 @@ export const VisualizarActa = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [datosIniciales, setDatosIniciales] = useState<DatosActaResponse | null>(null)
   const [activeTab, setActiveTab] = useState<TabId>('info')
-
-  const [loadingCaratula, setLoadingCaratula] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [blobUrl, setBlobUrl] = useState<string | null>(null)
-  const [fileName, setFileName] = useState<string>('')
-
-  const handleObtenerCaratula = async () => {
-    if (!id) {
-      toast.error('ID del acta no válido', toastOptions)
-      return
-    }
-    try {
-      setLoadingCaratula(true)
-      const data = await getCaratulaActa(id)
-      const dataUri = data.data.file
-      const name = data.data.file_name
-
-      const base64String = dataUri.split(',')[1]
-
-      const byteCharacters = atob(base64String)
-      const byteNumbers = new Array(byteCharacters.length)
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i)
-      }
-      const byteArray = new Uint8Array(byteNumbers)
-      const blob = new Blob([byteArray], { type: 'application/pdf' })
-
-      const url = URL.createObjectURL(blob)
-      setBlobUrl(url)
-      setFileName(name)
-      setModalOpen(true)
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al obtener la carátula'
-      toast.error(errorMessage, toastOptions)
-    } finally {
-      setLoadingCaratula(false)
-    }
-  }
-
-  const handleDownload = () => {
-    if (!blobUrl) return
-    const link = document.createElement('a')
-    link.href = blobUrl
-    link.download = fileName || `caratula_acta_${id}.pdf`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  const handleCloseModal = () => {
-    setModalOpen(false)
-    if (blobUrl) {
-      URL.revokeObjectURL(blobUrl)
-      setBlobUrl(null)
-    }
-  }
-
 
   const {
     control,
@@ -220,8 +161,6 @@ export const VisualizarActa = () => {
   } = useForm<VisualizarActaValues>({
     defaultValues: {},
   })
-
-
 
   const opciones = useMemo(() => {
     const combos = datosIniciales?.combos
@@ -235,12 +174,8 @@ export const VisualizarActa = () => {
       oficinasInternas: mapOptions(combos?.oficinas_internas),
       calles: mapOptions(combos?.calles),
       inspectores: mapOptions(combos?.inspectores),
-      juecesSubrogantes: (combos?.jueces ?? [])
-        .filter((j) => j.id === 3 || j.id === 4)
-        .map((j) => ({ value: j.id, label: j.nombre ?? '' })),
-      secretariasSubrogantes: (combos?.secretarias ?? [])
-        .filter((s) => s.secretaria === 'Secretaria Subrogante')
-        .map((s) => ({ value: s.id, label: s.descripcion ?? '' })),
+      juecesSubrogantes: (combos?.jueces ?? []).filter((j) => j.id === 3 || j.id === 4).map((j) => ({ value: j.id, label: j.nombre ?? '' })),
+      secretariasSubrogantes: (combos?.secretarias ?? []).filter((s) => s.secretaria === 'Secretaria Subrogante').map((s) => ({ value: s.id, label: s.descripcion ?? '' })),
     }
   }, [datosIniciales])
 
@@ -256,9 +191,7 @@ export const VisualizarActa = () => {
         fecha_labrada: formatDate(acta.fecha_labrada),
         fecha_carga: formatDate(acta.fecha_carga),
         fecha_notificado: formatDate(acta.fecha_notificado),
-        medida_cautelar_id: Array.isArray(acta.cautelares)
-          ? acta.cautelares.map((c) => c.id)
-          : [],
+        medida_cautelar_id: Array.isArray(acta.cautelares) ? acta.cautelares.map((c) => c.id) : [],
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
         Infractores: acta.infractores || [],
@@ -270,10 +203,8 @@ export const VisualizarActa = () => {
         secretaria_descripcion: acta.secretaria?.descripcion || '',
         juez_codigo: acta.juez?.codigo || '',
         juez_nombre: acta.juez?.nombre || '',
-        oficina_interna_codigo:
-          String(acta.ultimo_movimiento?.oficina_destino?.codigo) || '',
-        oficina_interna_descripcion:
-          acta.ultimo_movimiento?.oficina_destino?.descripcion || '',
+        oficina_interna_codigo: String(acta.ultimo_movimiento?.oficina_destino?.codigo) || '',
+        oficina_interna_descripcion: acta.ultimo_movimiento?.oficina_destino?.descripcion || '',
       })
     }
   }, [acta, reset])
@@ -292,37 +223,17 @@ export const VisualizarActa = () => {
   }
 
   return (
-    <Container
-      title="Visualizar Acta"
-      linkBack="#/acta/listado"
-      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
-    >
+    <Container title="Visualizar Acta" linkBack="#/acta/listado" backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}>
       {acta ? (
         <>
-          <BannerAgrupacion
-            actaId={id}
-            grupoId={acta.grupo_acta_id}
-            onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)}
-            setIsLoadingGlobal={setIsLoading}
-          />
-          <form
-            onSubmit={handleSubmit(
-              (formData) => editarActa(formData, setIsLoading)
-            )}
-            className="space-y-6"
-          >
+          <BannerAgrupacion actaId={id} grupoId={acta.grupo_acta_id} onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)} setIsLoadingGlobal={setIsLoading} />
+          <form onSubmit={handleSubmit((formData) => editarActa(formData, setIsLoading))} className="space-y-6">
             {/* TABS PRINCIPALES */}
             <div className="flex border-b">
               {TABS.filter((t) => !t.visible || t.visible(acta)).map((t) => {
                 const isActive = activeTab === t.id
                 return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setActiveTab(t.id)}
-                    className={`${TAB_BASE} ${isActive ? TAB_ACTIVE : TAB_INACTIVE
-                      }`}
-                  >
+                  <button key={t.id} type="button" onClick={() => setActiveTab(t.id)} className={`${TAB_BASE} ${isActive ? TAB_ACTIVE : TAB_INACTIVE}`}>
                     {t.label}
                   </button>
                 )
@@ -335,82 +246,23 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
                     <h3 className="text-lg font-bold">Información Básica</h3>
-                    <button
-                      type="button"
-                      onClick={handleObtenerCaratula}
-                      disabled={isLoading || loadingCaratula}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 self-start sm:self-auto"
-                    >
-                      {loadingCaratula ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Cargando...
-                        </>
-                      ) : (
-                        'Obtener Carátula'
-                      )}
-                    </button>
+                    {id && <BotonCaratula actaId={id} disabled={isLoading} />}
                   </div>
 
                   <div className="gap-4 mb-4">
-                    <MultiSelectField
-                      label="Medida Cautelar"
-                      name="medida_cautelar_id"
-                      control={control}
-                      options={opciones.medidasCautelares}
-                      error={errors.medida_cautelar_id}
-                    />
-
+                    <MultiSelectField label="Medida Cautelar" name="medida_cautelar_id" control={control} options={opciones.medidasCautelares} error={errors.medida_cautelar_id} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-                      <RHFInput
-                        control={control}
-                        disabled
-                        name="id"
-                        label="Número de Causa"
-                      />
-                      <RHFInput
-                        control={control}
-                        disabled
-                        name="numero_acta"
-                        label="Número del Acta"
-                      />
+                      <RHFInput control={control} disabled name="id" label="Número de Causa" />
+                      <RHFInput control={control} disabled name="numero_acta" label="Número del Acta" />
                     </div>
-                    <RHFInput
-                      control={control}
-                      name="juzgado"
-                      label="Juzgado"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="year"
-                      label="Año del Acta"
-                    />
-                    <RHFInput
-                      control={control}
-                      name="caratula"
-                      label="Carátula"
-                    />
-                    <ColorSelect
-                      label="Color"
-                      name="color"
-                      control={control}
-                      options={COLOR_OPTIONS}
-                    />
-                    <SelectField
-                      label="Estado"
-                      name="estado_acta_id"
-                      control={control}
-                      options={opciones.estadosActa}
-                      error={errors.estado_acta_id}
-                    />
+                    <RHFInput control={control} name="juzgado" label="Juzgado" disabled />
+                    <RHFInput control={control} name="year" label="Año del Acta" />
+                    <RHFInput control={control} name="caratula" label="Carátula" />
+                    <ColorSelect label="Color" name="color" control={control} options={COLOR_OPTIONS} />
+                    <SelectField label="Estado" name="estado_acta_id" control={control} options={opciones.estadosActa} error={errors.estado_acta_id} />
                   </div>
                 </div>
 
@@ -418,19 +270,8 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">Mover Causa</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <RHFInput
-                      control={control}
-                      name="oficina_interna_descripcion"
-                      label="Oficina Actual"
-                      disabled
-                    />
-                    <SelectField
-                      label="Oficina Destino"
-                      name="movimiento_destino_id"
-                      control={control}
-                      options={opciones.oficinasInternas}
-                      error={errors.movimiento_destino_id}
-                    />
+                    <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Actual" disabled />
+                    <SelectField label="Oficina Destino" name="movimiento_destino_id" control={control} options={opciones.oficinasInternas} error={errors.movimiento_destino_id} />
                     <button
                       type="button"
                       onClick={handleMovimientoRapido}
@@ -446,99 +287,25 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">Clasificación</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <SelectField
-                      label="Tipo de Acta"
-                      name="tipo_id"
-                      control={control}
-                      options={opciones.tiposActa}
-                      error={errors.tipo_id}
-                    />
-                    <SelectField
-                      label="Subtipo de Acta"
-                      name="sub_tipo_id"
-                      control={control}
-                      options={opciones.subTipos}
-                      error={errors.sub_tipo_id}
-                    />
-                    <SelectField
-                      label="Ley"
-                      name="ley_id"
-                      control={control}
-                      options={opciones.leyes}
-                      error={errors.ley_id}
-                    />
-                    <SelectField
-                      label="Oficina"
-                      name="oficina_id"
-                      control={control}
-                      options={opciones.oficinas}
-                      error={errors.oficina_id}
-                    />
+                    <SelectField label="Tipo de Acta" name="tipo_id" control={control} options={opciones.tiposActa} error={errors.tipo_id} />
+                    <SelectField label="Subtipo de Acta" name="sub_tipo_id" control={control} options={opciones.subTipos} error={errors.sub_tipo_id} />
+                    <SelectField label="Ley" name="ley_id" control={control} options={opciones.leyes} error={errors.ley_id} />
+                    <SelectField label="Oficina" name="oficina_id" control={control} options={opciones.oficinas} error={errors.oficina_id} />
                   </div>
                 </div>
 
                 {/* SECCIÓN: Juzgado y Secretaría */}
                 <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">
-                    Juzgado y Secretaría
-                  </h3>
+                  <h3 className="text-lg font-bold mb-4">Juzgado y Secretaría</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                    <RHFInput
-                      control={control}
-                      name="secretaria_codigo"
-                      label="Secretaria"
-                      type="text"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="secretaria_descripcion"
-                      label="Secretaria"
-                      type="text"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="juez_codigo"
-                      label="Juez"
-                      type="text"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="juez_nombre"
-                      label="Juez"
-                      type="text"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="oficina_interna_codigo"
-                      label="Oficina Interna"
-                      type="text"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="oficina_interna_descripcion"
-                      label="Oficina Interna"
-                      type="text"
-                      disabled
-                    />
-                    <SelectField
-                      label="Juez Subrogante"
-                      name="juez_subrogante_id"
-                      control={control}
-                      options={opciones.juecesSubrogantes}
-                      error={errors.juez_subrogante_id}
-                    />
-                    <SelectField
-                      label="Secretaria subrogante"
-                      name="secretaria_subrogante_id"
-                      control={control}
-                      options={opciones.secretariasSubrogantes}
-                      error={errors.secretaria_subrogante_id}
-                    />
+                    <RHFInput control={control} name="secretaria_codigo" label="Secretaria" type="text" disabled />
+                    <RHFInput control={control} name="secretaria_descripcion" label="Secretaria" type="text" disabled />
+                    <RHFInput control={control} name="juez_codigo" label="Juez" type="text" disabled />
+                    <RHFInput control={control} name="juez_nombre" label="Juez" type="text" disabled />
+                    <RHFInput control={control} name="oficina_interna_codigo" label="Oficina Interna" type="text" disabled />
+                    <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Interna" type="text" disabled />
+                    <SelectField label="Juez Subrogante" name="juez_subrogante_id" control={control} options={opciones.juecesSubrogantes} error={errors.juez_subrogante_id} />
+                    <SelectField label="Secretaria subrogante" name="secretaria_subrogante_id" control={control} options={opciones.secretariasSubrogantes} error={errors.secretaria_subrogante_id} />
                   </div>
                 </div>
 
@@ -546,18 +313,8 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">Fechas</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <RHFInput
-                      control={control}
-                      name="fecha_labrada"
-                      label="Fecha Labrada"
-                      type="date"
-                    />
-                    <RHFInput
-                      control={control}
-                      name="fecha_carga"
-                      label="Fecha de Carga"
-                      type="date"
-                    />
+                    <RHFInput control={control} name="fecha_labrada" label="Fecha Labrada" type="date" />
+                    <RHFInput control={control} name="fecha_carga" label="Fecha de Carga" type="date" />
                   </div>
                 </div>
 
@@ -566,20 +323,8 @@ export const VisualizarActa = () => {
                   <h3 className="text-lg font-bold mb-4">Ubicación</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <RHFInput control={control} name="lugar" label="Lugar" />
-                    <SelectField
-                      label="Calle"
-                      name="calle_id"
-                      control={control}
-                      options={opciones.calles}
-                      error={errors.calle_id}
-                    />
-                    <SelectField
-                      label="Cruce de Calle"
-                      name="cruce_id"
-                      control={control}
-                      options={opciones.calles}
-                      error={errors.cruce_id}
-                    />
+                    <SelectField label="Calle" name="calle_id" control={control} options={opciones.calles} error={errors.calle_id} />
+                    <SelectField label="Cruce de Calle" name="cruce_id" control={control} options={opciones.calles} error={errors.cruce_id} />
                   </div>
                 </div>
 
@@ -587,119 +332,37 @@ export const VisualizarActa = () => {
                 <div className="bg-white p-6 rounded-lg shadow">
                   <h3 className="text-lg font-bold mb-4">Inspectores</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SelectField
-                      label="Inspector"
-                      name="inspector_1_id"
-                      control={control}
-                      options={opciones.inspectores}
-                      error={errors.inspector_1_id}
-                    />
-                    <SelectField
-                      label="2° Inspector"
-                      name="inspector_2_id"
-                      control={control}
-                      options={opciones.inspectores}
-                      error={errors.inspector_2_id}
-                    />
+                    <SelectField label="Inspector" name="inspector_1_id" control={control} options={opciones.inspectores} error={errors.inspector_1_id} />
+                    <SelectField label="2° Inspector" name="inspector_2_id" control={control} options={opciones.inspectores} error={errors.inspector_2_id} />
                   </div>
                 </div>
 
                 {/* SECCIÓN: Tabs de Involucrados */}
                 <div className="bg-white p-6 rounded-lg shadow">
-                  <ActaTabsForm
-                    control={control}
-                    infractores={datosIniciales?.combos?.infractores}
-                    padrones={datosIniciales?.combos?.padrones}
-                    infracciones={datosIniciales?.combos?.infracciones}
-                  />
+                  <ActaTabsForm control={control} infractores={datosIniciales?.combos?.infractores} padrones={datosIniciales?.combos?.padrones} infracciones={datosIniciales?.combos?.infracciones} />
                 </div>
 
                 {/* BOTONES DE ACCIÓN */}
                 <div className="flex justify-end gap-4 mb-6">
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
+                  <button type="submit" disabled={isLoading} className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                     Guardar Cambios
                   </button>
                 </div>
               </div>
             )}
 
-            {activeTab === 'movimientos' && (
-              <MovimientosTab
-                actaId={id}
-                oficinas={datosIniciales?.combos?.oficinas_internas || []}
-                setIsLoadingGlobal={setIsLoading}
-              />
-            )}
+            {activeTab === 'movimientos' && <MovimientosTab actaId={id} oficinas={datosIniciales?.combos?.oficinas_internas || []} setIsLoadingGlobal={setIsLoading} />}
 
-            {activeTab === 'estados' && (
-              <EstadoProcesalTab
-                actaId={id}
-                estadosProcesales={opciones.estadosActa}
-                setIsLoadingGlobal={setIsLoading}
-              />
-            )}
+            {activeTab === 'estados' && <EstadoProcesalTab actaId={id} estadosProcesales={opciones.estadosActa} setIsLoadingGlobal={setIsLoading} />}
 
             {activeTab === 'pruebas' && <PruebasTab actaId={id} />}
 
-            {activeTab === 'grupo' && (
-              <GrupoTab actaId={acta.id} grupo={acta.grupo} />
-            )}
+            {activeTab === 'grupo' && <GrupoTab actaId={acta.id} grupo={acta.grupo} />}
           </form>
         </>
       ) : (
         <div className="text-center text-gray-500">No se encontró el acta</div>
       )}
-
-      {/* Modal para visualizar Carátula */}
-      <Modal open={modalOpen} onOpenChange={(open) => !open && handleCloseModal()} size="lg">
-        <ModalHeader
-          title="Previsualización de Carátula"
-          right={
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="rounded-lg px-2 py-1 text-primary-700/80 hover:text-primary-700 hover:bg-black/10 font-bold"
-              aria-label="Cerrar"
-            >
-              ✕
-            </button>
-          }
-        />
-        <ModalContent>
-          {blobUrl ? (
-            <div className="flex flex-col gap-4">
-              <iframe
-                src={blobUrl}
-                className="w-full h-[550px] rounded border border-gray-300"
-                title="Previsualización de Carátula"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold transition-colors"
-                >
-                  Descargar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded font-semibold transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">Cargando archivo...</div>
-          )}
-        </ModalContent>
-      </Modal>
     </Container>
   )
 }
-
