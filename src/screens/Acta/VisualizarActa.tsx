@@ -80,6 +80,7 @@ interface Acta {
   padrones?: any[]
   infractores?: any[]
   infracciones?: any[]
+  ultimo_estado_procesal?: { id: number; nombre?: string; estado?: string, estado_procesal_id?: number } | null
 }
 
 interface VisualizarActaValues {
@@ -88,7 +89,7 @@ interface VisualizarActaValues {
   year?: string
   caratula?: string
   color?: string
-  estado_acta_id?: number
+  estado_procesal_id?: number
   medida_cautelar_id?: number[]
   tipo_id?: number
   sub_tipo_id?: number
@@ -259,6 +260,7 @@ export const VisualizarActa = () => {
         medida_cautelar_id: Array.isArray(acta.cautelares)
           ? acta.cautelares.map((c) => c.id)
           : [],
+        estado_procesal_id: acta.ultimo_estado_procesal?.estado_procesal_id,
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
         Infractores: acta.infractores || [],
@@ -406,10 +408,11 @@ export const VisualizarActa = () => {
                     />
                     <SelectField
                       label="Estado"
-                      name="estado_acta_id"
+                      name="estado_procesal_id"
                       control={control}
                       options={opciones.estadosActa}
-                      error={errors.estado_acta_id}
+                      error={errors.estado_procesal_id}
+                      disabled
                     />
                   </div>
                 </div>
