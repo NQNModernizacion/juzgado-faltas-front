@@ -79,7 +79,7 @@ interface Acta {
   padrones?: any[]
   infractores?: any[]
   infracciones?: any[]
-  ultimo_estado_procesal?: { id: number; nombre?: string; estado?: string, estado_procesal_id?: number } | null
+  ultimo_estado_procesal?: { id?: number; nombre?: string; estado?: string; estado_procesal_id?: number } | null
 }
 
 interface VisualizarActaValues {
@@ -195,7 +195,7 @@ export const VisualizarActa = () => {
         medida_cautelar_id: Array.isArray(acta.cautelares)
           ? acta.cautelares.map((c) => c.id)
           : [],
-        estado_procesal_id: acta.ultimo_estado_procesal?.estado_procesal_id,
+        estado_procesal_id: acta.ultimo_estado_procesal?.estado_procesal_id ?? undefined,
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
         Infractores: acta.infractores || [],

@@ -37,6 +37,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         render={({ field }) => (
           <select
             {...field}
+            value={field.value ?? ''}
             disabled={disabled}
             className="mx-select"
             onChange={(e) => {
