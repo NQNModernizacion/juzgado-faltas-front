@@ -92,7 +92,7 @@ export const ListadoActas = () => {
   }
 
   return (
-    <Container title={'Listado de Actas'}
+    <Container title={'Listado de Causas'}
       linkBack="#/"
       backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
     >

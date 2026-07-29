@@ -112,6 +112,7 @@ interface VisualizarActaValues {
   juez_subrogante_id?: number
   secretaria_subrogante_id?: number
   movimiento_destino_id?: number
+  movimiento_motivo?: string
   Padrones?: any[]
   Infractores?: any[]
   Infracciones?: any[]
@@ -154,6 +155,7 @@ export const VisualizarActa = () => {
 
   const {
     control,
+    register,
     handleSubmit,
     reset,
     setValue,
@@ -217,9 +219,10 @@ export const VisualizarActa = () => {
     const destino = watch('movimiento_destino_id')
     if (!destino) return
     postMoverCausa(
-      { acta_id: id, oficina_id_destino: destino },
+      { acta_id: id, oficina_id_destino: destino, motivo: watch('movimiento_motivo') },
       () => {
         setValue('movimiento_destino_id', undefined)
+        setValue('movimiento_motivo', '')
         getActa(id, setActa, setIsLoading)
       },
       setIsLoading
@@ -227,7 +230,7 @@ export const VisualizarActa = () => {
   }
 
   return (
-    <Container title="Visualizar Acta" linkBack="#/acta/listado" backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}>
+    <Container title="Visualizar Causa" linkBack="#/acta/listado" backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}>
       {acta ? (
         <>
           <BannerAgrupacion actaId={id} grupoId={acta.grupo_acta_id} onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)} setIsLoadingGlobal={setIsLoading} />
@@ -310,6 +313,16 @@ export const VisualizarActa = () => {
                       Confirmar Movimiento
                     </button>
                   </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Motivo / Observación
+                    </label>
+                    <textarea
+                      className="w-full border rounded-lg px-3 py-2"
+                      rows={2}
+                      {...register('movimiento_motivo')}
+                    ></textarea>
+                  </div>
                 </div>
 
                 {/* SECCIÓN: Clasificación */}
@@ -384,7 +397,7 @@ export const VisualizarActa = () => {
 
             {activeTab === 'estados' && <EstadoProcesalTab actaId={id} estadosProcesales={opciones.estadosActa} setIsLoadingGlobal={setIsLoading} />}
 
-            {activeTab === 'pruebas' && <PruebasTab actaId={id} />}
+            {activeTab === 'pruebas' && <PruebasTab actaId={id} setIsLoadingGlobal={setIsLoading} />}
 
             {activeTab === 'grupo' && <GrupoTab actaId={acta.id} grupo={acta.grupo} />}
           </form>
