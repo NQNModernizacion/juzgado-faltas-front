@@ -67,7 +67,7 @@ export const buscarPadronDni = async (
 ) => {
   try {
 
-      return;
+    return;
 
     const resp = await axios().get('/buscar_padron', {
       params: {
@@ -183,6 +183,67 @@ export const getPruebasActa = async (
     if (!data) throw new Error('Error al obtener las pruebas')
 
     setPruebas(data)
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const postPrueba = async (
+  payload: FormData,
+  onSuccess: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    await axios().post('pruebas', payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    toast.success('Prueba registrada correctamente', toastOptions)
+    if (onSuccess) onSuccess()
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const putPrueba = async (
+  id: any,
+  payload: FormData,
+  onSuccess: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    // payload.append('_method', 'PUT')
+    await axios().post(`pruebas/${id}`, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    toast.success('Prueba actualizada correctamente', toastOptions)
+    if (onSuccess) onSuccess()
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const deletePrueba = async (
+  id: any,
+  onSuccess: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    await axios().delete(`pruebas/${id}`)
+    toast.success('Prueba eliminada correctamente', toastOptions)
+    if (onSuccess) onSuccess()
   } catch (error: any) {
     toast.error(error?.response?.data?.message || error.message, toastOptions)
   } finally {
