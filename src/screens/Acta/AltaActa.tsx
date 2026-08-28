@@ -8,16 +8,11 @@ import ChevronLeft from '@/components/Svgs/ChevronLeft'
 import { AltaActaSchema } from '@/schemas/AltaActaSchema'
 import { getDatosInicialesActa, onSubmitAlta } from '@/services/ActaService'
 import { yupResolver } from '@hookform/resolvers/yup'
-import {
-  ButtonBase,
-  Container,
-  FormFooter,
-  FormSection,
-  RHFInput,
-} from '@nqnmodernizacion/muni-ui'
+import { ButtonBase, FormFooter, RHFInput } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
+import { DenseContainer } from '@/components/Layouts/DenseContainer'
 
 interface Row {
   tipo_id: string
@@ -65,9 +60,7 @@ export const AltaActa = () => {
   const [isLoading, setIsLoading] = useState(false)
   const nav = useNavigate()
   const [datosIniciales, setDatosIniciales] = useState<any>(null)
-  const [estadoActaVisual, setEstadoActaVisual] = useState<
-    string | number | undefined
-  >(undefined)
+  const [estadoActaVisual, setEstadoActaVisual] = useState<string | number | undefined>(undefined)
 
   const {
     control,
@@ -90,7 +83,7 @@ export const AltaActa = () => {
       inspector_2_id: undefined,
       oficina_destino_id: undefined,
     },
-    // resolver: yupResolver(AltaActaSchema),
+    resolver: yupResolver(AltaActaSchema),
   })
 
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
@@ -98,14 +91,10 @@ export const AltaActa = () => {
   const inspectorOptions = useMemo(() => {
     const inspectors: any[] = datosIniciales?.combos?.inspectores ?? []
     const result: { value: any; label: string }[] = []
-    const noFilter =
-      selectedOfficeId === undefined || selectedOfficeId === ''
+    const noFilter = selectedOfficeId === undefined || selectedOfficeId === ''
 
     for (const inspector of inspectors) {
-      if (
-        noFilter ||
-        String(inspector.oficina_id) === String(selectedOfficeId)
-      ) {
+      if (noFilter || String(inspector.oficina_id) === String(selectedOfficeId)) {
         result.push({ value: inspector.id, label: inspector.nombre })
       }
     }
@@ -113,8 +102,7 @@ export const AltaActa = () => {
   }, [datosIniciales?.combos?.inspectores, selectedOfficeId])
 
   const opciones = useMemo(() => {
-    const mapOptions = (items: any[] = []) =>
-      items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion }))
+    const mapOptions = (items: any[] = []) => items.map((it) => ({ value: it.id, label: it.nombre ?? it.descripcion }))
 
     return {
       oficinas: mapOptions(datosIniciales?.oficinas),
@@ -139,139 +127,83 @@ export const AltaActa = () => {
   }, [opciones.estadosActa, estadoActaVisual])
 
   return (
-    <Container
-      linkBack="#/"
-      title="Alta de Actas"
-      subtitle=""
-      className="space-y-6"
-      backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}
-      backLabel="Volver"
-    >
+    <DenseContainer linkBack="#/" title="Alta de Actas" containerClassName="p-1 sm:p-1 space-y-2">
       {isLoading ? (
         <MuniSpinner file="muniexpress.svg" />
       ) : (
         <form
-          className="mt-2"
+          className="w-full mx-auto"
           onSubmit={handleSubmit(
             // (formData) => console.log('formData', formData)
             (formData) => onSubmitAlta(formData, setIsLoading, nav)
           )}
         >
-          {/* SECCIÓN DE ACTA */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
-            {/* LADO IZQUIERDO */}
-            <FormSection fullWidth className="p-2">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <RHFInput control={control} name="year" label="Año de Acta" />
-
-                <RHFInput
+          {/* SECCIÓN SUPERIOR: DATOS GENERALES Y UBICACIÓN LADO A LADO */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 mb-1">
+            {/* COLUMNA IZQUIERDA: DATOS DE LA CAUSA */}
+            <div className="mx-section p-1 px-2 bg-white">
+              <h3 className="text-xs font-bold text-primary-400 border-b">Datos de la Causa</h3>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-1 mt-1">
+                <RHFInput control={control} name="year" label="Año de Acta" containerClassName="md:col-span-2" />
+                <RHFInput control={control} name="numero_acta" label="Número de Acta" containerClassName="md:col-span-2" />
+                <SelectField
+                  label="Oficina"
+                  name="oficina_id"
                   control={control}
-                  name="numero_acta"
-                  label="Número de Acta"
+                  options={opciones.oficinas}
+                  error={errors.oficina_id}
+                  onChange={() => {
+                    setValue('inspector_1_id', undefined)
+                    setValue('inspector_2_id', undefined)
+                  }}
+                  containerClassName="md:col-span-2"
                 />
+                <RHFInput control={control} name="caratula" label="Carátula" containerClassName="md:col-span-6" />
+
+                <RHFInput control={control} name="fecha_labrada" label="Fecha Labrada" type="date" containerClassName="md:col-span-3" />
+                <RHFInput control={control} name="fecha_carga" label="Fecha de Carga" type="date" containerClassName="md:col-span-3" />
+
+                <SelectField label="Tipo de Acta" name="tipo_id" control={control} options={opciones.tiposActa} error={errors.tipo_id} containerClassName="md:col-span-2" />
+                <SelectField label="Subtipo de Acta" name="sub_tipo_id" control={control} options={opciones.subTipos} error={errors.sub_tipo_id} containerClassName="md:col-span-2" />
+                <SelectField label="Ley" name="ley_id" control={control} options={opciones.leyes} error={errors.ley_id} containerClassName="md:col-span-2" />
+
+                <SelectField label="Inspector" name="inspector_1_id" control={control} options={inspectorOptions} error={errors.inspector_1_id} containerClassName="md:col-span-3" />
+                <SelectField label="2° Inspector" name="inspector_2_id" control={control} options={inspectorOptions} error={errors.inspector_2_id} containerClassName="md:col-span-3" />
+
+                <MultiSelectField
+                  label="Medida Cautelar"
+                  name="medida_cautelar_id"
+                  control={control}
+                  options={opciones.medidasCautelares}
+                  error={errors.medida_cautelar_id}
+                  containerClassName="md:col-span-3"
+                />
+
+                <ColorSelect label="Color" name="color" control={control} options={COLOR_OPTIONS} containerClassName="md:col-span-3" />
               </div>
+            </div>
 
-              <div className="mt-2">
-                <RHFInput control={control} name="caratula" label="Carátula" />
-              </div>
+            {/* COLUMNA DERECHA: UBICACIÓN, DETALLES E INSPECTORES */}
+            <div className="mx-section p-1 px-2 bg-white">
+              <h3 className="text-xs font-bold text-primary-400 border-b">Ubicación y Detalles</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-1 mt-1">
+                <RHFInput control={control} name="lugar" label="Lugar" containerClassName="col-span-4" />
 
-              <SelectField
-                label="Oficina"
-                name="oficina_id"
-                control={control}
-                options={opciones.oficinas}
-                error={errors.oficina_id}
-                onChange={() => {
-                  setValue('inspector_1_id', undefined)
-                  setValue('inspector_2_id', undefined)
-                }}
-              />
+                <SelectField label="Calle" name="calle_id" control={control} options={opciones.calles} error={errors.calle_id} containerClassName="col-span-2" />
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <RHFInput
+                <SelectField label="Cruce de Calles" name="cruce_id" control={control} options={opciones.calles} error={errors.cruce_id} containerClassName="col-span-2" />
+
+                <SelectField
+                  label="Ubicación (Destino)"
+                  name="oficina_destino_id"
                   control={control}
-                  name="fecha_labrada"
-                  label="Fecha Labrada"
-                  type="date"
+                  options={opciones.oficinasInternas}
+                  error={errors.oficina_destino_id}
+                  containerClassName="col-span-2"
                 />
-                <RHFInput
-                  control={control}
-                  name="fecha_carga"
-                  label="Fecha de Carga"
-                  type="date"
-                // value={new Date().toISOString().split("T")[0]} // Establece la fecha actual como valor por defecto
-                />
-              </div>
-
-              <SelectField
-                label="Tipo de Acta"
-                name="tipo_id"
-                control={control}
-                options={opciones.tiposActa}
-                error={errors.tipo_id}
-              />
-              <SelectField
-                label="Subtipo de Acta"
-                name="sub_tipo_id"
-                control={control}
-                options={opciones.subTipos}
-                error={errors.sub_tipo_id}
-              />
-              <SelectField
-                label="Ley"
-                name="ley_id"
-                control={control}
-                options={opciones.leyes}
-                error={errors.ley_id}
-              />
-              
-            </FormSection>
-
-            {/* LADO DERECHO */}
-            <FormSection fullWidth className="p-2">
-
-              
-              <MultiSelectField
-                label="Medida Cautelar"
-                name="medida_cautelar_id"
-                control={control}
-                options={opciones.medidasCautelares}
-                error={errors.medida_cautelar_id}
-              />
-
-              <RHFInput control={control} name="lugar" label="Lugar" />
-              <SelectField
-                label="Calle"
-                name="calle_id"
-                control={control}
-                options={opciones.calles}
-                error={errors.calle_id}
-              />
-
-              <SelectField
-                label="Cruce de Calles"
-                name="cruce_id"
-                control={control}
-                options={opciones.calles}
-                error={errors.cruce_id}
-              />
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <ColorSelect
-                  label="Color"
-                  name="color"
-                  control={control}
-                  options={COLOR_OPTIONS}
-                />
-
-                <div className="w-full">
+                <div className="w-full col-span-2">
                   <label className="mx-label">Estado</label>
-                  <select
-                    className="mx-select"
-                    disabled
-                    value={estadoActaVisual ?? ''}
-                    onChange={() => {}}
-                  >
+                  <select className="mx-select" disabled value={estadoActaVisual ?? ''} onChange={() => {}}>
                     <option value="">Seleccione una opción</option>
                     {opciones.estadosActa?.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -280,65 +212,38 @@ export const AltaActa = () => {
                     ))}
                   </select>
                 </div>
-              </div>
 
+                <RHFInput control={control} name="fecha_notificado" label="Fecha Notificado" type="date" containerClassName="col-span-2" />
 
-              <div className="mt-2">
                 <SelectField
-                  label="Ubicación"
-                  name="oficina_destino_id"
+                  label="Desestimada"
+                  name="desestimada"
+                  containerClassName="col-span-2"
                   control={control}
-                  options={opciones.oficinasInternas}
-                  error={errors.oficina_destino_id}
+                  options={[
+                    { value: 0, label: 'No' },
+                    { value: 1, label: 'Sí' },
+                  ]}
+                  error={errors.desestimada}
                 />
+                <div className="md:col-span-4">
+                  <Controller
+                    control={control}
+                    name="observacion"
+                    render={({ field }) => (
+                      <div>
+                        <label className="mx-label">Observación</label>
+                        <textarea {...field} className="w-full border rounded-lg px-2 py-1 text-xs" rows={2} />
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
-
-              <div className="mt-2">
-                <Controller
-                  control={control}
-                  name="observacion"
-                  render={({ field }) => (
-                    <div>
-                      <label className="mx-label">Observación</label>
-                      <textarea
-                        {...field}
-                        className="w-full border rounded-lg px-3 py-2"
-                        rows={3}
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-
-            </FormSection>
+            </div>
           </div>
 
-          {/* SECCIÓN DE INSPECTORES */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* LADO IZQUIERDO */}
-            <FormSection fullWidth className="p-2">
-              <SelectField
-                label="Inspector"
-                name="inspector_1_id"
-                control={control}
-                options={inspectorOptions}
-                error={errors.inspector_1_id}
-              />
-            </FormSection>
-
-            {/* LADO DERECHO */}
-            <FormSection fullWidth className="p-2">
-              <SelectField
-                label="2° Inspector"
-                name="inspector_2_id"
-                control={control}
-                options={inspectorOptions}
-                error={errors.inspector_2_id}
-              />
-            </FormSection>
-          </div>
-
-          <FormSection fullWidth className="p-2 mt-2">
+          {/* SECCIÓN INFERIOR: INVOLUCRADOS (TABLAS AL 100%) */}
+          <div className="w-full">
             <ActaTabsForm
               control={control}
               errors={errors}
@@ -346,16 +251,15 @@ export const AltaActa = () => {
               padrones={datosIniciales?.combos?.padrones}
               infracciones={datosIniciales?.combos?.infracciones}
             />
-          </FormSection>
+          </div>
 
           <FormFooter>
             <ButtonBase type="submit" color="primary" isLoading={isSubmitting}>
               Grabar Acta
             </ButtonBase>
           </FormFooter>
-
         </form>
       )}
-    </Container>
+    </DenseContainer>
   )
 }
