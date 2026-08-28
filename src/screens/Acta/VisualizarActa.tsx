@@ -1,5 +1,5 @@
 import { editarActa, getActa, getDatosInicialesActa, getCaratulaActa, postMoverCausa } from '@/services/ActaService'
-import { Container, RHFInput, Modal, ModalHeader, ModalContent } from '@nqnmodernizacion/muni-ui'
+import { RHFInput, Modal, ModalHeader, ModalContent } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -15,6 +15,7 @@ import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
 import { BotonCaratula } from './components/BotonCaratula'
 import ChevronLeft from '@/components/Svgs/ChevronLeft'
+import { DenseContainer } from '@/components/Layouts/DenseContainer'
 
 interface SelectOption {
   id: number
@@ -134,7 +135,7 @@ const TABS: TabDef[] = [
   { id: 'grupo', label: 'Grupo', visible: (acta) => Boolean(acta.grupo_acta_id) },
 ]
 
-const TAB_BASE = 'px-6 py-3 font-semibold border-b-2 transition-colors'
+const TAB_BASE = 'px-3 py-1.5 text-xs font-semibold border-b-2 transition-colors'
 const TAB_ACTIVE = 'border-blue-500 text-blue-600'
 const TAB_INACTIVE = 'border-transparent text-gray-500 hover:text-gray-700'
 
@@ -194,9 +195,7 @@ export const VisualizarActa = () => {
         fecha_labrada: formatDate(acta.fecha_labrada),
         fecha_carga: formatDate(acta.fecha_carga),
         fecha_notificado: formatDate(acta.fecha_notificado),
-        medida_cautelar_id: Array.isArray(acta.cautelares)
-          ? acta.cautelares.map((c) => c.id)
-          : [],
+        medida_cautelar_id: Array.isArray(acta.cautelares) ? acta.cautelares.map((c) => c.id) : [],
         estado_procesal_id: acta.ultimo_estado_procesal?.estado_procesal_id ?? undefined,
         juzgado: acta.juzgado ? acta.juzgado.descripcion : '',
         Padrones: acta.padrones || [],
@@ -230,11 +229,11 @@ export const VisualizarActa = () => {
   }
 
   return (
-    <Container title="Visualizar Causa" linkBack="#/acta/listado" backIcon={<ChevronLeft className="size-4 shrink-0 text-primary-700" />}>
+    <DenseContainer title="Visualizar Causa" linkBack="#/acta/listado">
       {acta ? (
         <>
           <BannerAgrupacion actaId={id} grupoId={acta.grupo_acta_id} onAgrupacionCambio={() => getActa(id, setActa, setIsLoading)} setIsLoadingGlobal={setIsLoading} />
-          <form onSubmit={handleSubmit((formData) => editarActa(formData, setIsLoading))} className="space-y-6">
+          <form onSubmit={handleSubmit((formData) => editarActa(formData, setIsLoading))} className="space-y-2">
             {/* TABS PRINCIPALES */}
             <div className="flex border-b">
               {TABS.filter((t) => !t.visible || t.visible(acta)).map((t) => {
@@ -248,145 +247,160 @@ export const VisualizarActa = () => {
             </div>
 
             {activeTab === 'info' && (
-              <div className="space-y-8">
-                {/* SECCIÓN: Información Básica */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-                    <h3 className="text-lg font-bold">Información Básica</h3>
-                    {id && <BotonCaratula actaId={id} disabled={isLoading} />}
-                  </div>
+              <div className="space-y-1.5">
+                {/* DISEÑO DE 2 COLUMNAS COMPACTAS */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5 mb-1.5">
+                  {/* COLUMNA IZQUIERDA */}
+                  <div className="space-y-1.5">
+                    {/* SECCIÓN: Información Básica */}
+                    <div className="mx-section p-1 px-2 bg-white">
+                      <div className="flex justify-between items-center border-b pb-0.5 mb-1">
+                        <h3 className="text-xs font-bold text-primary-400">Información Básica</h3>
+                        {id && <BotonCaratula actaId={id} disabled={isLoading} />}
+                      </div>
 
-                  <div className="gap-4 mb-4">
-                    <MultiSelectField label="Medida Cautelar" name="medida_cautelar_id" control={control} options={opciones.medidasCautelares} error={errors.medida_cautelar_id} />
-                  </div>
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-1">
+                        <RHFInput control={control} disabled name="id" label="Número de Causa" containerClassName="md:col-span-2" />
+                        <RHFInput control={control} disabled name="numero_acta" label="Número del Acta" containerClassName="md:col-span-2" />
+                        <RHFInput control={control} name="year" label="Año del Acta" containerClassName="md:col-span-2" />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <RHFInput control={control} disabled name="id" label="Número de Causa" />
-                      <RHFInput control={control} disabled name="numero_acta" label="Número del Acta" />
+                        <RHFInput control={control} name="juzgado" label="Juzgado" disabled containerClassName="md:col-span-3" />
+                        <SelectField
+                          label="Estado"
+                          name="estado_procesal_id"
+                          control={control}
+                          options={opciones.estadosActa}
+                          error={errors.estado_procesal_id}
+                          disabled
+                          containerClassName="md:col-span-3"
+                        />
+
+                        <RHFInput control={control} name="caratula" label="Carátula" containerClassName="md:col-span-6" />
+
+                        <MultiSelectField
+                          label="Medida Cautelar"
+                          name="medida_cautelar_id"
+                          control={control}
+                          options={opciones.medidasCautelares}
+                          error={errors.medida_cautelar_id}
+                          containerClassName="md:col-span-6"
+                        />
+
+                        <ColorSelect label="Color" name="color" control={control} options={COLOR_OPTIONS} containerClassName="md:col-span-6" />
+                        <SelectField label="Tipo de Acta" name="tipo_id" control={control} options={opciones.tiposActa} error={errors.tipo_id} containerClassName="md:col-span-2" />
+                        <SelectField label="Subtipo de Acta" name="sub_tipo_id" control={control} options={opciones.subTipos} error={errors.sub_tipo_id} containerClassName="md:col-span-2" />
+                        <SelectField label="Ley" name="ley_id" control={control} options={opciones.leyes} error={errors.ley_id} containerClassName="md:col-span-2" />
+
+                        <SelectField label="Oficina" name="oficina_id" control={control} options={opciones.oficinas} error={errors.oficina_id} containerClassName="md:col-span-6" />
+
+                        <RHFInput control={control} name="fecha_labrada" label="Fecha Labrada" type="date" containerClassName="md:col-span-3" />
+                        <RHFInput control={control} name="fecha_carga" label="Fecha de Carga" type="date" containerClassName="md:col-span-3" />
+                      </div>
                     </div>
-                    <RHFInput
-                      control={control}
-                      name="juzgado"
-                      label="Juzgado"
-                      disabled
-                    />
-                    <RHFInput
-                      control={control}
-                      name="year"
-                      label="Año del Acta"
-                    />
-                    <RHFInput
-                      control={control}
-                      name="caratula"
-                      label="Carátula"
-                    />
-                    <ColorSelect
-                      label="Color"
-                      name="color"
-                      control={control}
-                      options={COLOR_OPTIONS}
-                    />
-                    <SelectField
-                      label="Estado"
-                      name="estado_procesal_id"
-                      control={control}
-                      options={opciones.estadosActa}
-                      error={errors.estado_procesal_id}
-                      disabled
-                    />
-                  </div>
-                </div>
 
-                {/* SECCIÓN: Mover Causa */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Mover Causa</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Actual" disabled />
-                    <SelectField label="Oficina Destino" name="movimiento_destino_id" control={control} options={opciones.oficinasInternas} error={errors.movimiento_destino_id} />
-                    <button
-                      type="button"
-                      onClick={handleMovimientoRapido}
-                      disabled={isLoading}
-                      className="h-10 px-4 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Confirmar Movimiento
-                    </button>
+                    {/*                     
+                    <div className="mx-section p-1 px-2 bg-white">
+                      <h3 className="text-xs font-bold text-primary-400 border-b pb-0.5 mb-1">Clasificación y Fechas</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-1">
+                        
+                      </div>
+                    </div> */}
                   </div>
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Motivo / Observación
-                    </label>
-                    <textarea
-                      className="w-full border rounded-lg px-3 py-2"
-                      rows={2}
-                      {...register('movimiento_motivo')}
-                    ></textarea>
-                  </div>
-                </div>
 
-                {/* SECCIÓN: Clasificación */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Clasificación</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <SelectField label="Tipo de Acta" name="tipo_id" control={control} options={opciones.tiposActa} error={errors.tipo_id} />
-                    <SelectField label="Subtipo de Acta" name="sub_tipo_id" control={control} options={opciones.subTipos} error={errors.sub_tipo_id} />
-                    <SelectField label="Ley" name="ley_id" control={control} options={opciones.leyes} error={errors.ley_id} />
-                    <SelectField label="Oficina" name="oficina_id" control={control} options={opciones.oficinas} error={errors.oficina_id} />
-                  </div>
-                </div>
+                  {/* COLUMNA DERECHA */}
+                  <div className="space-y-1.5">
+                    {/* SECCIÓN: Ubicación e Inspectores */}
+                    <div className="mx-section p-1 px-2 bg-white">
+                      <h3 className="text-xs font-bold text-primary-400 border-b pb-0.5 mb-1">Ubicación e Inspectores</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-1">
+                        <RHFInput control={control} name="lugar" label="Lugar" containerClassName="md:col-span-6" />
 
-                {/* SECCIÓN: Juzgado y Secretaría */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Juzgado y Secretaría</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                    <RHFInput control={control} name="secretaria_codigo" label="Secretaria" type="text" disabled />
-                    <RHFInput control={control} name="secretaria_descripcion" label="Secretaria" type="text" disabled />
-                    <RHFInput control={control} name="juez_codigo" label="Juez" type="text" disabled />
-                    <RHFInput control={control} name="juez_nombre" label="Juez" type="text" disabled />
-                    <RHFInput control={control} name="oficina_interna_codigo" label="Oficina Interna" type="text" disabled />
-                    <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Interna" type="text" disabled />
-                    <SelectField label="Juez Subrogante" name="juez_subrogante_id" control={control} options={opciones.juecesSubrogantes} error={errors.juez_subrogante_id} />
-                    <SelectField label="Secretaria subrogante" name="secretaria_subrogante_id" control={control} options={opciones.secretariasSubrogantes} error={errors.secretaria_subrogante_id} />
-                  </div>
-                </div>
+                        <SelectField label="Calle" name="calle_id" control={control} options={opciones.calles} error={errors.calle_id} containerClassName="md:col-span-3" />
+                        <SelectField label="Cruce de Calle" name="cruce_id" control={control} options={opciones.calles} error={errors.cruce_id} containerClassName="md:col-span-3" />
 
-                {/* SECCIÓN: Fechas */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Fechas</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <RHFInput control={control} name="fecha_labrada" label="Fecha Labrada" type="date" />
-                    <RHFInput control={control} name="fecha_carga" label="Fecha de Carga" type="date" />
-                  </div>
-                </div>
+                        <SelectField label="Inspector" name="inspector_1_id" control={control} options={opciones.inspectores} error={errors.inspector_1_id} containerClassName="md:col-span-3" />
+                        <SelectField label="2° Inspector" name="inspector_2_id" control={control} options={opciones.inspectores} error={errors.inspector_2_id} containerClassName="md:col-span-3" />
+                      </div>
+                    </div>
 
-                {/* SECCIÓN: Ubicación */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Ubicación</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <RHFInput control={control} name="lugar" label="Lugar" />
-                    <SelectField label="Calle" name="calle_id" control={control} options={opciones.calles} error={errors.calle_id} />
-                    <SelectField label="Cruce de Calle" name="cruce_id" control={control} options={opciones.calles} error={errors.cruce_id} />
-                  </div>
-                </div>
+                    {/* SECCIÓN: Juzgado y Secretaría */}
+                    <div className="mx-section p-1 px-2 bg-white">
+                      <h3 className="text-xs font-bold text-primary-400 border-b pb-0.5 mb-1">Juzgado y Secretaría</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-1">
+                        <RHFInput control={control} name="secretaria_codigo" label="Sec. Cód." type="text" disabled containerClassName="md:col-span-2" />
+                        <RHFInput control={control} name="secretaria_descripcion" label="Secretaría Descripción" type="text" disabled containerClassName="md:col-span-4" />
 
-                {/* SECCIÓN: Inspectores */}
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="text-lg font-bold mb-4">Inspectores</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SelectField label="Inspector" name="inspector_1_id" control={control} options={opciones.inspectores} error={errors.inspector_1_id} />
-                    <SelectField label="2° Inspector" name="inspector_2_id" control={control} options={opciones.inspectores} error={errors.inspector_2_id} />
+                        <RHFInput control={control} name="juez_codigo" label="Juez Cód." type="text" disabled containerClassName="md:col-span-2" />
+                        <RHFInput control={control} name="juez_nombre" label="Juez Nombre" type="text" disabled containerClassName="md:col-span-4" />
+
+                        <RHFInput control={control} name="oficina_interna_codigo" label="Of. Int. Cód." type="text" disabled containerClassName="md:col-span-2" />
+                        <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Interna Descripción" type="text" disabled containerClassName="md:col-span-4" />
+
+                        <SelectField
+                          label="Juez Subrogante"
+                          name="juez_subrogante_id"
+                          control={control}
+                          options={opciones.juecesSubrogantes}
+                          error={errors.juez_subrogante_id}
+                          containerClassName="md:col-span-3"
+                        />
+                        <SelectField
+                          label="Secretaría subrogante"
+                          name="secretaria_subrogante_id"
+                          control={control}
+                          options={opciones.secretariasSubrogantes}
+                          error={errors.secretaria_subrogante_id}
+                          containerClassName="md:col-span-3"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SECCIÓN: Mover Causa */}
+                    <div className="mx-section p-1 px-2 bg-white">
+                      <h3 className="text-xs font-bold text-primary-400 border-b pb-0.5 mb-1">Mover Causa</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-1 items-end">
+                        <RHFInput control={control} name="oficina_interna_descripcion" label="Oficina Actual" disabled containerClassName="md:col-span-2" />
+                        <SelectField
+                          label="Oficina Destino"
+                          name="movimiento_destino_id"
+                          control={control}
+                          options={opciones.oficinasInternas}
+                          error={errors.movimiento_destino_id}
+                          containerClassName="md:col-span-2"
+                        />
+
+                        <div className="md:col-span-2 mb-0.5">
+                          <button
+                            type="button"
+                            onClick={handleMovimientoRapido}
+                            disabled={isLoading}
+                            className="w-full h-8 text-xs px-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                          >
+                            Confirmar Movimiento
+                          </button>
+                        </div>
+
+                        <div className="md:col-span-6 mt-1">
+                          <label className="mx-label">Observación</label>
+                          <textarea className="w-full border rounded-lg px-2 py-0.5 text-xs" rows={4} {...register('movimiento_motivo')}></textarea>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* SECCIÓN: Tabs de Involucrados */}
-                <div className="bg-white p-6 rounded-lg shadow">
+                <div className="w-full">
                   <ActaTabsForm control={control} infractores={datosIniciales?.combos?.infractores} padrones={datosIniciales?.combos?.padrones} infracciones={datosIniciales?.combos?.infracciones} />
                 </div>
 
                 {/* BOTONES DE ACCIÓN */}
-                <div className="flex justify-end gap-4 mb-6">
-                  <button type="submit" disabled={isLoading} className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                <div className="flex justify-end gap-4 mt-2">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-1.5 h-8 text-xs bg-green-500 text-white rounded hover:bg-green-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Guardar Cambios
                   </button>
                 </div>
@@ -405,6 +419,6 @@ export const VisualizarActa = () => {
       ) : (
         <div className="text-center text-gray-500">No se encontró el acta</div>
       )}
-    </Container>
+    </DenseContainer>
   )
 }
