@@ -29,6 +29,19 @@ body {
   .app-scope h6 {
     @apply text-primary-400;
   }
+
+  /* Compresión extrema para formularios densos (Accesibilidad mínima ~32px alto) */
+  .app-scope input,
+  .app-scope select,
+  .mx-input,
+  .mx-select {
+    @apply h-8 min-h-[32px] text-xs mx-0 py-0 border-gray-300 rounded-md !important;
+  }
+
+  .app-scope label,
+  .mx-label {
+    @apply text-[11px] font-semibold text-gray-600 mb-0 leading-tight !important;
+  }
 }
 
 @layer components {
