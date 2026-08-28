@@ -133,15 +133,15 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+    <div className="bg-white rounded-xl shadow-md p-1 px-2 border border-border mt-1">
       {/* Tabs */}
-      <div className="flex border-b mb-4">
+      <div className="flex border-b mb-1">
         {tabs.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium border-b-2 ${activeTab === tab ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500'}`}
+            className={`px-3 py-1 text-xs font-medium border-b-2 ${activeTab === tab ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500'}`}
           >
             {tab === 'Infractores' ? 'Imputados' : tab}
           </button>
@@ -150,10 +150,10 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
       {/* Tabla */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs">
           <thead>
             <tr className="text-left border-b text-gray-600">
-              <th className="p-2">{activeTab === 'Infracciones' ? 'Identificación' : 'Tipo'}</th>
+              <th className="p-1">{activeTab === 'Infracciones' ? 'Identificación' : 'Tipo'}</th>
 
               {activeTab === 'Infractores' && <th className="p-1">N° Documento</th>}
 
@@ -213,7 +213,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                           <div>
                             <select
                               {...field}
-                              className={`w-full border rounded-lg px-3 py-1 ${fieldError ? 'border-red-500' : ''}`}
+                              className={`w-full border rounded-lg px-2 py-0 h-8 text-xs ${fieldError ? 'border-red-500' : ''}`}
                             >
                               <option key={''} value={''}>
                                 Seleccione
@@ -252,7 +252,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                                   type="button"
                                   onClick={() => handleBuscarInfractor(index)}
                                   disabled={searchingInfractor[index]}
-                                  className="flex items-center justify-center border-l border-gray-300 bg-gray-50 px-2 py-1 text-blue-600 hover:bg-gray-100"
+                                  className="flex items-center justify-center border-l border-gray-300 bg-gray-50 px-2 py-0 h-8 text-blue-600 hover:bg-gray-100"
                                   aria-label="Buscar"
                                   title="Buscar"
                                 >
@@ -287,7 +287,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                                 <button
                                   type="button"
                                   onClick={() => handleBuscarPadron(index)}
-                                  className="flex items-center justify-center border-l border-gray-300 bg-gray-50 px-2 py-1 text-blue-600 hover:bg-gray-100"
+                                  className="flex items-center justify-center border-l border-gray-300 bg-gray-50 px-2 py-0 h-8 text-blue-600 hover:bg-gray-100"
                                   disabled={searchingPadron[index]}
                                   aria-label="Buscar"
                                   title="Buscar"
@@ -311,7 +311,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                           const fieldError = errors?.[activeTab]?.[index]?.nombre
                           return (
                             <div>
-                              <input {...field} className={`w-full border rounded-lg px-3 py-1 ${fieldError ? 'border-red-500' : ''}`} />
+                              <input {...field} className={`w-full border rounded-lg px-2 py-0 h-8 text-xs ${fieldError ? 'border-red-500' : ''}`} />
                               {fieldError && (
                                 <p className="text-red-500 text-xs mt-1">{fieldError.message}</p>
                               )}
@@ -329,7 +329,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                               const fieldError = errors?.[activeTab]?.[index]?.categoria_infractor_id
                               return (
                                 <div>
-                                  <select {...field} className={`w-full border rounded-lg px-3 py-1 ${fieldError ? 'border-red-500' : ''}`}>
+                                  <select {...field} className={`w-full border rounded-lg px-2 py-0 h-8 text-xs ${fieldError ? 'border-red-500' : ''}`}>
                                     <option value="">Seleccione</option>
                                     {infractores?.categoria_infractor?.map((opt: any) => (
                                       <option key={opt.id} value={opt.id}>
@@ -356,7 +356,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
                               const fieldError = errors?.[activeTab]?.[index]?.categoria_padron_id
                               return (
                                 <div>
-                                  <select {...field} className={`w-full border rounded-lg px-3 py-1 ${fieldError ? 'border-red-500' : ''}`}>
+                                  <select {...field} className={`w-full border rounded-lg px-2 py-0 h-8 text-xs ${fieldError ? 'border-red-500' : ''}`}>
                                     <option value="">Seleccione</option>
                                     {padrones?.categorias?.map((opt: any) => (
                                       <option key={opt.id} value={opt.id}>
@@ -378,7 +378,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
                   {/* Acciones */}
                   <td className="p-1">
-                    <button type="button" onClick={() => removeRow(index)} className="text-red-500 hover:text-red-700 px-2 py-1 rounded">
+                    <button type="button" onClick={() => removeRow(index)} className="text-red-500 hover:text-red-700 px-2 py-1 rounded text-xs">
                       Eliminar
                     </button>
                   </td>
@@ -390,8 +390,8 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
       </div>
 
       {/* Botón para agregar fila */}
-      <div className="mt-4">
-        <button type="button" onClick={addRow} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      <div className="mt-2">
+        <button type="button" onClick={addRow} className="px-3 py-1 text-xs h-8 bg-blue-500 text-white rounded hover:bg-blue-600">
           + Agregar Fila
         </button>
       </div>
