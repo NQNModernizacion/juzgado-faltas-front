@@ -38,10 +38,10 @@ const UserLayout = () => {
 
   return (
     <>
-      <nav className="bg-surface/90 backdrop-blur shadow-mxSoft h-[90px] flex items-center border-b border-border">
-        <div className="container flex justify-between flex-wrap gap-1">
+      <nav className="bg-surface/90 backdrop-blur shadow-mxSoft h-[60px] flex items-center border-b border-border">
+        <div className="w-full px-4 flex justify-between flex-wrap gap-1">
           <LogoNeuquen
-            className="h-16 w-auto text-primary-500 cursor-pointer"
+            className="h-10 w-auto text-primary-500 cursor-pointer"
             onClick={() => nav('/')}
           />
 
@@ -71,7 +71,7 @@ const UserLayout = () => {
         </div>
       </nav>
 
-      <main className="app-scope container mx-auto py-6">
+      <main className="app-scope w-full px-4 py-3">
         <Outlet />
       </main>
 
