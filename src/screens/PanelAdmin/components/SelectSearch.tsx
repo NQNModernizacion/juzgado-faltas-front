@@ -52,8 +52,10 @@ const SelectSearch = <T,>({
   const selectStyles: SelectProps<T, boolean, GroupBase<T>>['styles'] = {
     control: (base, state) => ({
       ...base,
-      borderRadius: 12,
-      minHeight: 40,
+      borderRadius: 6,
+      minHeight: 32,
+      height: 32,
+      fontSize: 12,
 
       // ✅ borde coral SIEMPRE (como el resto del formulario)
       borderColor: 'rgb(var(--mx-primary-600))',
@@ -75,13 +77,17 @@ const SelectSearch = <T,>({
 
     valueContainer: (base) => ({
       ...base,
-      paddingLeft: 10,
-      paddingRight: 10,
+      paddingLeft: 6,
+      paddingRight: 6,
+      height: 30,
+      paddingTop: 0,
+      paddingBottom: 0,
     }),
 
     placeholder: (base) => ({
       ...base,
       color: 'rgba(var(--mx-text), 0.6)',
+      margin: 0,
     }),
 
     singleValue: (base) => ({
@@ -107,6 +113,18 @@ const SelectSearch = <T,>({
       boxShadow: '0 12px 30px rgba(0,0,0,0.14)',
     }),
 
+    indicatorsContainer: (base) => ({
+      ...base,
+      height: 30,
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: 4,
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      padding: 4,
+    }),
     indicatorSeparator: (base) => ({
       ...base,
       backgroundColor: 'rgb(var(--mx-border))',
