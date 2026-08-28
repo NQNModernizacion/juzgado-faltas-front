@@ -10,6 +10,7 @@ interface InputFieldProps {
   maxLength?: number;
   transform?: (value: string) => string;
   onChange?: (value: string) => void;
+  containerClassName?: string;
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -21,9 +22,10 @@ export const InputField: React.FC<InputFieldProps> = ({
   maxLength,
   transform,
   onChange,
+  containerClassName,
 }) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${containerClassName || ""}`}>
       <label className="mx-label">
         {label}
       </label>
