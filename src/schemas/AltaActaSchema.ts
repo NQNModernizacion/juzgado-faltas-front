@@ -71,7 +71,7 @@ const cruce_id = string().optional();
 
 const estado_acta_id = number()
   .transform(toNumber)
-  .required('El estado es requerido')
+  .optional()
   .typeError('El estado debe ser un número')
   .integer('Debe ser un número entero');
 
@@ -100,10 +100,16 @@ const inspector_2_id = number()
 const color = string().optional();
 const caratula = string().optional();
 const observacion = string().optional();
-const medida_cautelar_id = number()
+const oficina_destino_id = number()
   .transform(toNumber)
   .optional()
-  .typeError('Debe ser un número');
+  .typeError('La oficina destino debe ser un número')
+  .integer('Debe ser un número entero');
+
+const medida_cautelar_id = array()
+  .of(number().transform(toNumber))
+  .optional()
+  .typeError('Debe ser un arreglo de números');
 
 // Validaciones para filas de arrays
 const baseRowSchema = object().shape({
@@ -151,6 +157,7 @@ export const AltaActaSchema = object({
   color,
   caratula,
   observacion,
+  oficina_destino_id,
   medida_cautelar_id,
   Padrones: array().of(baseRowSchema),
   Infractores: array().of(infractorRowSchema),
