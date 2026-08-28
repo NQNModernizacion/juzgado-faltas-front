@@ -14,6 +14,7 @@ interface SelectFieldProps {
   error?: FieldError;
   disabled?: boolean;
   onChange?: (value: string) => void;
+  containerClassName?: string;
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -24,9 +25,10 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   error,
   disabled = false,
   onChange,
+  containerClassName,
 }) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${containerClassName || ""}`}>
       <label className="mx-label">
         {label}
       </label>
