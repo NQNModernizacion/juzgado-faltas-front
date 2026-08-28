@@ -18,12 +18,17 @@ export const onSubmitAlta = async (
       }))
       : []
 
-    formData.fecha_labrada = new Date(formData.fecha_labrada)
-      .toISOString()
-      .split('T')[0]
-    formData.fecha_carga = new Date(formData.fecha_carga)
-      .toISOString()
-      .split('T')[0]
+    if (formData.fecha_labrada) {
+      formData.fecha_labrada = new Date(formData.fecha_labrada).toISOString().split('T')[0]
+    } else {
+      formData.fecha_labrada = null
+    }
+
+    if (formData.fecha_carga) {
+      formData.fecha_carga = new Date(formData.fecha_carga).toISOString().split('T')[0]
+    } else {
+      formData.fecha_carga = null
+    }
     formData.fecha_notificado = formData.fecha_notificado
       ? new Date(formData.fecha_notificado).toISOString().split('T')[0]
       : null
@@ -429,12 +434,17 @@ export const editarActa = async (
       }))
       : []
 
-    formData.fecha_labrada = new Date(formData.fecha_labrada)
-      .toISOString()
-      .split('T')[0]
-    formData.fecha_carga = new Date(formData.fecha_carga)
-      .toISOString()
-      .split('T')[0]
+    if (formData.fecha_labrada) {
+      formData.fecha_labrada = new Date(formData.fecha_labrada).toISOString().split('T')[0]
+    } else {
+      formData.fecha_labrada = null
+    }
+
+    if (formData.fecha_carga) {
+      formData.fecha_carga = new Date(formData.fecha_carga).toISOString().split('T')[0]
+    } else {
+      formData.fecha_carga = null
+    }
     formData.fecha_notificado = formData.fecha_notificado
       ? new Date(formData.fecha_notificado).toISOString().split('T')[0]
       : null
