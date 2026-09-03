@@ -11,6 +11,7 @@ import { COLOR_OPTIONS } from '@/config/actaOptions'
 import { MovimientosTab } from './components/MovimientosTab'
 import { EstadoProcesalTab } from './components/EstadoProcesalTab'
 import { PruebasTab } from './components/PruebasTab'
+import { FormulariosTab } from './components/FormulariosTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
 import { BotonCaratula } from './components/BotonCaratula'
@@ -119,7 +120,7 @@ interface VisualizarActaValues {
   Infracciones?: any[]
 }
 
-type TabId = 'info' | 'movimientos' | 'estados' | 'pruebas' | 'grupo'
+type TabId = 'info' | 'movimientos' | 'estados' | 'pruebas' | 'formularios' | 'grupo'
 
 interface TabDef {
   id: TabId
@@ -132,6 +133,7 @@ const TABS: TabDef[] = [
   { id: 'movimientos', label: 'Movimientos' },
   { id: 'estados', label: 'Estado Procesal' },
   { id: 'pruebas', label: 'Pruebas' },
+  { id: 'formularios', label: 'Formularios' },
   { id: 'grupo', label: 'Grupo', visible: (acta) => Boolean(acta.grupo_acta_id) },
 ]
 
@@ -412,6 +414,8 @@ export const VisualizarActa = () => {
             {activeTab === 'estados' && <EstadoProcesalTab actaId={id} estadosProcesales={opciones.estadosActa} setIsLoadingGlobal={setIsLoading} />}
 
             {activeTab === 'pruebas' && <PruebasTab actaId={id} setIsLoadingGlobal={setIsLoading} />}
+
+            {activeTab === 'formularios' && <FormulariosTab actaId={id} setIsLoadingGlobal={setIsLoading} />}
 
             {activeTab === 'grupo' && <GrupoTab actaId={acta.id} grupo={acta.grupo} />}
           </form>

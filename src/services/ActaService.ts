@@ -479,3 +479,72 @@ export const getCaratulaActa = async (
   return resp.data
 }
 
+export interface FormularioActa {
+  id: number | string
+  nombre: string
+  contenido: string
+}
+
+export const FORMULARIOS_MOCK: FormularioActa[] = [
+  {
+    id: 'descargo',
+    nombre: 'Descargo',
+    contenido:
+      '<p><strong>DESCARGO</strong></p><p><br></p><p>En la ciudad de Neuquén, a los ____ días del mes de __________ de ______, comparece el/la Sr/a ______________________ y, en ejercicio de su defensa, presenta el siguiente descargo:</p><p><br></p><p>________________________________________________________________</p><p><br></p><p>_______________________</p><p>Firma</p>',
+  },
+  {
+    id: 'notificacion_audiencia',
+    nombre: 'Notificación de Audiencia',
+    contenido:
+      '<p><strong>NOTIFICACIÓN DE AUDIENCIA</strong></p><p><br></p><p>Se notifica al/la Sr/a ______________________ la celebración de la audiencia el día ____ de __________ de ______ a las ____ hs., en las oficinas del Tribunal de Faltas.</p><p><br></p><p>_______________________</p><p>Firma</p>',
+  },
+  {
+    id: 'resolucion',
+    nombre: 'Resolución',
+    contenido:
+      '<p><strong>RESOLUCIÓN</strong></p><p><br></p><p>Neuquén Capital, ____ de __________ de ______.</p><p><br></p><p>VISTOS: ...</p><p><br></p><p>Y CONSIDERANDO: ...</p><p><br></p><p>RESUELVO: ...</p><p><br></p><p>_______________________</p><p>Firma</p>',
+  },
+]
+
+export const getFormulariosActa = async (
+  actaId: any,
+  setFormularios: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    const resp = await axios().get(`actas/${actaId}/formularios`)
+    const data = resp.data.data || resp.data
+
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      setFormularios(FORMULARIOS_MOCK)
+      return
+    }
+
+    setFormularios(data)
+  } catch {
+    setFormularios(FORMULARIOS_MOCK)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+export const guardarFormularioActa = async (
+  actaId: any,
+  formularioId: any,
+  contenido: string,
+  onSuccess: any,
+  setIsLoading: any
+) => {
+  try {
+    setIsLoading(true)
+    await axios().put(`actas/${actaId}/formularios/${formularioId}`, { contenido })
+    toast.success('Formulario guardado correctamente', toastOptions)
+    if (onSuccess) onSuccess()
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error.message, toastOptions)
+  } finally {
+    setIsLoading(false)
+  }
+}
+
