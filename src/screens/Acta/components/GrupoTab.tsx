@@ -28,7 +28,7 @@ export const GrupoTab = ({ actaId, grupo }: Props) => {
   }
 
   // Asumimos que el backend envía la relación actas dentro del objeto grupo
-  const actasDelGrupo = grupo.actas || []
+  const actasDelGrupo = grupoState?.actas || grupo.actas || []
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'Causa', width: 100, align: 'center' },
@@ -78,7 +78,7 @@ export const GrupoTab = ({ actaId, grupo }: Props) => {
         <div className="w-full">
           {/* {grupoState?.actas?.length > 0 ? ( */}
           <Table
-            data={{ rows: grupoState?.actas, columns }}
+            data={{ rows: filas, columns }}
             height={400}
             loading={isLoading}
             noResultsMessage="No se encontraron actas relacionadas en este grupo o no se cargaron correctamente."
