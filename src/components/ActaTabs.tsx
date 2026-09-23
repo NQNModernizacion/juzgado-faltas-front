@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useFieldArray, Controller, useWatch, FieldErrors } from 'react-hook-form'
+import { useFieldArray, Controller, useWatch } from 'react-hook-form'
 import SelectSearch from '@/screens/PanelAdmin/components/SelectSearch'
 import { buscarInfractorDni, buscarPadronDni } from '@/services/ActaService'
 import Lupa from '@/components/Svgs/Lupa'
@@ -101,7 +101,7 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
     try {
       setSearchingPadron((prev) => ({ ...prev, [index]: true }))
-      const result = await buscarPadronDni(tipoNombre, identificacion)
+      await buscarPadronDni(tipoNombre, identificacion)
       toast.success('Padrón encontrado', toastOptions);
     } catch (error) {
       toast.error('Error buscando padrón', toastOptions);
@@ -112,7 +112,6 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
   const handleBuscarInfractor = async (index: number) => {
     const identificacion = infractoresValues?.[index]?.identificacion || ''
-    const tipoId = infractoresValues?.[index]?.tipo_id
 
     if (!identificacion) {
       toast.warning('Debe completar identificación para buscar imputados', toastOptions)

@@ -4,14 +4,12 @@ import { MultiSelectField } from '@/components/Forms/MultiSelectField'
 import ColorSelect from '@/components/Forms/ColorSelect'
 import MuniSpinner from '@/components/MuniSpinner'
 import { COLOR_OPTIONS } from '@/config/actaOptions'
-import ChevronLeft from '@/components/Svgs/ChevronLeft'
 import { AltaActaSchema } from '@/schemas/AltaActaSchema'
 import { getDatosInicialesActa, onSubmitAlta } from '@/services/ActaService'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ButtonBase, FormFooter, RHFInput } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useForm, Controller, Resolver } from 'react-hook-form'
 import { DenseContainer } from '@/components/Layouts/DenseContainer'
 
 interface Row {
@@ -58,7 +56,6 @@ const createEmptyRows = () =>
 
 export const AltaActa = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const nav = useNavigate()
   const [datosIniciales, setDatosIniciales] = useState<any>(null)
   const [estadoActaVisual, setEstadoActaVisual] = useState<string | number | undefined>(undefined)
 
@@ -83,7 +80,7 @@ export const AltaActa = () => {
       inspector_2_id: undefined,
       oficina_destino_id: undefined,
     },
-    resolver: yupResolver(AltaActaSchema),
+    resolver: yupResolver(AltaActaSchema) as unknown as Resolver<FormValues>,
   })
 
   const selectedOfficeId = watch('oficina_id') as string | number | undefined
@@ -135,7 +132,7 @@ export const AltaActa = () => {
           className="w-full mx-auto"
           onSubmit={handleSubmit(
             // (formData) => console.log('formData', formData)
-            (formData) => onSubmitAlta(formData, setIsLoading, nav)
+            (formData) => onSubmitAlta(formData, setIsLoading)
           )}
         >
           {/* SECCIÓN SUPERIOR: DATOS GENERALES Y UBICACIÓN LADO A LADO */}
