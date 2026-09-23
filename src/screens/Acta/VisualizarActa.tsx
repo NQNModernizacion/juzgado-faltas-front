@@ -1,5 +1,5 @@
-import { editarActa, getActa, getDatosInicialesActa, getCaratulaActa, postMoverCausa } from '@/services/ActaService'
-import { RHFInput, Modal, ModalHeader, ModalContent } from '@nqnmodernizacion/muni-ui'
+import { editarActa, getActa, getDatosInicialesActa, postMoverCausa } from '@/services/ActaService'
+import { RHFInput } from '@nqnmodernizacion/muni-ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -15,7 +15,6 @@ import { FormulariosTab } from './components/FormulariosTab'
 import { BannerAgrupacion } from './components/BannerAgrupacion'
 import { GrupoTab } from './components/GrupoTab'
 import { BotonCaratula } from './components/BotonCaratula'
-import ChevronLeft from '@/components/Svgs/ChevronLeft'
 import { DenseContainer } from '@/components/Layouts/DenseContainer'
 
 interface SelectOption {
