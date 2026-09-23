@@ -1,5 +1,7 @@
+import { GridColDef } from '@mui/x-data-grid'
+
 export const TableData = (data: any, nav: any) => {
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: 'id',
       // headerName: 'ID',
@@ -41,7 +43,7 @@ export const TableData = (data: any, nav: any) => {
       headerAlign: 'center',
       align: 'center',
       renderCell: (params: any) => {
-        let clase = params.row.grupo_acta_id
+        const clase = params.row.grupo_acta_id
           ? 'px-3 py-1 rounded text-xs font-medium text-white bg-teal-500'
           : ''
         return (
