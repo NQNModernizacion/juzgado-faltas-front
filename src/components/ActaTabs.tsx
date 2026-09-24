@@ -13,7 +13,7 @@ const tabs: TabType[] = ['Padrones', 'Infractores', 'Infracciones']
 
 let tipoOptions: any = [];
 
-export default function ActaTabsForm({ control, infractores, padrones, infracciones, errors }: any) {
+export default function ActaTabsForm({ control, setValue, infractores, padrones, infracciones, errors }: any) {
 
   const [activeTab, setActiveTab] = useState<TabType>('Padrones');
   const [searchingPadron, setSearchingPadron] = useState<Record<number, boolean>>({});
@@ -80,52 +80,94 @@ export default function ActaTabsForm({ control, infractores, padrones, infraccio
 
 
   const handleBuscarPadron = async (index: number) => {
-    const identificacion = padronesValues?.[index]?.identificacion || ''
+    const identificacion = (padronesValues?.[index]?.identificacion || '').trim().toUpperCase()
     const tipoId = padronesValues?.[index]?.tipo_id
 
     const tipoOption = padrones?.tipo_padron?.find(
       (opt: any) =>
         String(opt.id) === String(tipoId) || String(opt.value) === String(tipoId)
     )
+    const tipoCodigo = tipoOption?.value || ''
     const tipoNombre = tipoOption?.nombre || ''
 
-    if (!identificacion) {
-      toast.warning('Debe completar identificación para buscar padrones', toastOptions);
+    if (!tipoId || !tipoOption) {
+      toast.warning('Debe seleccionar el tipo de padrón', toastOptions)
       return
     }
 
-    if (!['Automotores', 'Motovehiculos'].includes(tipoNombre)) {
-      toast.warning('La búsqueda solo está disponible para Automotores o Motovehiculos', toastOptions);
+    if (!identificacion) {
+      toast.warning('Debe completar la identificación (patente) para buscar padrones', toastOptions)
+      return
+    }
+
+    if (!['AUT', 'MOT'].includes(tipoCodigo) && !['Automotores', 'Motovehiculos'].includes(tipoNombre)) {
+      toast.warning('La búsqueda automática está disponible para Automotores o Motovehículos', toastOptions)
       return
     }
 
     try {
       setSearchingPadron((prev) => ({ ...prev, [index]: true }))
-      await buscarPadronDni(tipoNombre, identificacion)
-      toast.success('Padrón encontrado', toastOptions);
+      const codigoParam = ['AUT', 'MOT'].includes(tipoCodigo) ? tipoCodigo : (tipoNombre === 'Automotores' ? 'AUT' : 'MOT')
+      const data = await buscarPadronDni(codigoParam, identificacion)
+
+      if (data) {
+        let nombreAuto = ''
+        if (data.vehiculo) {
+          nombreAuto = `${data.vehiculo.marca || ''} ${data.vehiculo.modelo || ''}`.trim()
+        } else if (typeof data === 'string') {
+          nombreAuto = data
+        } else if (data.nombre) {
+          nombreAuto = data.nombre
+        }
+
+        if (nombreAuto && setValue) {
+          setValue(`Padrones.${index}.nombre`, nombreAuto, { shouldDirty: true, shouldValidate: true })
+        }
+        toast.success(`Padrón encontrado: ${nombreAuto || identificacion}`, toastOptions)
+      } else {
+        toast.info('No se encontraron datos para la identificación ingresada', toastOptions)
+      }
     } catch (error) {
-      toast.error('Error buscando padrón', toastOptions);
+      // El toast de error ya es manejado en buscarPadronDni con el mensaje específico
     } finally {
       setSearchingPadron((prev) => ({ ...prev, [index]: false }))
     }
   }
 
   const handleBuscarInfractor = async (index: number) => {
-    const identificacion = infractoresValues?.[index]?.identificacion || ''
+    const documento = (infractoresValues?.[index]?.documento || infractoresValues?.[index]?.identificacion || '').trim()
+    const tipoId = infractoresValues?.[index]?.tipo_id
 
-    if (!identificacion) {
-      toast.warning('Debe completar identificación para buscar imputados', toastOptions)
+    const tipoOption = infractores?.tipo?.find(
+      (opt: any) =>
+        String(opt.id) === String(tipoId) || String(opt.value) === String(tipoId) || String(opt.nombre) === String(tipoId)
+    )
+    const tipoNombre = tipoOption?.nombre || tipoOption?.value || 'DNI'
+
+    if (!documento) {
+      toast.warning('Debe completar el número de documento para buscar imputados', toastOptions)
       return
     }
 
     try {
       setSearchingInfractor((prev) => ({ ...prev, [index]: true }))
-      const result = await buscarInfractorDni(identificacion)
-      toast.success('Imputado encontrado', toastOptions)
-      console.log('Resultado búsqueda imputado', result)
+      const data = await buscarInfractorDni(tipoNombre, documento)
+
+      if (data) {
+        const nombreCompleto = data.nombreCompleto || `${data.nombre || ''} ${data.apellido || ''}`.trim()
+        if (nombreCompleto && setValue) {
+          setValue(`Infractores.${index}.nombre`, nombreCompleto, { shouldDirty: true, shouldValidate: true })
+        }
+        if (data.documento && setValue) {
+          setValue(`Infractores.${index}.documento`, data.documento, { shouldDirty: true, shouldValidate: true })
+          setValue(`Infractores.${index}.identificacion`, data.documento, { shouldDirty: true, shouldValidate: true })
+        }
+        toast.success(`Imputado encontrado: ${nombreCompleto || documento}`, toastOptions)
+      } else {
+        toast.info('No se encontraron datos para el documento ingresado', toastOptions)
+      }
     } catch (error) {
-      toast.error('Error buscando imputado', toastOptions)
-      console.error('Error buscando imputado', error)
+      // El toast de error ya es manejado en buscarInfractorDni con el mensaje específico
     } finally {
       setSearchingInfractor((prev) => ({ ...prev, [index]: false }))
     }

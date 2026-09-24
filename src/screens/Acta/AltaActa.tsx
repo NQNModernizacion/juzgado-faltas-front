@@ -243,6 +243,7 @@ export const AltaActa = () => {
           <div className="w-full">
             <ActaTabsForm
               control={control}
+              setValue={setValue}
               errors={errors}
               infractores={datosIniciales?.combos?.infractores}
               padrones={datosIniciales?.combos?.padrones}

@@ -57,33 +57,42 @@ export const getDatosInicialesActa = async (setIsLoading: any, setDatosIniciales
 
 export const buscarPadronDni = async (tipo: string, identificacion: string) => {
   try {
-    return
-
-    const resp = await axios().get('/buscar_padron', {
+    const resp = await axios().get('/consultar_padron', {
       params: {
         tipo,
         identificacion,
       },
     })
-    const { data } = resp
-    return data
+    return resp.data?.data
   } catch (error: any) {
-    toast.error(error?.message || 'Error al buscar padrón', toastOptions)
+    const errorMsg =
+      error?.response?.data?.error?.general ||
+      error?.response?.data?.error?.identificacion?.[0] ||
+      error?.response?.data?.message ||
+      error?.message ||
+      'Error al buscar padrón'
+    toast.error(errorMsg, toastOptions)
     throw error
   }
 }
 
-export const buscarInfractorDni = async (identificacion: string) => {
+export const buscarInfractorDni = async (tipo: string, identificacion: string) => {
   try {
-    return
-
-    const resp = await axios().get('/buscar_infractor', {
-      params: { identificacion },
+    const resp = await axios().get('/consultar_imputado', {
+      params: {
+        tipo,
+        identificacion,
+      },
     })
-    const { data } = resp
-    return data
+    return resp.data?.data
   } catch (error: any) {
-    toast.error(error?.message || 'Error al buscar imputado', toastOptions)
+    const errorMsg =
+      error?.response?.data?.error?.general ||
+      error?.response?.data?.error?.identificacion?.[0] ||
+      error?.response?.data?.message ||
+      error?.message ||
+      'Error al buscar imputado'
+    toast.error(errorMsg, toastOptions)
     throw error
   }
 }
