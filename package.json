@@ -1,6 +1,6 @@
 {
-  "name": "template-front-tailwind",
-  "description": "descripcion-template-front",
+  "name": "frontend-juzgado-faltas",
+  "description": "Interfaz web para el juzgado de faltas",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -22,6 +22,7 @@
     "@mui/x-data-grid": "^6.11.2",
     "@nqnmodernizacion/muni-ui": "^0.1.0",
     "@tanstack/react-query": "^5.90.21",
+    "@tinymce/tinymce-react": "^5.1.1",
     "axios": "^1.6.8",
     "motion": "^12.0.6",
     "react": "^18.2.0",
@@ -31,6 +32,7 @@
     "react-router-dom": "^6.22.3",
     "react-select": "^5.8.0",
     "react-toastify": "^10.0.4",
+    "tinymce": "^7.3.0",
     "yup": "^1.4.0",
     "zustand": "^5.0.11"
   },
