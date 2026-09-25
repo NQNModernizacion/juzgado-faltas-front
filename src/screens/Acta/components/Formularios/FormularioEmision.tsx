@@ -10,6 +10,8 @@ export interface FormularioEmisionProps {
   isCargandoInicial: boolean
   isPrecargando: boolean
   isGuardando: boolean
+  editingDocumentoId?: number | null
+  onCancelarEdicion?: () => void
   onSeleccionarPlantilla: (codigo: string) => void
   onChangeContenido: (html: string) => void
   onGuardar: () => void
@@ -23,6 +25,8 @@ export const FormularioEmision = ({
   isCargandoInicial,
   isPrecargando,
   isGuardando,
+  editingDocumentoId,
+  onCancelarEdicion,
   onSeleccionarPlantilla,
   onChangeContenido,
   onGuardar,
@@ -31,11 +35,33 @@ export const FormularioEmision = ({
   const selectId = useId()
 
   return (
-    <div className="mx-section p-2 sm:p-3 bg-white">
-      <div className="border-b pb-1 mb-2">
-        <h3 className="text-xs font-bold text-primary-500 uppercase tracking-wide">
-          Emisión de Nuevo Formulario / Sentencia
-        </h3>
+    <div id="formulario-emision-section" className="mx-section p-2 sm:p-3 bg-white">
+      <div className="flex items-center justify-between border-b pb-1 mb-2">
+        <div className="flex items-center gap-2">
+          <h3
+            className={`text-xs font-bold uppercase tracking-wide ${
+              editingDocumentoId ? 'text-amber-600' : 'text-primary-500'
+            }`}
+          >
+            {editingDocumentoId
+              ? `✏️ Editando Formulario / Sentencia (#${editingDocumentoId})`
+              : 'Emisión de Nuevo Formulario / Sentencia'}
+          </h3>
+          {editingDocumentoId && (
+            <span className="text-[11px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.2 rounded-full">
+              Modo Edición
+            </span>
+          )}
+        </div>
+        {editingDocumentoId && onCancelarEdicion && (
+          <button
+            type="button"
+            onClick={onCancelarEdicion}
+            className="text-[11px] text-gray-600 hover:text-gray-900 font-medium px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-100 transition-colors flex items-center gap-1"
+          >
+            ✖ Cancelar Edición
+          </button>
+        )}
       </div>
 
       {/* Selector de plantilla */}
@@ -81,13 +107,19 @@ export const FormularioEmision = ({
 
           <div className="flex items-center justify-between pt-1">
             <p className="text-[11px] text-gray-500 italic">
-              * Formato procesador de texto legal: justificado de margen a margen, control de fuentes, tablas y saltos de página.
+              {editingDocumentoId
+                ? `* Modificando documento guardado #${editingDocumentoId}. Al presionar "Actualizar", los cambios reemplazarán la versión en la causa.`
+                : '* Formato procesador de texto legal: justificado de margen a margen, control de fuentes, tablas y saltos de página.'}
             </p>
             <button
               type="button"
               onClick={onGuardar}
               disabled={isGuardando || isPrecargando || !contenido}
-              className="h-8 px-4 text-xs bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className={`h-8 px-4 text-xs text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 ${
+                editingDocumentoId
+                  ? 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-primary-600 hover:bg-primary-700'
+              }`}
             >
               {isGuardando ? (
                 <>
@@ -95,10 +127,10 @@ export const FormularioEmision = ({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Guardando...
+                  {editingDocumentoId ? 'Actualizando...' : 'Guardando...'}
                 </>
               ) : (
-                '💾 Guardar Formulario'
+                editingDocumentoId ? '💾 Actualizar Formulario' : '💾 Guardar Formulario'
               )}
             </button>
           </div>

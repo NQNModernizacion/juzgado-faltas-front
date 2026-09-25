@@ -9,6 +9,7 @@ import {
   getFormulariosActa,
   precargarFormulario,
   guardarFormulario,
+  actualizarFormulario,
   getPdfDocumento,
 } from '@/services/FormularioService'
 import { FormulariosHistorial } from './Formularios/FormulariosHistorial'
@@ -31,6 +32,7 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
   const [selectedCodigo, setSelectedCodigo] = useState('')
   const [selectedPlantilla, setSelectedPlantilla] = useState<Plantilla | null>(null)
   const [contenido, setContenido] = useState('')
+  const [editingDocumentoId, setEditingDocumentoId] = useState<number | null>(null)
 
   // Estados de carga
   const [isCargandoInicial, setIsCargandoInicial] = useState(false)
@@ -85,6 +87,10 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
   // Seleccionar plantilla -> precarga
   const handleSeleccionarPlantilla = async (codigo: string) => {
     setSelectedCodigo(codigo)
+    if (editingDocumentoId) {
+      setEditingDocumentoId(null)
+    }
+
     if (!codigo) {
       setSelectedPlantilla(null)
       setContenido('')
@@ -119,9 +125,55 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
     }
   }
 
-  // Guardar formulario
+  // Iniciar edición de un formulario previamente emitido
+  const handleIniciarEdicion = (formulario: FormularioGuardado) => {
+    setEditingDocumentoId(formulario.id)
+
+    // Buscar la plantilla coincidente
+    const encontrada =
+      plantillas.find(
+        (p) =>
+          p.id === formulario.plantilla_documento_id ||
+          p.codigo === formulario.plantilla?.codigo ||
+          p.codigo === formulario.tipo
+      ) || null
+
+    setSelectedPlantilla(encontrada)
+    setSelectedCodigo(encontrada?.codigo ?? formulario.plantilla?.codigo ?? formulario.tipo)
+
+    const htmlToEdit = formulario.contenido_html || ''
+    setContenido(htmlToEdit)
+
+    if (editorRef.current) {
+      editorRef.current.setContent(htmlToEdit)
+    }
+
+    // Scroll suave hacia la sección del editor
+    document.getElementById('formulario-emision-section')?.scrollIntoView({ behavior: 'smooth' })
+
+    toast.info(`Cargado documento #${formulario.id} para edición`, toastOptions)
+  }
+
+  // Cancelar modo edición
+  const handleCancelarEdicion = () => {
+    setEditingDocumentoId(null)
+    setSelectedCodigo('')
+    setSelectedPlantilla(null)
+    setContenido('')
+    if (editorRef.current) {
+      editorRef.current.setContent('')
+    }
+    toast.info('Edición cancelada', toastOptions)
+  }
+
+  // Guardar o Actualizar formulario
   const handleGuardar = async () => {
-    if (!actaId || !selectedPlantilla) {
+    if (!actaId) {
+      toast.error('No se encontró el ID del acta', toastOptions)
+      return
+    }
+
+    if (!selectedPlantilla && !selectedCodigo) {
       toast.warning('Seleccione una plantilla antes de guardar', toastOptions)
       return
     }
@@ -137,14 +189,23 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
       setIsGuardando(true)
       if (setIsLoadingGlobal) setIsLoadingGlobal(true)
 
-      await guardarFormulario(actaId, {
-        plantilla_documento_id: selectedPlantilla.id,
-        tipo: selectedPlantilla.codigo,
-        contenido_html: htmlFinal,
-      })
+      if (editingDocumentoId) {
+        await actualizarFormulario(editingDocumentoId, {
+          plantilla_documento_id: selectedPlantilla?.id,
+          tipo: selectedPlantilla?.codigo ?? selectedCodigo,
+          contenido_html: htmlFinal,
+        })
+        toast.success(`Formulario #${editingDocumentoId} actualizado exitosamente`, toastOptions)
+      } else {
+        await guardarFormulario(actaId, {
+          plantilla_documento_id: selectedPlantilla?.id ?? 0,
+          tipo: selectedPlantilla?.codigo ?? selectedCodigo,
+          contenido_html: htmlFinal,
+        })
+        toast.success('Formulario guardado exitosamente', toastOptions)
+      }
 
-      toast.success('Formulario guardado exitosamente', toastOptions)
-
+      setEditingDocumentoId(null)
       setSelectedCodigo('')
       setSelectedPlantilla(null)
       setContenido('')
@@ -234,9 +295,11 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
         isCargando={isCargandoInicial}
         descargandoId={descargandoId}
         isCargandoPdf={isCargandoPdf}
+        editingDocumentoId={editingDocumentoId}
         onRecargar={recargarEmitidos}
         onPrevisualizar={handlePrevisualizarPdf}
         onDescargar={handleDescargarPdf}
+        onEditar={handleIniciarEdicion}
       />
 
       <FormularioEmision
@@ -246,6 +309,8 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
         isCargandoInicial={isCargandoInicial}
         isPrecargando={isPrecargando}
         isGuardando={isGuardando}
+        editingDocumentoId={editingDocumentoId}
+        onCancelarEdicion={handleCancelarEdicion}
         onSeleccionarPlantilla={handleSeleccionarPlantilla}
         onChangeContenido={setContenido}
         onGuardar={handleGuardar}

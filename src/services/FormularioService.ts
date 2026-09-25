@@ -23,8 +23,12 @@ export interface GuardarFormularioPayload {
 
 export interface FormularioGuardado {
   id: number
+  acta_id?: number
   tipo: string
+  contenido_html?: string
+  plantilla_documento_id?: number
   created_at: string
+  updated_at?: string
   plantilla?: {
     id: number
     codigo: string
@@ -68,6 +72,17 @@ export const guardarFormulario = async (
   payload: GuardarFormularioPayload
 ): Promise<unknown> => {
   const resp = await axios().post(`/actas/${actaId}/formularios`, payload)
+  return resp.data.data ?? resp.data
+}
+
+/**
+ * Actualiza un formulario previamente emitido/guardado.
+ */
+export const actualizarFormulario = async (
+  documentoId: string | number,
+  payload: Partial<GuardarFormularioPayload>
+): Promise<unknown> => {
+  const resp = await axios().put(`/documentos/${documentoId}`, payload)
   return resp.data.data ?? resp.data
 }
 

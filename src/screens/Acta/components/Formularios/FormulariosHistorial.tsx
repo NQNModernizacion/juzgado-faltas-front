@@ -5,9 +5,11 @@ export interface FormulariosHistorialProps {
   isCargando: boolean
   descargandoId: number | null
   isCargandoPdf: boolean
+  editingDocumentoId?: number | null
   onRecargar: () => void
   onPrevisualizar: (documentoId: number) => void
   onDescargar: (documentoId: number, tipoDoc: string) => void
+  onEditar?: (formulario: FormularioGuardado) => void
 }
 
 export const FormulariosHistorial = ({
@@ -15,9 +17,11 @@ export const FormulariosHistorial = ({
   isCargando,
   descargandoId,
   isCargandoPdf,
+  editingDocumentoId,
   onRecargar,
   onPrevisualizar,
   onDescargar,
+  onEditar,
 }: FormulariosHistorialProps) => {
   return (
     <div className="mx-section p-2 sm:p-3 bg-white">
@@ -60,14 +64,33 @@ export const FormulariosHistorial = ({
             <tbody className="divide-y divide-gray-100 text-xs">
               {formularios.map((f) => {
                 const isDownloading = descargandoId === f.id
+                const isEditingThis = editingDocumentoId === f.id
                 return (
-                  <tr key={f.id} className="hover:bg-primary-50/40 transition-colors">
+                  <tr
+                    key={f.id}
+                    className={`transition-colors ${
+                      isEditingThis ? 'bg-amber-50/80 font-medium' : 'hover:bg-primary-50/40'
+                    }`}
+                  >
                     <td className="py-1 px-2 font-medium text-gray-700">#{f.id}</td>
                     <td className="py-1 px-2 text-gray-600">{f.created_at}</td>
                     <td className="py-1 px-2 font-semibold text-primary-700">
                       {f.plantilla?.nombre ?? f.tipo}
                     </td>
                     <td className="py-1 px-2 text-right space-x-1">
+                      {onEditar && (
+                        <button
+                          type="button"
+                          onClick={() => onEditar(f)}
+                          className={`h-6 px-2 text-[11px] rounded font-medium border transition-colors ${
+                            isEditingThis
+                              ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-sm'
+                              : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200'
+                          }`}
+                        >
+                          {isEditingThis ? '✏️ Editando...' : '✏️ Editar'}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => onPrevisualizar(f.id)}
