@@ -15,7 +15,6 @@ import 'tinymce/plugins/advlist'
 import 'tinymce/plugins/autolink'
 import 'tinymce/plugins/lists'
 import 'tinymce/plugins/link'
-import 'tinymce/plugins/image'
 import 'tinymce/plugins/charmap'
 import 'tinymce/plugins/searchreplace'
 import 'tinymce/plugins/fullscreen'
@@ -50,7 +49,7 @@ export const TinyEditor = memo(({ value, onChange, onInit, height = 550, disable
           promotion: false,
           branding: false,
           language: 'es',
-          plugins: ['advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'searchreplace', 'fullscreen', 'pagebreak', 'table', 'wordcount'],
+          plugins: ['advlist', 'autolink', 'lists', 'link', 'charmap', 'searchreplace', 'fullscreen', 'pagebreak', 'table', 'wordcount'],
           toolbar: [
             'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor',
             'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
