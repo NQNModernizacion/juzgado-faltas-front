@@ -25,6 +25,7 @@ export interface FormularioGuardado {
   id: number
   acta_id?: number
   tipo: string
+  file_name?: string
   contenido_html?: string
   plantilla_documento_id?: number
   created_at: string
