@@ -19,12 +19,20 @@ export interface GuardarFormularioPayload {
   plantilla_documento_id: number
   tipo: string
   contenido_html: string
+  documento_reemplazado_id?: number
 }
 
 export interface FormularioGuardado {
   id: number
   acta_id?: number
   tipo: string
+  estado?: 'activo' | 'anulado' | 'reemplazado'
+  motivo_anulacion?: string
+  documento_reemplazado_id?: number
+  reemplazado_por_id?: number | null
+  desactualizado?: boolean
+  cant_movimientos_posteriores?: number
+  cant_estados_posteriores?: number
   file_name?: string
   contenido_html?: string
   plantilla_documento_id?: number
@@ -95,6 +103,28 @@ export const getFormulariosActa = async (
 ): Promise<FormularioGuardado[]> => {
   const resp = await axios().get(`/actas/${actaId}/formularios`)
   return resp.data.data ?? resp.data ?? []
+}
+
+/**
+ * Anula un documento legal emitido registrando el motivo formal.
+ */
+export const anularFormulario = async (
+  documentoId: string | number,
+  motivo: string
+): Promise<unknown> => {
+  const resp = await axios().post(`/documentos/${documentoId}/anular`, { motivo })
+  return resp.data.data ?? resp.data
+}
+
+/**
+ * Reemite un formulario combinando tablas actualizadas del acta con el texto redactado del documento anterior.
+ */
+export const reemitirFormulario = async (
+  actaId: string | number,
+  documentoId: string | number
+): Promise<FormularioPrecargado & { documento_reemplazado_id: number }> => {
+  const resp = await axios().get(`/actas/${actaId}/formularios/reemitir/${documentoId}`)
+  return resp.data.data ?? resp.data
 }
 
 /**
