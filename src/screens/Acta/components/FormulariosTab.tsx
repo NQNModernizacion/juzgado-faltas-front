@@ -11,10 +11,13 @@ import {
   guardarFormulario,
   actualizarFormulario,
   getPdfDocumento,
+  anularFormulario,
+  reemitirFormulario,
 } from '@/services/FormularioService'
 import { FormulariosHistorial } from './Formularios/FormulariosHistorial'
 import { FormularioEmision } from './Formularios/FormularioEmision'
 import { FormularioPdfModal } from './Formularios/FormularioPdfModal'
+import { FormularioAnularModal } from './Formularios/FormularioAnularModal'
 
 interface Props {
   actaId: string | undefined
@@ -33,12 +36,22 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
   const [selectedPlantilla, setSelectedPlantilla] = useState<Plantilla | null>(null)
   const [contenido, setContenido] = useState('')
   const [editingDocumentoId, setEditingDocumentoId] = useState<number | null>(null)
+  const [reemisionOrigenId, setReemisionOrigenId] = useState<number | null>(null)
+
+  // Estados de Anulación
+  const [anularModalOpen, setAnularModalOpen] = useState(false)
+  const [documentoAAnular, setDocumentoAAnular] = useState<FormularioGuardado | null>(null)
+  const [isAnulando, setIsAnulando] = useState(false)
 
   // Estados de carga
   const [isCargandoInicial, setIsCargandoInicial] = useState(false)
+  const [isRecargando, setIsRecargando] = useState(false)
+  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<number | null>(null)
   const [isPrecargando, setIsPrecargando] = useState(false)
   const [isGuardando, setIsGuardando] = useState(false)
   const [descargandoId, setDescargandoId] = useState<number | null>(null)
+  const [previsualizandoId, setPrevisualizandoId] = useState<number | null>(null)
+  const [reemitiendoId, setReemitiendoId] = useState<number | null>(null)
 
   // Estado del Modal de Previsualización PDF
   const [pdfModalOpen, setPdfModalOpen] = useState(false)
@@ -72,23 +85,38 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
     cargarDatosIniciales()
   }, [actaId, setIsLoadingGlobal])
 
-  // Recargar historial
-  const recargarEmitidos = useCallback(async () => {
-    if (!actaId) return
-    try {
-      const data = await getFormulariosActa(actaId)
-      setFormulariosEmitidos(data)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al refrescar listado de emitidos'
-      toast.error(msg, toastOptions)
-    }
-  }, [actaId])
+  // Recargar historial con feedback visual y resaltado opcional
+  const recargarEmitidos = useCallback(
+    async (highlightId?: number) => {
+      if (!actaId) return
+      try {
+        setIsRecargando(true)
+        const data = await getFormulariosActa(actaId)
+        setFormulariosEmitidos(data)
+        if (highlightId) {
+          setRecentlyUpdatedId(highlightId)
+          setTimeout(() => {
+            setRecentlyUpdatedId(null)
+          }, 3500)
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error al refrescar listado de emitidos'
+        toast.error(msg, toastOptions)
+      } finally {
+        setIsRecargando(false)
+      }
+    },
+    [actaId]
+  )
 
   // Seleccionar plantilla -> precarga
   const handleSeleccionarPlantilla = async (codigo: string) => {
     setSelectedCodigo(codigo)
     if (editingDocumentoId) {
       setEditingDocumentoId(null)
+    }
+    if (reemisionOrigenId) {
+      setReemisionOrigenId(null)
     }
 
     if (!codigo) {
@@ -128,6 +156,14 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
   // Iniciar edición de un formulario previamente emitido
   const handleIniciarEdicion = (formulario: FormularioGuardado) => {
     setEditingDocumentoId(formulario.id)
+    setReemisionOrigenId(null)
+
+    if (formulario.desactualizado) {
+      toast.warn(
+        `Atención: El expediente registró movimientos o cambios procesales posteriores a la emisión #${formulario.id}. Puede editar este registro o utilizar la opción "Reemitir" para incorporar los datos vigentes automáticamente.`,
+        { ...toastOptions, autoClose: 7000 }
+      )
+    }
 
     // Buscar la plantilla coincidente
     const encontrada =
@@ -166,6 +202,97 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
     toast.info('Edición cancelada', toastOptions)
   }
 
+  // Iniciar reemisión con datos actualizados
+  const handleReemitir = async (formulario: FormularioGuardado) => {
+    if (!actaId) {
+      toast.error('No se encontró el ID del acta', toastOptions)
+      return
+    }
+
+    try {
+      setIsPrecargando(true)
+      setReemitiendoId(formulario.id)
+      const data = await reemitirFormulario(actaId, formulario.id)
+
+      setEditingDocumentoId(null)
+      setReemisionOrigenId(formulario.id)
+
+      const encontrada =
+        plantillas.find(
+          (p) =>
+            p.id === formulario.plantilla_documento_id ||
+            p.codigo === formulario.plantilla?.codigo ||
+            p.codigo === formulario.tipo
+        ) || null
+
+      setSelectedPlantilla(encontrada)
+      setSelectedCodigo(encontrada?.codigo ?? formulario.plantilla?.codigo ?? formulario.tipo)
+
+      const nuevoHtml = data?.contenido_html ?? ''
+      setContenido(nuevoHtml)
+      if (editorRef.current) {
+        editorRef.current.setContent(nuevoHtml)
+      }
+
+      document.getElementById('formulario-emision-section')?.scrollIntoView({ behavior: 'smooth' })
+      toast.info(
+        `Documento #${formulario.id} cargado para reemisión. Las tablas procesales se actualizaron al estado actual de la causa preservando el texto redactado.`,
+        { ...toastOptions, autoClose: 6000 }
+      )
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al reemitir el formulario'
+      toast.error(msg, toastOptions)
+    } finally {
+      setIsPrecargando(false)
+      setReemitiendoId(null)
+    }
+  }
+
+  // Cancelar reemisión
+  const handleCancelarReemision = () => {
+    setReemisionOrigenId(null)
+    setSelectedCodigo('')
+    setSelectedPlantilla(null)
+    setContenido('')
+    if (editorRef.current) {
+      editorRef.current.setContent('')
+    }
+    toast.info('Reemisión cancelada', toastOptions)
+  }
+
+  // Abrir modal de anulación
+  const handleAbrirAnular = (formulario: FormularioGuardado) => {
+    setDocumentoAAnular(formulario)
+    setAnularModalOpen(true)
+  }
+
+  // Confirmar anulación formal
+  const handleConfirmarAnular = async (motivo: string) => {
+    if (!documentoAAnular) return
+    const idParaResaltar = documentoAAnular.id
+    try {
+      setIsAnulando(true)
+      await anularFormulario(idParaResaltar, motivo)
+      toast.success(`Documento #${idParaResaltar} anulado exitosamente`, toastOptions)
+      setAnularModalOpen(false)
+      setDocumentoAAnular(null)
+
+      if (editingDocumentoId === idParaResaltar) {
+        handleCancelarEdicion()
+      }
+      if (reemisionOrigenId === idParaResaltar) {
+        handleCancelarReemision()
+      }
+
+      await recargarEmitidos(idParaResaltar)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al anular el documento'
+      toast.error(msg, toastOptions)
+    } finally {
+      setIsAnulando(false)
+    }
+  }
+
   // Guardar o Actualizar formulario
   const handleGuardar = async () => {
     if (!actaId) {
@@ -189,30 +316,40 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
       setIsGuardando(true)
       if (setIsLoadingGlobal) setIsLoadingGlobal(true)
 
+      let idGuardado: number | undefined
+
       if (editingDocumentoId) {
         await actualizarFormulario(editingDocumentoId, {
           plantilla_documento_id: selectedPlantilla?.id,
           tipo: selectedPlantilla?.codigo ?? selectedCodigo,
           contenido_html: htmlFinal,
         })
+        idGuardado = editingDocumentoId
         toast.success(`Formulario #${editingDocumentoId} actualizado exitosamente`, toastOptions)
       } else {
-        await guardarFormulario(actaId, {
+        const nuevo = await guardarFormulario(actaId, {
           plantilla_documento_id: selectedPlantilla?.id ?? 0,
           tipo: selectedPlantilla?.codigo ?? selectedCodigo,
           contenido_html: htmlFinal,
+          documento_reemplazado_id: reemisionOrigenId ?? undefined,
         })
-        toast.success('Formulario guardado exitosamente', toastOptions)
+        idGuardado = nuevo?.id
+        if (reemisionOrigenId) {
+          toast.success(`Nuevo formulario emitido en reemplazo del #${reemisionOrigenId}`, toastOptions)
+        } else {
+          toast.success('Formulario guardado exitosamente', toastOptions)
+        }
       }
 
       setEditingDocumentoId(null)
+      setReemisionOrigenId(null)
       setSelectedCodigo('')
       setSelectedPlantilla(null)
       setContenido('')
       if (editorRef.current) {
         editorRef.current.setContent('')
       }
-      await recargarEmitidos()
+      await recargarEmitidos(idGuardado)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al guardar el formulario'
       toast.error(msg, toastOptions)
@@ -239,6 +376,11 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
   const handlePrevisualizarPdf = async (documentoId: number) => {
     try {
       setIsCargandoPdf(true)
+      setPrevisualizandoId(documentoId)
+      setPdfBlobUrl(null)
+      setPdfFileName(`formulario_${documentoId}.pdf`)
+      setPdfModalOpen(true)
+
       const resp = await getPdfDocumento(documentoId)
       const dataUri = resp.data.file
       const name = resp.data.file_name || `formulario_${documentoId}.pdf`
@@ -246,12 +388,13 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
       const url = crearBlobUrlDesdeBase64(dataUri)
       setPdfBlobUrl(url)
       setPdfFileName(name)
-      setPdfModalOpen(true)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar previsualización del PDF'
       toast.error(msg, toastOptions)
+      setPdfModalOpen(false)
     } finally {
       setIsCargandoPdf(false)
+      setPrevisualizandoId(null)
     }
   }
 
@@ -293,13 +436,19 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
       <FormulariosHistorial
         formularios={formulariosEmitidos}
         isCargando={isCargandoInicial}
+        isRecargando={isRecargando}
+        recentlyUpdatedId={recentlyUpdatedId}
         descargandoId={descargandoId}
+        previsualizandoId={previsualizandoId}
+        reemitiendoId={reemitiendoId}
         isCargandoPdf={isCargandoPdf}
         editingDocumentoId={editingDocumentoId}
-        onRecargar={recargarEmitidos}
+        onRecargar={() => recargarEmitidos()}
         onPrevisualizar={handlePrevisualizarPdf}
         onDescargar={handleDescargarPdf}
         onEditar={handleIniciarEdicion}
+        onReemitir={handleReemitir}
+        onAnular={handleAbrirAnular}
       />
 
       <FormularioEmision
@@ -310,7 +459,9 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
         isPrecargando={isPrecargando}
         isGuardando={isGuardando}
         editingDocumentoId={editingDocumentoId}
+        reemisionOrigenId={reemisionOrigenId}
         onCancelarEdicion={handleCancelarEdicion}
+        onCancelarReemision={handleCancelarReemision}
         onSeleccionarPlantilla={handleSeleccionarPlantilla}
         onChangeContenido={setContenido}
         onGuardar={handleGuardar}
@@ -324,6 +475,19 @@ export const FormulariosTab = ({ actaId, setIsLoadingGlobal }: Props) => {
         pdfBlobUrl={pdfBlobUrl}
         fileName={pdfFileName}
         onClose={handleCerrarModalPdf}
+      />
+
+      <FormularioAnularModal
+        formulario={documentoAAnular}
+        isOpen={anularModalOpen}
+        isProcesando={isAnulando}
+        onClose={() => {
+          if (!isAnulando) {
+            setAnularModalOpen(false)
+            setDocumentoAAnular(null)
+          }
+        }}
+        onConfirm={handleConfirmarAnular}
       />
     </div>
   )
